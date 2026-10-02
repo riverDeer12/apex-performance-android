@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The login token is encrypted with a device-bound Keystore key, so it can't
+     be restored on another device; it is left out of backups. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="auth.xml" />
+</full-backup-content>

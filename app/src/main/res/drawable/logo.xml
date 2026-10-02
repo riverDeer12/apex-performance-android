@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same artwork as the iOS logo.svg. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="354.8dp"
+    android:height="177.4dp"
+    android:viewportWidth="1774"
+    android:viewportHeight="887">
+    <path android:fillColor="@color/logo" android:pathData="M283,190 L744,430 L865,683 L716,468 L470,338 Z" />
+    <path android:fillColor="@color/logo" android:pathData="M1489,190 L1028,430 L907,683 L1056,468 L1302,338 Z" />
+    <path android:fillColor="@color/logo" android:pathData="M441,348 L517,396 L547,469 L712,534 L778,615 L707,557 L512,497 L475,399 Z" />
+    <path android:fillColor="@color/logo" android:pathData="M1331,348 L1255,396 L1225,469 L1060,534 L994,615 L1065,557 L1260,497 L1297,399 Z" />
+</vector>

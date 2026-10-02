@@ -1,0 +1,307 @@
+package software.rdd.apexperformance.ui.workouts
+
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import software.rdd.apexperformance.R
+import software.rdd.apexperformance.core.AppEnvironment
+import software.rdd.apexperformance.core.auth.AuthManager
+import software.rdd.apexperformance.core.navigation.LocalNavigator
+import software.rdd.apexperformance.core.navigation.Screen
+import software.rdd.apexperformance.core.navigation.launch
+import software.rdd.apexperformance.core.navigation.showError
+import software.rdd.apexperformance.core.network.ApiClient
+import software.rdd.apexperformance.core.network.HttpMethod
+import software.rdd.apexperformance.core.util.Roles
+import software.rdd.apexperformance.core.util.ToastManager
+import software.rdd.apexperformance.core.util.ToastType
+import software.rdd.apexperformance.model.ImportWorkoutsResponse
+import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.ui.components.CardView
+import software.rdd.apexperformance.ui.components.Chevron
+import software.rdd.apexperformance.ui.components.EmptyText
+import software.rdd.apexperformance.ui.components.PlainTextField
+import software.rdd.apexperformance.ui.components.RowDivider
+import software.rdd.apexperformance.ui.components.ScreenHeader
+import software.rdd.apexperformance.ui.components.ScrollScreen
+import software.rdd.apexperformance.ui.components.WorkoutThumbnail
+import software.rdd.apexperformance.ui.theme.ApexColors
+import software.rdd.apexperformance.ui.theme.ApexText
+
+class WorkoutsScreen : Screen() {
+
+    private var workouts by mutableStateOf<List<Workout>>(emptyList())
+    private var searchText by mutableStateOf("")
+    private var isLoading by mutableStateOf(false)
+    private var isImporting by mutableStateOf(false)
+    private var hasLoaded = false
+
+    // Same audience as the web: coaches and administrators manage workouts.
+    private val canManageWorkouts: Boolean get() = !AuthManager.hasRole(Roles.CLIENT)
+
+    private val filteredWorkouts: List<Workout>
+        get() = workouts
+            .filter { it.matches(searchText) }
+            .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.localized })
+
+    // The template is served by the web app on the same host as the API.
+    private val importTemplateUrl = "${AppEnvironment.webUrl}/assets/templates/workouts-import-template.xlsx"
+
+    fun updateWorkout(updated: Workout) {
+        workouts = workouts.map { if (it.id == updated.id) updated else it }
+    }
+
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.current
+        val context = LocalContext.current
+
+        val fileImporter = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null) launch { importWorkouts(context, uri) }
+        }
+
+        LaunchedEffect(Unit) {
+            if (!hasLoaded) {
+                hasLoaded = true
+                loadWorkouts()
+            }
+        }
+
+        ScrollScreen(
+            showLoading = isLoading && workouts.isEmpty(),
+            onRefresh = { loadWorkouts() }
+        ) {
+            ScreenHeader(stringResource(R.string.workouts), stringResource(R.string.workouts_subtitle))
+
+            if (canManageWorkouts) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ImportButton(
+                        text = stringResource(R.string.import_workouts),
+                        icon = Icons.Outlined.FileDownload,
+                        filled = true,
+                        isLoading = isImporting,
+                        modifier = Modifier.weight(1f)
+                    ) { fileImporter.launch(arrayOf(XLSX_MIME_TYPE)) }
+
+                    ImportButton(
+                        text = stringResource(R.string.download_template),
+                        icon = Icons.Outlined.Description,
+                        filled = false,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(importTemplateUrl)))
+                    }
+                }
+            }
+
+            SearchField()
+
+            CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
+                val list = filteredWorkouts
+                if (list.isEmpty() && !isLoading) {
+                    EmptyText(stringResource(if (searchText.isEmpty()) R.string.no_workouts else R.string.no_workouts_found))
+                } else {
+                    Column {
+                        list.forEach { workout ->
+                            WorkoutRow(workout) {
+                                navigator.push(WorkoutDetailScreen(workout, canManageWorkouts, ::updateWorkout))
+                            }
+                            if (workout.id != list.last().id) RowDivider(startIndent = 108.dp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ImportButton(
+        text: String,
+        icon: ImageVector,
+        filled: Boolean,
+        modifier: Modifier = Modifier,
+        isLoading: Boolean = false,
+        onClick: () -> Unit
+    ) {
+        val content = if (filled) Color.White else ApexColors.main
+        Row(
+            modifier = modifier
+                .height(44.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(if (filled) ApexColors.main else ApexColors.main.copy(alpha = 0.12f))
+                .clickable(enabled = !isLoading, onClick = onClick),
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(color = content, strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
+            } else {
+                Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
+            }
+            Text(text, color = content, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
+        }
+    }
+
+    @Composable
+    private fun SearchField() {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .height(44.dp)
+                .shadow(8.dp, RoundedCornerShape(12.dp), ambientColor = Color.Black.copy(alpha = 0.05f), spotColor = Color.Black.copy(alpha = 0.05f))
+                .clip(RoundedCornerShape(12.dp))
+                .background(ApexColors.background)
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Filled.Search, contentDescription = null, tint = ApexColors.secondaryLabel)
+            PlainTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                placeholder = stringResource(R.string.search_workouts),
+                modifier = Modifier.weight(1f)
+            )
+            if (searchText.isNotEmpty()) {
+                Icon(
+                    Icons.Filled.Cancel,
+                    contentDescription = stringResource(R.string.clear),
+                    tint = ApexColors.secondaryLabel,
+                    modifier = Modifier.clickable { searchText = "" }
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun WorkoutRow(workout: Workout, onClick: () -> Unit) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 96.dp, height = 54.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                WorkoutThumbnail(workout.thumbnailUrl)
+            }
+
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    workout.name.localized,
+                    style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (workout.workoutTypes.isNotEmpty()) {
+                    Text(
+                        workout.workoutTypes.joinToString(", ") { it.name.localized },
+                        style = ApexText.caption,
+                        color = ApexColors.secondaryLabel,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Chevron()
+        }
+    }
+
+    private suspend fun loadWorkouts() {
+        isLoading = true
+        try {
+            workouts = ApiClient.get("workouts")
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isLoading = false
+        }
+    }
+
+    // Uploads the file only; the API validates and saves rows in a background
+    // job and emails the result to the user, same as the web import.
+    private suspend fun importWorkouts(context: Context, uri: Uri) {
+        isImporting = true
+        try {
+            val (fileName, bytes) = withContext(Dispatchers.IO) {
+                val name = context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                    ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+                    ?: "workouts.xlsx"
+                val data = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                    ?: throw IllegalArgumentException("Can't read file")
+                name to data
+            }
+
+            val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", fileName, bytes.toRequestBody(XLSX_MIME_TYPE.toMediaType()))
+                .build()
+
+            val data = ApiClient.requestData("workouts/import", HttpMethod.POST, body)
+            ApiClient.decode<ImportWorkoutsResponse>(data)
+
+            ToastManager.show(R.string.workouts_import_started, ToastType.SUCCESS)
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isImporting = false
+        }
+    }
+
+    private companion object {
+        const val XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }
+}
