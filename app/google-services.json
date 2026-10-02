@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "408889762343",
+    "project_id": "apex-performance-e9a76",
+    "storage_bucket": "apex-performance-e9a76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:408889762343:android:62adb158605f7e639de402",
+        "android_client_info": {
+          "package_name": "software.rdd.apexperformance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKSzJU9578uvpSDB9LLrd0VZkV7lRd5so"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
