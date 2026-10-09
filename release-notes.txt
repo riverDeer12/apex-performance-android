@@ -1,1 +1,7 @@
-Prva Android verzija aplikacije Apex Performance.
+Nova verzija s novostima iz iPhone aplikacije:
+- Novi izgled aplikacije, uz svijetli, tamni ili sistemski način (Profil > Izgled).
+- Klijenti: nova početna stranica (sljedeći termin, paket, cilj i plan), moji treninzi, napredak (mjesečni pregled trenera, tjelesna masa, opsezi i grafovi treninga) i biblioteka vježbi prema planu.
+- Treneri: unos treninga sa setovima od prošlog puta, supersetovi, cilj i plan klijenta, mjesečni pregledi i napredak po klijentu.
+- Termini: odabir vremena preko tipki, treneri dodaju klijente izravno u zauzeti termin.
+- Brojevi (mjere, težine, ponavljanja) biraju se kotačićem.
+- Zaboravljena lozinka, poruka kad sesija istekne i profilna slika preko cijelog ekrana.
