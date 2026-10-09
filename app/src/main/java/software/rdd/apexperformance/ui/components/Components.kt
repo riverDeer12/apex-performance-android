@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.sp
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
-// White rounded card with a soft shadow, same as CardView on iOS.
+// Flat card with a hairline border, same as CardView on iOS.
 @Composable
 fun CardView(
     modifier: Modifier = Modifier,
@@ -68,14 +68,12 @@ fun CardView(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(10.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black.copy(alpha = 0.06f), spotColor = Color.Black.copy(alpha = 0.06f))
-            .clip(RoundedCornerShape(18.dp))
-            .background(ApexColors.background)
+            .apexCard()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (title != null) {
-            Text(title, style = ApexText.headline, modifier = Modifier.padding(top = 2.dp))
+            ApexLabel(title, modifier = Modifier.padding(top = 2.dp))
         }
         content()
     }
@@ -230,15 +228,13 @@ fun Badge(text: String, color: Color, isPulsing: Boolean = false) {
 fun StatTile(value: String, label: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .shadow(8.dp, RoundedCornerShape(16.dp), ambientColor = Color.Black.copy(alpha = 0.05f), spotColor = Color.Black.copy(alpha = 0.05f))
-            .clip(RoundedCornerShape(16.dp))
-            .background(ApexColors.background)
+            .apexCard()
             .padding(vertical = 14.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(value, style = ApexText.headline, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(label, style = ApexText.caption, color = ApexColors.secondaryLabel)
+        ApexLabel(label)
     }
 }
 

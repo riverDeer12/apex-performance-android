@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.network.ApexMessagingService
+import software.rdd.apexperformance.core.util.AppearanceSettings
 
 class ApexApp : Application() {
 
@@ -13,6 +14,7 @@ class ApexApp : Application() {
         super.onCreate()
         appContext = applicationContext
 
+        AppearanceSettings.init(this)
         AuthManager.init(this)
         createNotificationChannel()
     }

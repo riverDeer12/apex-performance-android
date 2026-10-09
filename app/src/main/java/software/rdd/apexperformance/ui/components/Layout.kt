@@ -97,7 +97,7 @@ fun TopBar(
         if (title != null) {
             Text(
                 title,
-                style = ApexText.headline,
+                style = ApexText.navigationTitle,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,

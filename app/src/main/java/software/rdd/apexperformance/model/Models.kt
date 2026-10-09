@@ -20,6 +20,8 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
 import software.rdd.apexperformance.ApexApp
 import software.rdd.apexperformance.R
+import software.rdd.apexperformance.core.network.ApiClient
+import software.rdd.apexperformance.core.network.HttpMethod
 import java.time.Instant
 
 // MARK: - Auth
@@ -492,4 +494,63 @@ object LocalizedTextSerializer : KSerializer<LocalizedText> {
         obj.mapNotNull { (key, value) ->
             if (value is JsonNull) null else (value as? JsonPrimitive)?.contentOrNull?.let { key to it }
         }.toMap()
+}
+
+// MARK: - Workout library and deletes
+
+// Which workouts a client can see in the library, agreed with the coach.
+enum class WorkoutLibraryAccess {
+    // Private coaching: only mobility and stretching workouts.
+    MOBILITY_AND_STRETCHING,
+    // Online coaching: all workouts.
+    ALL,
+    // Membership or no plan: no library.
+    NONE;
+
+    fun allows(workout: Workout): Boolean = when (this) {
+        MOBILITY_AND_STRETCHING -> workout.isMobilityOrStretching
+        ALL -> true
+        NONE -> false
+    }
+
+    companion object {
+        fun from(plan: String?): WorkoutLibraryAccess = when (ClientPlan.from(plan)) {
+            ClientPlan.PRIVATE_COACHING -> MOBILITY_AND_STRETCHING
+            ClientPlan.ONLINE_COACHING -> ALL
+            ClientPlan.MEMBERSHIP, null -> NONE
+        }
+    }
+}
+
+// Parts of workout type names, in any language, for mobility and stretching.
+private val mobilityAndStretchingKeywords = listOf("mobil", "stretch", "istez", "fleksib", "flexib", "allung")
+
+// True when one of the workout's types is mobility or stretching.
+val Workout.isMobilityOrStretching: Boolean
+    get() = workoutTypes.any { type ->
+        type.name.allValues.any { name ->
+            val lowercased = name.lowercase()
+            mobilityAndStretchingKeywords.any { lowercased.contains(it) }
+        }
+    }
+
+// Deletes the workout (soft delete on the API, staff only).
+suspend fun deleteWorkout(id: String) {
+    ApiClient.requestData("workouts/$id", HttpMethod.DELETE)
+}
+
+// Wheel range and starting value of a body measurement, by its title key.
+data class MeasurementWheel(val range: IntRange, val start: Double)
+
+fun measurementWheel(key: String): MeasurementWheel = when (key) {
+    "height" -> MeasurementWheel(100..230, 175.0)
+    "weight" -> MeasurementWheel(30..250, 75.0)
+    "shoulders" -> MeasurementWheel(60..180, 110.0)
+    "chest" -> MeasurementWheel(50..180, 100.0)
+    "upper_arm" -> MeasurementWheel(15..70, 32.0)
+    "waist" -> MeasurementWheel(40..180, 85.0)
+    "thigh" -> MeasurementWheel(30..100, 55.0)
+    "calves" -> MeasurementWheel(20..70, 37.0)
+    "glutes" -> MeasurementWheel(50..180, 100.0)
+    else -> MeasurementWheel(0..300, 0.0)
 }

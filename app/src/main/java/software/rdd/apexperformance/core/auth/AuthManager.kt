@@ -20,6 +20,11 @@ object AuthManager {
     var isAuthenticated by mutableStateOf(false)
         private set
 
+    // Set when the user was logged out because the session expired,
+    // so login can tell why.
+    var sessionExpired by mutableStateOf(false)
+        private set
+
     fun init(context: Context) {
         storage = TokenStorage(context)
         token = storage.getToken()
@@ -47,12 +52,30 @@ object AuthManager {
     fun login(token: String) {
         storage.saveToken(token)
         this.token = token
+        sessionExpired = false
         isAuthenticated = true
+    }
+
+    // Logs out a user whose session ended (401 or expired token)
+    // and shows login with a message.
+    fun expireSession() {
+        if (!isAuthenticated) return
+        logout()
+        sessionExpired = true
+    }
+
+    // Checks the token again, e.g. when the app comes back to the foreground.
+    fun checkSession() {
+        if (!isAuthenticated) return
+        val current = token
+        if (current != null && JwtDecoder.isTokenValid(current)) return
+        expireSession()
     }
 
     fun logout() {
         storage.deleteToken()
         token = null
+        sessionExpired = false
         isAuthenticated = false
     }
 

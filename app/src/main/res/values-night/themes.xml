@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Window colors before Compose draws, the app then follows the
-         appearance picked in the profile (system, light or dark). -->
-    <style name="Theme.ApexPerformance" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.ApexPerformance" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/grouped_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

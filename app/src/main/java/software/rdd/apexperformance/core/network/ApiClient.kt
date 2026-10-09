@@ -1,7 +1,9 @@
 package software.rdd.apexperformance.core.network
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.Call
 import okhttp3.Callback
@@ -100,8 +102,9 @@ object ApiClient {
         if (BuildConfig.DEBUG) Log.d("ApiClient", "Response ${response.code}")
 
         if (response.code == 401) {
-            // The token expired or was revoked, so the user has to log in again.
-            if (token != null) AuthManager.logout()
+            // The session expired or the token is no longer valid,
+            // so the user is taken to login, which tells why.
+            if (token != null) withContext(Dispatchers.Main) { AuthManager.expireSession() }
             throw UnauthorizedException()
         }
 

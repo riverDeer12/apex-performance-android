@@ -4,5 +4,6 @@
     <color name="apex_main">#FF0034C4</color>
     <color name="logo">#FF000000</color>
     <color name="ic_launcher_background">#FFFFFFFF</color>
-    <color name="grouped_background">#FFF2F2F7</color>
+    <!-- ApexBackground from the iOS asset catalog. -->
+    <color name="grouped_background">#FFF2F1EE</color>
 </resources>

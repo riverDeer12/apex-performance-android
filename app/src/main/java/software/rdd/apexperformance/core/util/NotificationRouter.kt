@@ -7,11 +7,13 @@ import androidx.compose.runtime.setValue
 import software.rdd.apexperformance.BuildConfig
 
 enum class AppTab {
+    HOME,
     APPOINTMENTS,
     APPOINTMENT_REQUESTS,
     WORKOUTS,
     CLIENTS,
     BODY_MEASUREMENTS,
+    TRAININGS,
     PROFILE
 }
 
@@ -26,6 +28,8 @@ object NotificationRouter {
             "appointment_request" -> pendingTab = AppTab.APPOINTMENT_REQUESTS
             "appointment_updated" -> pendingTab = AppTab.APPOINTMENTS
             "body_measurement" -> pendingTab = AppTab.BODY_MEASUREMENTS
+            "client_goal", "monthly_review" -> pendingTab = AppTab.HOME
+            "monthly_review_reminder" -> pendingTab = AppTab.CLIENTS
             else -> if (BuildConfig.DEBUG) Log.w("NotificationRouter", "Unknown notification type: $notificationType")
         }
     }

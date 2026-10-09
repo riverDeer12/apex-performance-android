@@ -18,7 +18,8 @@ fun mapError(error: Throwable): String {
         is UnknownHostException -> context.getString(R.string.error_no_internet)
         is SocketTimeoutException -> context.getString(R.string.error_timed_out)
         is IOException -> context.getString(R.string.error_network)
-        is UnauthorizedException -> context.getString(R.string.error_unauthorized)
+        // The user is taken to login, which explains it.
+        is UnauthorizedException -> context.getString(R.string.session_expired)
         is ApiException.Validation -> {
             val response = error.response
             val messages = response.errors.orEmpty().flatMap { (key, values) ->

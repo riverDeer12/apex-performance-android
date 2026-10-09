@@ -9,6 +9,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.ui.AppRoot
 
@@ -18,11 +19,8 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Light status and navigation bars, the app is light only like on iOS.
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
-        )
+        // System bars follow the appearance picked in the app, see setDarkSystemBars.
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // Same as iOS, notification permission is asked on the first launch.
@@ -33,6 +31,19 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) handleNotificationTap(intent)
 
         setContent { AppRoot() }
+    }
+
+    // Light or dark status and navigation bar icons for the app's appearance.
+    fun setDarkSystemBars(isDark: Boolean) {
+        val transparent = android.graphics.Color.TRANSPARENT
+        val style = if (isDark) SystemBarStyle.dark(transparent) else SystemBarStyle.light(transparent, transparent)
+        enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // A token can expire while the app is in the background.
+        AuthManager.checkSession()
     }
 
     override fun onNewIntent(intent: Intent) {
