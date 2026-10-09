@@ -22,7 +22,9 @@ import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.BodyMeasurement
+import software.rdd.apexperformance.ui.components.ApexDestructiveButton
 import software.rdd.apexperformance.ui.components.CardView
+import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.SaveAction
 import software.rdd.apexperformance.ui.components.ScreenHeader
 import software.rdd.apexperformance.ui.components.ScrollScreen
@@ -33,11 +35,15 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 class BodyMeasurementDetailsScreen(
     private val bodyMeasurement: BodyMeasurement,
     private val isEditable: Boolean = true,
-    private val onSaved: (() -> Unit)? = null
+    private val onSaved: (() -> Unit)? = null,
+    // Set for staff, shows the delete button.
+    private val onDeleted: ((String) -> Unit)? = null
 ) : Screen() {
 
     private val form = MeasurementForm(bodyMeasurement)
     private var isSaving by mutableStateOf(false)
+    private var isDeleting by mutableStateOf(false)
+    private var showDeleteDialog by mutableStateOf(false)
 
     @Composable
     override fun Content() {
@@ -64,6 +70,41 @@ class BodyMeasurementDetailsScreen(
                     }
                 }
             }
+
+            if (isEditable && onDeleted != null) {
+                ApexDestructiveButton(
+                    text = stringResource(R.string.delete_measurement),
+                    enabled = !isDeleting && !isSaving,
+                    isLoading = isDeleting,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                ) {
+                    showDeleteDialog = true
+                }
+            }
+        }
+
+        if (showDeleteDialog) {
+            ConfirmDialog(
+                title = stringResource(R.string.delete_measurement_question),
+                message = stringResource(R.string.can_not_be_undone),
+                confirmText = stringResource(R.string.delete),
+                onConfirm = { launch { delete(navigator) } },
+                onDismiss = { showDeleteDialog = false }
+            )
+        }
+    }
+
+    private suspend fun delete(navigator: Navigator) {
+        isDeleting = true
+        try {
+            ApiClient.requestData("body-measurements/${bodyMeasurement.id}", HttpMethod.DELETE)
+            onDeleted?.invoke(bodyMeasurement.id)
+            ToastManager.show(R.string.body_measurement_deleted_successfully, ToastType.SUCCESS)
+            navigator.pop()
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isDeleting = false
         }
     }
 

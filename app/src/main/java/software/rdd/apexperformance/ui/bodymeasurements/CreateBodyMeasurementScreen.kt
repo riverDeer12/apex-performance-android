@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,8 @@ import software.rdd.apexperformance.core.navigation.launch
 import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.HttpMethod
+import software.rdd.apexperformance.core.network.isCancellation
+import software.rdd.apexperformance.core.network.mapError
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Client
@@ -30,6 +33,7 @@ import software.rdd.apexperformance.ui.components.SavingOverlay
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
+import software.rdd.apexperformance.ui.theme.ApexText
 
 class CreateBodyMeasurementScreen(
     private val client: Client,
@@ -38,6 +42,7 @@ class CreateBodyMeasurementScreen(
 
     private val form = MeasurementForm()
     private var isSaving by mutableStateOf(false)
+    private var errorMessage by mutableStateOf<String?>(null)
 
     @Composable
     override fun Content() {
@@ -56,10 +61,14 @@ class CreateBodyMeasurementScreen(
             CardView(modifier = Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
                 Column {
                     MeasurementField.entries.forEach { field ->
-                        MeasurementRow(field, form, isEditable = true, verticalPadding = 16.dp)
+                        MeasurementRow(field, form, isEditable = true, verticalPadding = 16.dp, horizontalPadding = 8.dp)
                         if (field != MeasurementField.entries.last()) {
                             HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
                         }
+                    }
+
+                    errorMessage?.let {
+                        Text(it, style = ApexText.body, color = ApexColors.red, modifier = Modifier.padding(top = 10.dp))
                     }
                 }
             }
@@ -80,6 +89,7 @@ class CreateBodyMeasurementScreen(
             onSuccess?.invoke()
             navigator.pop()
         } catch (e: Exception) {
+            if (!e.isCancellation) errorMessage = mapError(e)
             showError(e)
         } finally {
             isSaving = false

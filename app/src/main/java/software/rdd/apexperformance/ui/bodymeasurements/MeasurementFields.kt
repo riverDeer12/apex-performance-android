@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
@@ -15,29 +13,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import software.rdd.apexperformance.R
-import software.rdd.apexperformance.core.util.formatNumber
 import software.rdd.apexperformance.model.BodyMeasurement
 import software.rdd.apexperformance.model.BodyMeasurementValues
-import software.rdd.apexperformance.ui.components.PlainTextField
+import software.rdd.apexperformance.model.measurementWheel
+import software.rdd.apexperformance.ui.components.NumberWheelField
+import software.rdd.apexperformance.ui.components.formatWheelNumber
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
-// The nine measurements in the order the iOS app shows them.
-enum class MeasurementField(@StringRes val title: Int, val unit: String) {
-    HEIGHT(R.string.height, "cm"),
-    WEIGHT(R.string.weight, "kg"),
-    SHOULDERS(R.string.shoulders, "cm"),
-    CHEST(R.string.chest, "cm"),
-    UPPER_ARM(R.string.upper_arm, "cm"),
-    WAIST(R.string.waist, "cm"),
-    THIGH(R.string.thigh, "cm"),
-    CALVES(R.string.calves, "cm"),
-    GLUTES(R.string.glutes, "cm");
+// The nine measurements in the order the iOS app shows them. The key
+// picks the wheel range (measurementWheel), same as the iOS title key.
+enum class MeasurementField(val key: String, @StringRes val title: Int, val unit: String) {
+    HEIGHT("height", R.string.height, "cm"),
+    WEIGHT("weight", R.string.weight, "kg"),
+    SHOULDERS("shoulders", R.string.shoulders, "cm"),
+    CHEST("chest", R.string.chest, "cm"),
+    UPPER_ARM("upper_arm", R.string.upper_arm, "cm"),
+    WAIST("waist", R.string.waist, "cm"),
+    THIGH("thigh", R.string.thigh, "cm"),
+    CALVES("calves", R.string.calves, "cm"),
+    GLUTES("glutes", R.string.glutes, "cm");
 
     fun value(m: BodyMeasurement): Double = when (this) {
         HEIGHT -> m.height
@@ -52,23 +50,19 @@ enum class MeasurementField(@StringRes val title: Int, val unit: String) {
     }
 }
 
-// Text of each field while it is edited, so "80," can be typed on the way to "80,5".
+// Values of the fields; 0 means not measured and shows as empty on the wheel field.
 class MeasurementForm(initial: BodyMeasurement? = null) {
-    private val texts = mutableStateMapOf<MeasurementField, String>().apply {
+    private val numbers = mutableStateMapOf<MeasurementField, Double>().apply {
         MeasurementField.entries.forEach { field ->
-            put(field, initial?.let { formatNumber(field.value(it)) } ?: "0")
+            put(field, initial?.let { field.value(it) } ?: 0.0)
         }
     }
 
-    fun text(field: MeasurementField): String = texts[field].orEmpty()
+    fun number(field: MeasurementField): Double = numbers[field] ?: 0.0
 
-    fun update(field: MeasurementField, text: String) {
-        texts[field] = text.filter { it.isDigit() || it == '.' || it == ',' }
+    fun update(field: MeasurementField, value: Double) {
+        numbers[field] = value
     }
-
-    // Both decimal separators are accepted (Croatian keyboards use a comma).
-    fun number(field: MeasurementField): Double =
-        text(field).replace(',', '.').toDoubleOrNull() ?: 0.0
 
     fun values() = BodyMeasurementValues(
         height = number(MeasurementField.HEIGHT),
@@ -88,28 +82,36 @@ fun MeasurementRow(
     field: MeasurementField,
     form: MeasurementForm,
     isEditable: Boolean,
-    verticalPadding: Dp = 10.dp
+    verticalPadding: Dp = 10.dp,
+    horizontalPadding: Dp = 0.dp
 ) {
+    val title = stringResource(field.title)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = verticalPadding),
+            .padding(vertical = verticalPadding, horizontal = horizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(stringResource(field.title), style = ApexText.body, color = ApexColors.secondaryLabel)
+        Text(title, style = ApexText.body, color = ApexColors.secondaryLabel)
         Spacer(Modifier.weight(1f))
         if (isEditable) {
-            PlainTextField(
-                value = form.text(field),
-                onValueChange = { form.update(field, it) },
-                placeholder = "",
-                textAlign = TextAlign.End,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.widthIn(min = 60.dp, max = 120.dp)
+            val wheel = measurementWheel(field.key)
+            // 0 is shown as empty, so the wheel starts at a typical value.
+            NumberWheelField(
+                value = form.number(field).takeIf { it != 0.0 },
+                onValueChange = { form.update(field, it ?: 0.0) },
+                range = wheel.range,
+                step = 0.1,
+                defaultValue = wheel.start,
+                title = title
             )
         } else {
-            Text(form.text(field), style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
+            Text(
+                formatWheelNumber(form.number(field), 0.1),
+                style = ApexText.body.copy(fontWeight = FontWeight.SemiBold)
+            )
         }
         Text(field.unit, style = ApexText.subheadline, color = ApexColors.secondaryLabel)
     }
