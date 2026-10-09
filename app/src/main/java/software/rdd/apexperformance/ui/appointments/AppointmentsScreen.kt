@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EventBusy
 import androidx.compose.material.icons.outlined.EventRepeat
+import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,15 +57,16 @@ import software.rdd.apexperformance.model.Appointment
 import software.rdd.apexperformance.model.AppointmentRequest
 import software.rdd.apexperformance.model.AppointmentsStatus
 import software.rdd.apexperformance.ui.components.ActionButton
+import software.rdd.apexperformance.ui.components.ApexLabel
+import software.rdd.apexperformance.ui.components.ApexPrimaryButton
+import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CalendarMonth
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.IconCircle
 import software.rdd.apexperformance.ui.components.RowDivider
-import software.rdd.apexperformance.ui.components.ScreenHeader
 import software.rdd.apexperformance.ui.components.ScrollScreen
-import software.rdd.apexperformance.ui.components.SectionTitle
 import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
@@ -84,7 +85,9 @@ class AppointmentsScreen : Screen() {
     private var isGeneratingRecurring by mutableStateOf(false)
     private var selectedDate by mutableStateOf(LocalDate.now())
 
-    private val canManageRequests: Boolean get() = !AuthManager.hasRole(Roles.CLIENT)
+    private val isClient: Boolean get() = AuthManager.hasRole(Roles.CLIENT)
+
+    private val canManageRequests: Boolean get() = !isClient
 
     private val cancelationRequests: List<AppointmentRequest>
         get() = appointmentRequests.filter { it.type.name.lowercase() == "cancelationrequest" }
@@ -107,6 +110,12 @@ class AppointmentsScreen : Screen() {
         ScrollScreen(
             topBar = {
                 TopBar {
+                    if (isClient) {
+                        // Requests the client sent, with their status.
+                        ToolbarIcon(Icons.Outlined.PendingActions, stringResource(R.string.appointment_requests)) {
+                            navigator.push(AppointmentRequestsScreen())
+                        }
+                    }
                     if (AuthManager.hasRole(Roles.COACH)) {
                         ToolbarIcon(
                             Icons.Filled.Autorenew,
@@ -114,20 +123,23 @@ class AppointmentsScreen : Screen() {
                             enabled = !isGeneratingRecurring
                         ) { launch { generateRecurringAppointments() } }
                     }
-                    ToolbarIcon(Icons.Filled.Add, stringResource(R.string.new_appointment)) {
-                        navigator.push(CreateAppointmentScreen())
-                    }
                 }
             },
             showLoading = isInitialLoading && appointments.isEmpty(),
             onRefresh = { loadData(showInitialSpinner = false) },
             overlay = { if (isGeneratingRecurring) GeneratingOverlay() }
         ) {
-            ScreenHeader(stringResource(R.string.appointments), stringResource(R.string.upcoming_past_sessions))
+            ApexScreenHeader(stringResource(R.string.appointments), stringResource(R.string.upcoming_past_sessions))
+
+            // The only way to add an appointment, there is no + in the corner.
+            ApexPrimaryButton(
+                stringResource(if (isClient) R.string.book_appointment else R.string.new_appointment),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            ) { navigator.push(CreateAppointmentScreen()) }
 
             if (pendingAppointments.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionTitle(stringResource(R.string.pending_approvals))
+                    SectionLabel(stringResource(R.string.pending_approvals))
                     CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                         Column {
                             pendingAppointments.forEach { appointment ->
@@ -143,7 +155,7 @@ class AppointmentsScreen : Screen() {
             RequestsSection(stringResource(R.string.join_requests), joinRequests)
 
             if (pendingAppointments.isNotEmpty() || cancelationRequests.isNotEmpty() || joinRequests.isNotEmpty()) {
-                SectionTitle(stringResource(R.string.approved_appointments), Modifier.padding(top = 8.dp))
+                SectionLabel(stringResource(R.string.approved_appointments), Modifier.padding(top = 8.dp))
             }
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -156,7 +168,7 @@ class AppointmentsScreen : Screen() {
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                SectionTitle(DateFormats.date(selectedDate))
+                SectionLabel(DateFormats.date(selectedDate))
                 CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                     val dayAppointments = appointmentsForSelectedDate
                     if (dayAppointments.isEmpty() && !isInitialLoading) {
@@ -176,11 +188,17 @@ class AppointmentsScreen : Screen() {
         }
     }
 
+    // Small uppercase label above a card (apexLabel).
+    @Composable
+    private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
+        ApexLabel(text, modifier = modifier.padding(horizontal = 20.dp))
+    }
+
     @Composable
     private fun RequestsSection(title: String, requests: List<AppointmentRequest>) {
         if (requests.isEmpty()) return
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionTitle(title)
+            SectionLabel(title)
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Column {
                     requests.forEach { request ->

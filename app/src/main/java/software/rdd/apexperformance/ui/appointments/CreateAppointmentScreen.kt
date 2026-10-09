@@ -1,16 +1,26 @@
 package software.rdd.apexperformance.ui.appointments
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,8 +32,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import software.rdd.apexperformance.R
@@ -46,6 +61,7 @@ import software.rdd.apexperformance.model.Coach
 import software.rdd.apexperformance.model.CreateAppointmentRequest
 import software.rdd.apexperformance.model.GetTimeSlotsRequest
 import software.rdd.apexperformance.model.TimeSlot
+import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import software.rdd.apexperformance.ui.components.FormSection
 import software.rdd.apexperformance.ui.components.LoadingRow
 import software.rdd.apexperformance.ui.components.MenuPicker
@@ -96,6 +112,17 @@ class CreateAppointmentScreen : Screen() {
 
     private val isSelectedTimeSlotTaken: Boolean get() = selectedSlot?.isTaken ?: false
 
+    // Only clients ask to join a taken slot. Staff create the appointment
+    // as usual and the API adds the clients to the existing one.
+    private val sendsJoinRequest: Boolean get() = isSelectedTimeSlotTaken && isClient
+
+    private val confirmButtonTitle: Int
+        get() = when {
+            sendsJoinRequest -> R.string.join_appointment
+            isSelectedTimeSlotTaken -> R.string.add_to_appointment
+            else -> R.string.confirm_booking
+        }
+
     // Clients can book from tomorrow on, staff from today.
     private fun startDate(): LocalDate =
         if (AuthManager.hasRole(Roles.CLIENT)) LocalDate.now().plusDays(1) else LocalDate.now()
@@ -120,7 +147,7 @@ class CreateAppointmentScreen : Screen() {
                     SaveAction(
                         enabled = canCreateAppointment,
                         isSaving = isSaving,
-                        icon = if (isSelectedTimeSlotTaken) Icons.Outlined.GroupAdd else Icons.Filled.Check
+                        icon = if (sendsJoinRequest) Icons.Outlined.GroupAdd else Icons.Filled.Check
                     ) { launch { createAppointment(navigator) } }
                 }
             },
@@ -156,16 +183,10 @@ class CreateAppointmentScreen : Screen() {
                 }
             }
 
-            FormSection {
+            FormSection(header = stringResource(R.string.select_time_slot)) {
                 if (isLoadingTimeSlots) LoadingRow(stringResource(R.string.loading_time_slots))
-                MenuPicker(
-                    label = stringResource(R.string.select_time_slot),
-                    selectedText = selectedSlot?.let { it.name ?: stringResource(R.string.unknown_value) } ?: selectValue,
-                    options = listOf<TimeSlot?>(null) + timeSlots,
-                    optionText = { slot -> slot?.let { it.name ?: stringResource(R.string.unknown_value) } ?: selectValue },
-                    onSelect = { selectedTimeSlot = it?.id },
-                    enabled = !isLoadingTimeSlots && timeSlots.isNotEmpty()
-                )
+                // Time slots as chips, taken ones can be joined.
+                TimeSlotChips(enabled = !isLoadingTimeSlots)
             }
 
             FormSection {
@@ -195,6 +216,12 @@ class CreateAppointmentScreen : Screen() {
                     }
                 }
             }
+
+            ApexPrimaryButton(
+                text = stringResource(confirmButtonTitle),
+                enabled = canCreateAppointment,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            ) { launch { createAppointment(navigator) } }
         }
 
         if (showDatePicker) {
@@ -238,6 +265,102 @@ class CreateAppointmentScreen : Screen() {
                         todayContentColor = ApexColors.main
                     )
                 )
+            }
+        }
+    }
+
+    @Composable
+    private fun TimeSlotChips(enabled: Boolean) {
+        if (timeSlots.isEmpty()) {
+            Text(
+                stringResource(R.string.no_time_slots),
+                style = ApexText.body,
+                color = ApexColors.secondaryLabel,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+            return
+        }
+        // Free slots two in a row; a taken slot takes the whole row
+        // so the names of clients already in it fit under the time.
+        Column(
+            modifier = Modifier.padding(vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            timeSlotRows().forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { slot -> TimeSlotChip(slot, enabled) }
+                    if (row.size == 1 && row[0].isTaken != true) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+
+    // Slots in rows, keeping their order: taken slots alone, free ones in pairs.
+    private fun timeSlotRows(): List<List<TimeSlot>> {
+        val rows = mutableListOf<List<TimeSlot>>()
+        var pending = mutableListOf<TimeSlot>()
+        for (slot in timeSlots) {
+            if (slot.isTaken == true) {
+                if (pending.isNotEmpty()) {
+                    rows.add(pending)
+                    pending = mutableListOf()
+                }
+                rows.add(listOf(slot))
+            } else {
+                pending.add(slot)
+                if (pending.size == 2) {
+                    rows.add(pending)
+                    pending = mutableListOf()
+                }
+            }
+        }
+        if (pending.isNotEmpty()) rows.add(pending)
+        return rows
+    }
+
+    @Composable
+    private fun RowScope.TimeSlotChip(slot: TimeSlot, enabled: Boolean) {
+        val isSelected = selectedTimeSlot == slot.id
+        val (time, slotClients) = splitTimeSlotName(slot.name ?: slot.description ?: "—")
+        val contentColor = if (isSelected) ApexColors.onAccent else ApexColors.label
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 38.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(if (isSelected) ApexColors.accent else ApexColors.label.copy(alpha = 0.06f))
+                .clickable(enabled = enabled) { selectedTimeSlot = if (isSelected) null else slot.id }
+                .padding(vertical = 8.dp, horizontal = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)
+        ) {
+            Text(
+                time,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (slot.isTaken == true && slotClients != null) {
+                // Clients already in the appointment, it can be joined.
+                val clientsColor = if (isSelected) ApexColors.onAccent.copy(alpha = 0.8f) else ApexColors.secondaryLabel
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(Icons.Filled.People, contentDescription = null, tint = clientsColor, modifier = Modifier.size(14.dp))
+                    Text(
+                        slotClients,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = clientsColor,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -347,12 +470,16 @@ class CreateAppointmentScreen : Screen() {
     private suspend fun createAppointment(navigator: Navigator) {
         isSaving = true
         try {
-            if (isSelectedTimeSlotTaken) {
+            if (sendsJoinRequest) {
                 joinExistingAppointment()
                 ToastManager.show(R.string.successfully_joined_appointment, ToastType.SUCCESS)
             } else {
+                val addsToExisting = isSelectedTimeSlotTaken
                 sendNewAppointment()
-                ToastManager.show(R.string.successfully_created_appointment, ToastType.SUCCESS)
+                ToastManager.show(
+                    if (addsToExisting) R.string.clients_added_to_appointment else R.string.successfully_created_appointment,
+                    ToastType.SUCCESS
+                )
             }
             navigator.pop()
         } catch (e: Exception) {
@@ -378,6 +505,15 @@ class CreateAppointmentScreen : Screen() {
             endTime = end.toString()
         )
         ApiClient.send("appointments", HttpMethod.POST, request)
+    }
+
+    // "6:15 - 7:15 (Ana Horvat)" -> ("6:15 - 7:15", "Ana Horvat").
+    private fun splitTimeSlotName(name: String): Pair<String, String?> {
+        val open = name.indexOf('(')
+        if (open < 0 || !name.endsWith(")")) return name to null
+        val time = name.substring(0, open).trim()
+        val slotClients = name.substring(open + 1, name.length - 1).trim()
+        return (time.ifEmpty { name }) to slotClients.ifEmpty { null }
     }
 
     private suspend fun joinExistingAppointment() {

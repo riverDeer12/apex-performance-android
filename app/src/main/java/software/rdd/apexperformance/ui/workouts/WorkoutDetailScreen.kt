@@ -16,7 +16,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,9 +34,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
+import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.Screen
+import software.rdd.apexperformance.core.navigation.launch
+import software.rdd.apexperformance.core.navigation.showError
+import software.rdd.apexperformance.core.util.ToastManager
+import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.deleteWorkout
 import software.rdd.apexperformance.ui.components.CardView
+import software.rdd.apexperformance.ui.components.ConfirmDialog
+import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.WorkoutThumbnail
@@ -46,11 +56,14 @@ import software.rdd.apexperformance.ui.theme.ApexText
 class WorkoutDetailScreen(
     workout: Workout,
     private val canEdit: Boolean,
-    private val onSaved: (Workout) -> Unit
+    private val onSaved: (Workout) -> Unit,
+    private val onDeleted: (() -> Unit)? = null
 ) : Screen() {
 
     private var workout by mutableStateOf(workout)
     private var isPlayingVideo by mutableStateOf(false)
+    private var showDeleteDialog by mutableStateOf(false)
+    private var isDeleting by mutableStateOf(false)
 
     @Composable
     override fun Content() {
@@ -68,6 +81,17 @@ class WorkoutDetailScreen(
                             })
                         }) {
                             Text(stringResource(R.string.edit), color = ApexColors.main, style = ApexText.body)
+                        }
+                        IconButton(onClick = { showDeleteDialog = true }, enabled = !isDeleting) {
+                            if (isDeleting) {
+                                SmallProgress()
+                            } else {
+                                Icon(
+                                    Icons.Outlined.Delete,
+                                    contentDescription = stringResource(R.string.delete_workout),
+                                    tint = ApexColors.red
+                                )
+                            }
                         }
                     }
                 }
@@ -109,6 +133,30 @@ class WorkoutDetailScreen(
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.description)) {
                 Text(workout.description.localized.ifEmpty { "—" }, style = ApexText.body, modifier = Modifier.fillMaxWidth())
             }
+        }
+
+        if (showDeleteDialog) {
+            ConfirmDialog(
+                title = stringResource(R.string.delete_workout_question),
+                message = stringResource(R.string.can_not_be_undone),
+                confirmText = stringResource(R.string.delete),
+                onConfirm = { launch { delete(navigator) } },
+                onDismiss = { showDeleteDialog = false }
+            )
+        }
+    }
+
+    private suspend fun delete(navigator: Navigator) {
+        isDeleting = true
+        try {
+            deleteWorkout(workout.id)
+            ToastManager.show(R.string.workout_deleted_successfully, ToastType.SUCCESS)
+            onDeleted?.invoke()
+            navigator.pop()
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isDeleting = false
         }
     }
 

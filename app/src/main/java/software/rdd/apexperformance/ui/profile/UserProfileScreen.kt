@@ -1,11 +1,16 @@
 package software.rdd.apexperformance.ui.profile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -25,10 +30,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.navigation.LocalNavigator
@@ -39,12 +47,13 @@ import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.model.ClientPlan
 import software.rdd.apexperformance.model.Profile
 import software.rdd.apexperformance.model.UserProfile
+import software.rdd.apexperformance.ui.components.ApexLabel
+import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.IconTile
 import software.rdd.apexperformance.ui.components.ProfilePicture
 import software.rdd.apexperformance.ui.components.RowDivider
-import software.rdd.apexperformance.ui.components.ScreenHeader
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.SettingsRow
 import software.rdd.apexperformance.ui.components.StatTile
@@ -75,9 +84,11 @@ class UserProfileScreen : Screen() {
         }
 
         ScrollScreen(showLoading = isLoading && accountProfile == null) {
-            ScreenHeader(stringResource(R.string.my_profile), stringResource(R.string.account_details_and_settings))
+            ApexScreenHeader(stringResource(R.string.my_profile), stringResource(R.string.account_details_and_settings))
 
-            ProfileContent()
+            ProfileContent(onEditProfile = { profile ->
+                navigator.push(EditProfileScreen(profile) { accountProfile = it })
+            })
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.profile_management)) {
                 Column {
@@ -110,6 +121,9 @@ class UserProfileScreen : Screen() {
                     )
                     RowDivider()
 
+                    AppearanceSwitcher()
+                    RowDivider()
+
                     SettingsRow(
                         icon = Icons.AutoMirrored.Outlined.Logout,
                         iconTint = ApexColors.red,
@@ -137,7 +151,7 @@ class UserProfileScreen : Screen() {
     }
 
     @Composable
-    private fun ProfileContent() {
+    private fun ProfileContent(onEditProfile: (Profile) -> Unit) {
         val profile = accountProfile
         if (profile == null) {
             if (!isLoading) {
@@ -151,12 +165,47 @@ class UserProfileScreen : Screen() {
             return
         }
 
+        // Top card with a big picture
         CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                ProfilePicture(profile)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(fullName(profile), style = ApexText.headline)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ProfilePicture(profile, size = 180.dp, opensFullScreen = true)
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        fullName(profile).uppercase(),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp,
+                        textAlign = TextAlign.Center
+                    )
                     Text("@${AuthManager.username}", style = ApexText.subheadline, color = ApexColors.secondaryLabel)
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(ApexColors.label.copy(alpha = 0.06f))
+                        .clickable { onEditProfile(profile) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        stringResource(
+                            if (profile.hasProfilePicture) R.string.change_profile_picture else R.string.upload_profile_picture
+                        ).uppercase(),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp,
+                        color = ApexColors.label
+                    )
                 }
             }
         }
@@ -205,7 +254,7 @@ class UserProfileScreen : Screen() {
         ) {
             IconTile(icon, ApexColors.main, backgroundAlpha = 0.25f)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(title, style = ApexText.caption, color = ApexColors.secondaryLabel)
+                ApexLabel(title)
                 Text(value, style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold))
             }
             Spacer(Modifier.weight(1f))

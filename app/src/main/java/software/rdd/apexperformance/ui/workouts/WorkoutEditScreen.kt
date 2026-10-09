@@ -46,20 +46,24 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
+// Edits a workout, or creates a new one when no workout is given.
 class WorkoutEditScreen(
-    private val workout: Workout,
+    // null when creating a new workout.
+    private val workout: Workout? = null,
     private val onSaved: (Workout) -> Unit
 ) : Screen() {
 
-    private var nameHr by mutableStateOf(workout.name.value("HR").orEmpty())
-    private var nameEn by mutableStateOf(workout.name.value("EN").orEmpty())
-    private var descriptionHr by mutableStateOf(workout.description.value("HR").orEmpty())
-    private var descriptionEn by mutableStateOf(workout.description.value("EN").orEmpty())
-    private var videoUrl by mutableStateOf(workout.videoUrl.orEmpty())
-    private var thumbnailUrl by mutableStateOf(workout.thumbnailUrl.orEmpty())
-    private var selectedWorkoutTypeIds by mutableStateOf(workout.workoutTypes.map { it.id }.toSet())
+    private var nameHr by mutableStateOf(workout?.name?.value("HR").orEmpty())
+    private var nameEn by mutableStateOf(workout?.name?.value("EN").orEmpty())
+    private var descriptionHr by mutableStateOf(workout?.description?.value("HR").orEmpty())
+    private var descriptionEn by mutableStateOf(workout?.description?.value("EN").orEmpty())
+    private var videoUrl by mutableStateOf(workout?.videoUrl.orEmpty())
+    private var thumbnailUrl by mutableStateOf(workout?.thumbnailUrl.orEmpty())
+    private var selectedWorkoutTypeIds by mutableStateOf(workout?.workoutTypes.orEmpty().map { it.id }.toSet())
     private var workoutTypes by mutableStateOf<List<WorkoutType>>(emptyList())
     private var isSaving by mutableStateOf(false)
+
+    private val isNew: Boolean get() = workout == null
 
     private val isVideoUrlValid: Boolean get() = YOUTUBE_PATTERN.containsMatchIn(videoUrl.trim())
 
@@ -70,7 +74,8 @@ class WorkoutEditScreen(
                 trimmedNameHr.length <= MAX_NAME_LENGTH &&
                 nameEn.trim().length <= MAX_NAME_LENGTH &&
                 descriptionHr.isNotBlank() &&
-                isVideoUrlValid
+                // The API accepts a new workout without a video, it can be added later.
+                (isVideoUrlValid || (isNew && videoUrl.isBlank()))
         }
 
     @Composable
@@ -81,7 +86,7 @@ class WorkoutEditScreen(
 
         ScrollScreen(
             topBar = {
-                TopBar(title = stringResource(R.string.edit_workout)) {
+                TopBar(title = stringResource(if (isNew) R.string.new_workout else R.string.edit_workout)) {
                     TextButton(onClick = { launch { save(navigator) } }, enabled = isValid && !isSaving) {
                         if (isSaving) {
                             SmallProgress()
@@ -203,16 +208,23 @@ class WorkoutEditScreen(
         isSaving = true
         try {
             val request = UpdateWorkoutRequest(
-                name = localizedText(workout.name, nameHr, nameEn),
-                description = localizedText(workout.description, descriptionHr, descriptionEn),
+                name = localizedText(workout?.name ?: LocalizedText(), nameHr, nameEn),
+                description = localizedText(workout?.description ?: LocalizedText(), descriptionHr, descriptionEn),
                 // An empty thumbnail is generated from the YouTube video on the API.
                 thumbnailUrl = thumbnailUrl.trim(),
                 videoUrl = videoUrl.trim(),
                 workoutTypes = selectedWorkoutTypeIds.toList()
             )
-            val updated: Workout = ApiClient.request("workouts/${workout.id}", HttpMethod.PUT, request)
-            onSaved(updated)
-            ToastManager.show(R.string.workout_updated_successfully, ToastType.SUCCESS)
+            val saved: Workout = if (workout == null) {
+                ApiClient.request("workouts", HttpMethod.POST, request)
+            } else {
+                ApiClient.request("workouts/${workout.id}", HttpMethod.PUT, request)
+            }
+            onSaved(saved)
+            ToastManager.show(
+                if (isNew) R.string.workout_created_successfully else R.string.workout_updated_successfully,
+                ToastType.SUCCESS
+            )
             navigator.pop()
         } catch (e: ApiException.Validation) {
             if (e.response.errors?.get("generalErrors")?.contains(DUPLICATE_ERROR_CODE) == true) {

@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import software.rdd.apexperformance.R
@@ -72,6 +74,7 @@ fun LoginScreen() {
     var password by rememberSaveable { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
+    var showForgotPassword by rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -126,6 +129,10 @@ fun LoginScreen() {
                         .widthIn(max = width * 0.9f)
                         .heightIn(max = height * 0.22f)
                 )
+
+                if (AuthManager.sessionExpired) {
+                    SessionExpiredMessage()
+                }
 
                 Column(verticalArrangement = Arrangement.spacedBy(30.dp)) {
                     FieldBox {
@@ -182,6 +189,10 @@ fun LoginScreen() {
                         }
                     }
 
+                    // The main color is white in dark mode, so the text uses
+                    // the background colour (white / black).
+                    val onMain = if (ApexColors.isDark) Color.Black else Color.White
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -197,16 +208,54 @@ fun LoginScreen() {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(stringResource(R.string.login), color = Color.White, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                            Text(stringResource(R.string.login), color = onMain, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = onMain, modifier = Modifier.size(20.dp))
                         }
                         if (isLoading) {
-                            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
+                            CircularProgressIndicator(color = onMain, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
                         }
                     }
+
+                    Text(
+                        stringResource(R.string.forgot_password),
+                        style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                        color = ApexColors.main,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .alpha(if (isLoading) 0.5f else 1f)
+                            .clip(RoundedCornerShape(6.dp))
+                            .clickable(enabled = !isLoading) { showForgotPassword = true }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
         }
+    }
+
+    if (showForgotPassword) {
+        ForgotPasswordSheet(onDismiss = { showForgotPassword = false })
+    }
+}
+
+@Composable
+private fun SessionExpiredMessage() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(ApexColors.orange.copy(alpha = 0.12f))
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Outlined.Schedule, contentDescription = null, tint = ApexColors.orange, modifier = Modifier.size(18.dp))
+        Text(
+            stringResource(R.string.session_expired),
+            style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+            color = ApexColors.orange,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

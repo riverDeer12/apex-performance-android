@@ -6,8 +6,11 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,17 +21,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,30 +68,43 @@ import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.ImportWorkoutsResponse
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.deleteWorkout
+import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.Chevron
+import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.RowDivider
-import software.rdd.apexperformance.ui.components.ScreenHeader
 import software.rdd.apexperformance.ui.components.ScrollScreen
+import software.rdd.apexperformance.ui.components.ToolbarIcon
+import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.WorkoutThumbnail
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
-class WorkoutsScreen : Screen() {
+// Workout library. Clients open it from home, limited by their plan
+// through `workoutFilter`, with their own title and subtitle.
+class WorkoutsScreen(
+    private val workoutFilter: ((Workout) -> Boolean)? = null,
+    @StringRes private val title: Int = R.string.workouts,
+    @StringRes private val subtitle: Int = R.string.workouts_subtitle
+) : Screen() {
 
     private var workouts by mutableStateOf<List<Workout>>(emptyList())
     private var searchText by mutableStateOf("")
     private var isLoading by mutableStateOf(false)
     private var isImporting by mutableStateOf(false)
     private var hasLoaded = false
+    // Workout picked for deletion from the long-press menu.
+    private var workoutToDelete by mutableStateOf<Workout?>(null)
 
     // Same audience as the web: coaches and administrators manage workouts.
     private val canManageWorkouts: Boolean get() = !AuthManager.hasRole(Roles.CLIENT)
 
     private val filteredWorkouts: List<Workout>
         get() = workouts
+            .filter { workoutFilter?.invoke(it) ?: true }
             .filter { it.matches(searchText) }
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.localized })
 
@@ -92,6 +113,10 @@ class WorkoutsScreen : Screen() {
 
     fun updateWorkout(updated: Workout) {
         workouts = workouts.map { if (it.id == updated.id) updated else it }
+    }
+
+    private fun removeWorkout(id: String) {
+        workouts = workouts.filter { it.id != id }
     }
 
     @Composable
@@ -111,10 +136,19 @@ class WorkoutsScreen : Screen() {
         }
 
         ScrollScreen(
+            topBar = {
+                TopBar {
+                    if (canManageWorkouts) {
+                        ToolbarIcon(Icons.Filled.Add, stringResource(R.string.new_workout)) {
+                            navigator.push(WorkoutEditScreen { created -> workouts = workouts + created })
+                        }
+                    }
+                }
+            },
             showLoading = isLoading && workouts.isEmpty(),
             onRefresh = { loadWorkouts() }
         ) {
-            ScreenHeader(stringResource(R.string.workouts), stringResource(R.string.workouts_subtitle))
+            ApexScreenHeader(stringResource(title), stringResource(subtitle))
 
             if (canManageWorkouts) {
                 Row(
@@ -150,13 +184,30 @@ class WorkoutsScreen : Screen() {
                     Column {
                         list.forEach { workout ->
                             WorkoutRow(workout) {
-                                navigator.push(WorkoutDetailScreen(workout, canManageWorkouts, ::updateWorkout))
+                                navigator.push(
+                                    WorkoutDetailScreen(
+                                        workout,
+                                        canManageWorkouts,
+                                        onSaved = ::updateWorkout,
+                                        onDeleted = { removeWorkout(workout.id) }
+                                    )
+                                )
                             }
                             if (workout.id != list.last().id) RowDivider(startIndent = 108.dp)
                         }
                     }
                 }
             }
+        }
+
+        workoutToDelete?.let { workout ->
+            ConfirmDialog(
+                title = stringResource(R.string.delete_workout_question),
+                message = stringResource(R.string.can_not_be_undone),
+                confirmText = stringResource(R.string.delete),
+                onConfirm = { launch { delete(workout) } },
+                onDismiss = { workoutToDelete = null }
+            )
         }
     }
 
@@ -169,7 +220,9 @@ class WorkoutsScreen : Screen() {
         isLoading: Boolean = false,
         onClick: () -> Unit
     ) {
-        val content = if (filled) Color.White else ApexColors.main
+        // The main color is white in dark mode, so filled buttons use
+        // the background colour (white / black) for their content.
+        val content = if (!filled) ApexColors.main else if (ApexColors.isDark) Color.Black else Color.White
         Row(
             modifier = modifier
                 .height(44.dp)
@@ -220,12 +273,42 @@ class WorkoutsScreen : Screen() {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun WorkoutRow(workout: Workout, onClick: () -> Unit) {
+        var showMenu by remember { mutableStateOf(false) }
+
+        Box {
+            WorkoutRowContent(
+                workout,
+                Modifier.combinedClickable(
+                    onClick = onClick,
+                    onLongClick = if (canManageWorkouts) ({ showMenu = true }) else null
+                )
+            )
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                containerColor = ApexColors.background
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.delete_workout), color = ApexColors.red) },
+                    leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = ApexColors.red) },
+                    onClick = {
+                        showMenu = false
+                        workoutToDelete = workout
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun WorkoutRowContent(workout: Workout, modifier: Modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onClick)
+                .then(modifier)
                 .padding(vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -257,6 +340,16 @@ class WorkoutsScreen : Screen() {
             }
 
             Chevron()
+        }
+    }
+
+    private suspend fun delete(workout: Workout) {
+        try {
+            deleteWorkout(workout.id)
+            removeWorkout(workout.id)
+            ToastManager.show(R.string.workout_deleted_successfully, ToastType.SUCCESS)
+        } catch (e: Exception) {
+            showError(e)
         }
     }
 
