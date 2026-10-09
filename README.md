@@ -60,6 +60,35 @@ keyPassword=...
 
 `./gradlew bundleRelease` then produces a signed `app-release.aab`.
 
+## Distribution outside Google Play (Firebase App Distribution)
+
+For the few Android users, the signed release APK (production API) goes out through
+[Firebase App Distribution](https://console.firebase.google.com/project/apex-performance-e9a76/appdistribution)
+instead of the Play Store. Testers get an email invite, install the app from their phone and
+are emailed again for every new version.
+
+One-time setup:
+
+1. Firebase console → **App Distribution** → Get started (Android app `software.rdd.apexperformance`).
+2. **Testers & Groups** → create a group with the alias `android-testers` and add the users' emails.
+3. Install the Firebase CLI (`brew install firebase-cli` or `npm install -g firebase-tools`) and run
+   `firebase login` – the Gradle plugin uploads with those credentials.
+4. `google-services.json` and `keystore.properties` must be in place (see above).
+
+Every release:
+
+1. Bump `versionCode` (and `versionName`) in `app/build.gradle.kts` – Android won't install an
+   update with the same or a lower `versionCode`.
+2. Write what changed in `release-notes.txt`.
+3. Build and upload:
+
+   ```bash
+   ./gradlew assembleRelease appDistributionUploadRelease
+   ```
+
+Always sign with the same upload key: an APK signed with a different key can't update the
+installed app, and users would have to uninstall it first.
+
 ## Publishing on Google Play
 
 1. [Google Play Console](https://play.google.com/console) developer account (one-time fee).

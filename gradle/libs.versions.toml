@@ -14,6 +14,7 @@ okhttp = "4.12.0"
 coil = "3.2.0"
 firebaseBom = "33.16.0"
 googleServices = "4.4.3"
+appDistribution = "5.1.1"
 junit = "4.13.2"
 
 [libraries]
@@ -45,3 +46,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "appDistribution" }
