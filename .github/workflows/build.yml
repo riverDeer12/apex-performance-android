@@ -16,3 +16,6 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and unit test
         run: ./gradlew assembleDebug testDebugUnitTest
+      # Minified like the APK sent to Firebase (unsigned here, the key isn't in git).
+      - name: Release build
+        run: ./gradlew assembleRelease
