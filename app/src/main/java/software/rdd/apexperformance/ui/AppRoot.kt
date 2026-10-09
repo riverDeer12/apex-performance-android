@@ -142,7 +142,7 @@ class HomeState {
         AppTab.WORKOUTS -> WorkoutsScreen()
         AppTab.CLIENTS -> ClientsScreen()
         AppTab.BODY_MEASUREMENTS -> MyBodyMeasurementsScreen()
-        AppTab.PROFILE -> UserProfileScreen()
+        AppTab.PROFILE, AppTab.HOME, AppTab.TRAININGS -> UserProfileScreen()
     }
 
     private companion object {
@@ -207,5 +207,5 @@ private fun AppTab.iconAndLabel(): Pair<ImageVector, String> = when (this) {
     AppTab.WORKOUTS -> Icons.Filled.FitnessCenter to stringResource(R.string.workouts)
     AppTab.CLIENTS -> Icons.Outlined.Groups to stringResource(R.string.clients)
     AppTab.BODY_MEASUREMENTS -> Icons.Outlined.Straighten to stringResource(R.string.body_measurements)
-    AppTab.PROFILE -> Icons.Outlined.Person to stringResource(R.string.profile)
+    AppTab.PROFILE, AppTab.HOME, AppTab.TRAININGS -> Icons.Outlined.Person to stringResource(R.string.profile)
 }
