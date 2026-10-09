@@ -35,12 +35,14 @@ import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.EditableRow
 import software.rdd.apexperformance.ui.components.LoadingRow
 import software.rdd.apexperformance.ui.components.MenuPicker
+import software.rdd.apexperformance.ui.components.NumberWheelField
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SaveAction
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.ToggleRow
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
+import kotlin.math.roundToInt
 
 class CreateClientScreen : Screen() {
 
@@ -48,7 +50,7 @@ class CreateClientScreen : Screen() {
     private var lastName by mutableStateOf("")
     private var email by mutableStateOf("")
     private var phone by mutableStateOf("")
-    private var credits by mutableStateOf("")
+    private var credits by mutableStateOf<Int?>(null)
     private var plan by mutableStateOf(ClientPlan.PRIVATE_COACHING)
     private var isSaving by mutableStateOf(false)
     private var isLoadingCoaches by mutableStateOf(false)
@@ -98,7 +100,12 @@ class CreateClientScreen : Screen() {
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.credits)) {
                 EditableRow(stringResource(R.string.appointments_left)) {
-                    Field(credits, { value -> credits = value.filter { it.isDigit() } }, "0", KeyboardType.Number)
+                    NumberWheelField(
+                        value = credits?.toDouble(),
+                        onValueChange = { credits = it?.roundToInt() },
+                        range = 0..200,
+                        title = stringResource(R.string.appointments_left)
+                    )
                 }
             }
 
@@ -160,7 +167,7 @@ class CreateClientScreen : Screen() {
                 lastName = lastName.trim(),
                 email = email.ifEmpty { null },
                 phone = phone.ifEmpty { null },
-                credits = credits.toIntOrNull(),
+                credits = credits,
                 coaches = if (canSelectCoaches) selectedCoaches else emptyList(),
                 plan = plan.value
             )

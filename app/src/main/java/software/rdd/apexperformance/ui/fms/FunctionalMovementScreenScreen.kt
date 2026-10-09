@@ -35,7 +35,8 @@ import software.rdd.apexperformance.ui.theme.ApexText
 // otherwise shows the existing one and lets staff edit it.
 class FunctionalMovementScreenScreen(
     private val clientId: String,
-    private val screen: FunctionalMovementScreen? = null
+    private val screen: FunctionalMovementScreen? = null,
+    private val onSaved: (() -> Unit)? = null
 ) : Screen() {
 
     private var deepSquat by mutableStateOf(screen?.deepSquat.orEmpty())
@@ -153,7 +154,7 @@ class FunctionalMovementScreenScreen(
                 if (isNew) R.string.fms_created_successfully else R.string.fms_updated_successfully,
                 ToastType.SUCCESS
             )
-            // The client screen reloads its list when it is shown again.
+            onSaved?.invoke()
             navigator.pop()
         } catch (e: Exception) {
             showError(e)
