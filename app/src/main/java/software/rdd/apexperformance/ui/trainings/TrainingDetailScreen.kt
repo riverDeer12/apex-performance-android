@@ -15,19 +15,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -40,14 +46,20 @@ import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.launch
+import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.util.DateFormats
+import software.rdd.apexperformance.core.util.ToastManager
+import software.rdd.apexperformance.core.util.ToastType
+import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.ui.components.ApexPictureBackground
 import software.rdd.apexperformance.ui.components.ApexTitle
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.EmptyText
+import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
@@ -68,6 +80,9 @@ class TrainingDetailScreen(
     private var showMenu by mutableStateOf(false)
     private var showDeleteDialog by mutableStateOf(false)
     private var isUpdating by mutableStateOf(false)
+    // "Save as template" asks for the template's name.
+    private var showSaveAsTemplate by mutableStateOf(false)
+    private var templateName by mutableStateOf("")
 
     @Composable
     override fun Content() {
@@ -98,13 +113,7 @@ class TrainingDetailScreen(
                 }
             }
 
-            val exercises = training.exercises.sortedBy { it.order }
-            val labels = SupersetLabels.labels(exercises.map { it.isSupersetWithPrevious })
-            exercises.forEachIndexed { index, exercise ->
-                val isInSuperset = exercise.isSupersetWithPrevious ||
-                    (index + 1 < exercises.size && exercises[index + 1].isSupersetWithPrevious)
-                ExerciseCard(exercise, labels[index], isInSuperset)
-            }
+            TrainingExerciseCards(training.exercises)
 
             val note = training.note
             if (!note.isNullOrEmpty()) {
@@ -121,6 +130,15 @@ class TrainingDetailScreen(
                 confirmText = stringResource(R.string.delete),
                 onConfirm = { launch { delete(navigator) } },
                 onDismiss = { showDeleteDialog = false }
+            )
+        }
+
+        if (showSaveAsTemplate) {
+            TemplateNameDialog(
+                name = templateName,
+                onNameChange = { templateName = it },
+                onSave = { launch { saveAsTemplate() } },
+                onDismiss = { showSaveAsTemplate = false }
             )
         }
     }
@@ -208,6 +226,30 @@ class TrainingDetailScreen(
                     }
                 }
 
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.copy_training)) },
+                    leadingIcon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) },
+                    onClick = {
+                        showMenu = false
+                        // The copy is a new training, so it is only added to the list.
+                        navigator.push(
+                            TrainingFormScreen(copying = training, history = history) { saved ->
+                                onSaved?.invoke(saved)
+                            }
+                        )
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.save_as_template)) },
+                    leadingIcon = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = null) },
+                    onClick = {
+                        showMenu = false
+                        templateName = training.name
+                        showSaveAsTemplate = true
+                    }
+                )
+
                 if (onDeleted != null) {
                     DeleteTrainingMenuItem {
                         showMenu = false
@@ -215,6 +257,18 @@ class TrainingDetailScreen(
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun saveAsTemplate() {
+        isUpdating = true
+        try {
+            TrainingTemplate.save(SaveTrainingTemplateRequest.from(templateName.trim(), training))
+            ToastManager.show(R.string.template_created, ToastType.SUCCESS)
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isUpdating = false
         }
     }
 
@@ -229,73 +283,88 @@ class TrainingDetailScreen(
             isUpdating = false
         }
     }
+}
 
-    @Composable
-    private fun ExerciseCard(exercise: Training.Exercise, label: String, isInSuperset: Boolean) {
-        CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                if (isInSuperset) {
-                    // Exercises of a superset are done one after another without rest.
-                    SupersetBadge(modifier = Modifier.padding(bottom = 6.dp))
-                }
+// Cards of a training's or template's exercises with their sets,
+// numbered "1.", "2a", "2b"... like the web.
+@Composable
+internal fun TrainingExerciseCards(exercises: List<Training.Exercise>) {
+    val sorted = exercises.sortedBy { it.order }
+    val labels = SupersetLabels.labels(sorted.map { it.isSupersetWithPrevious })
+    sorted.forEachIndexed { index, exercise ->
+        val isInSuperset = exercise.isSupersetWithPrevious ||
+            (index + 1 < sorted.size && sorted[index + 1].isSupersetWithPrevious)
+        key(exercise.id) {
+            TrainingExerciseCard(exercise, labels[index], isInSuperset)
+        }
+    }
+}
 
-                Text(
-                    "$label ${exercise.workoutName.localized}".uppercase(),
-                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
-                    modifier = Modifier.padding(bottom = 10.dp)
+@Composable
+private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isInSuperset: Boolean) {
+    CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (isInSuperset) {
+                // Exercises of a superset are done one after another without rest.
+                SupersetBadge(modifier = Modifier.padding(bottom = 6.dp))
+            }
+
+            Text(
+                "$label ${exercise.workoutName.localized}".uppercase(),
+                style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+
+            val sets = exercise.sets.sortedBy { it.order }
+            if (sets.isNotEmpty()) {
+                TrainingSetRow(
+                    stringResource(R.string.set),
+                    stringResource(R.string.reps),
+                    stringResource(R.string.kg),
+                    isHeader = true
                 )
+            }
+            sets.forEachIndexed { index, set ->
+                HorizontalDivider(thickness = 0.5.dp, color = ApexColors.border)
+                TrainingSetRow(
+                    "${index + 1}",
+                    set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
+                    set.weight?.let(::formatWeight) ?: "—"
+                )
+            }
 
-                val sets = exercise.sets.sortedBy { it.order }
-                if (sets.isNotEmpty()) {
-                    SetRow(
-                        stringResource(R.string.set),
-                        stringResource(R.string.reps),
-                        stringResource(R.string.kg),
-                        isHeader = true
-                    )
-                }
-                sets.forEachIndexed { index, set ->
-                    HorizontalDivider(thickness = 0.5.dp, color = ApexColors.border)
-                    SetRow(
-                        "${index + 1}",
-                        set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
-                        set.weight?.let(::formatWeight) ?: "—"
-                    )
-                }
-
-                val note = exercise.note
-                if (!note.isNullOrEmpty()) {
-                    Text(
-                        note,
-                        style = ApexText.caption,
-                        color = ApexColors.secondaryLabel,
-                        modifier = Modifier.padding(top = 10.dp)
-                    )
-                }
+            val note = exercise.note
+            if (!note.isNullOrEmpty()) {
+                Text(
+                    note,
+                    style = ApexText.caption,
+                    color = ApexColors.secondaryLabel,
+                    modifier = Modifier.padding(top = 10.dp)
+                )
             }
         }
     }
+}
 
-    // Row of the sets table: set number, repetitions and weight.
-    @Composable
-    private fun SetRow(set: String, reps: String, weight: String, isHeader: Boolean = false) {
-        val style = if (isHeader) {
-            TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, color = ApexColors.secondaryLabel)
-        } else {
-            ApexText.subheadline.copy(color = ApexColors.label)
-        }
-        fun text(value: String) = if (isHeader) value.uppercase() else value
+// Row of the sets table: set number, repetitions and weight.
+@Composable
+private fun TrainingSetRow(set: String, reps: String, weight: String, isHeader: Boolean = false) {
+    val style = if (isHeader) {
+        TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, color = ApexColors.secondaryLabel)
+    } else {
+        ApexText.subheadline.copy(color = ApexColors.label)
+    }
+    fun text(value: String) = if (isHeader) value.uppercase() else value
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = if (isHeader) 6.dp else 9.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text(set), style = style, modifier = Modifier.width(56.dp))
-            Text(text(reps), style = style, modifier = Modifier.weight(1f))
-            Text(text(weight), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
-        }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = if (isHeader) 6.dp else 9.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text(set), style = style, modifier = Modifier.width(56.dp))
+        Text(text(reps), style = style, modifier = Modifier.weight(1f))
+        Text(text(weight), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
     }
 }
 
@@ -309,5 +378,56 @@ internal fun SupersetBadge(modifier: Modifier = Modifier) {
         modifier = modifier
             .background(ApexColors.accent, CircleShape)
             .padding(horizontal = 6.dp, vertical = 2.dp)
+    )
+}
+
+// Asks for the name of a template made from a training ("Save as template").
+@Composable
+internal fun TemplateNameDialog(
+    name: String,
+    onNameChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val isValid = name.trim().isNotEmpty()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = ApexColors.background,
+        title = { Text(stringResource(R.string.save_as_template), style = ApexText.headline) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.save_as_template_hint), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
+                PlainTextField(
+                    value = name,
+                    onValueChange = onNameChange,
+                    placeholder = stringResource(R.string.name),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(ApexColors.groupedBackground)
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = isValid,
+                onClick = {
+                    onDismiss()
+                    onSave()
+                }
+            ) {
+                Text(
+                    stringResource(R.string.save),
+                    color = if (isValid) ApexColors.main else ApexColors.tertiaryLabel,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel), color = ApexColors.main)
+            }
+        }
     )
 }

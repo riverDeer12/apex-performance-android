@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,10 +75,13 @@ import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.SaveTrainingRequest
+import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.model.Workout
 import software.rdd.apexperformance.ui.components.Chevron
+import software.rdd.apexperformance.ui.components.MenuPicker
 import software.rdd.apexperformance.ui.components.NumberWheelField
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SaveAction
@@ -90,30 +94,77 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import kotlin.coroutines.cancellation.CancellationException
 
 // Creates or edits a client's training (staff only). Next to every
 // exercise it shows the sets the client did in the same exercise on
-// the previous training, same as the web form.
-class TrainingFormScreen(
-    private val clientId: String,
+// the previous training, same as the web form. The same form creates
+// and edits training templates, which have no client, date or state.
+class TrainingFormScreen private constructor(
+    private val clientId: String?,
     // Training being edited, null for a new one.
-    private val training: Training? = null,
+    private val training: Training?,
     // Client's other trainings, used for the "last time" sets.
     private val history: List<Training>,
-    private val onSaved: ((Training) -> Unit)? = null
+    private val onSaved: ((Training) -> Unit)?,
+    // Template form: the template being edited, null for a new one.
+    private val isTemplate: Boolean,
+    private val template: TrainingTemplate?,
+    private val onTemplateSaved: ((TrainingTemplate) -> Unit)?,
+    // Training whose exercises and sets a new training starts with.
+    copying: Training?
 ) : Screen() {
 
-    private var name by mutableStateOf(training?.name.orEmpty())
+    constructor(
+        clientId: String,
+        training: Training? = null,
+        history: List<Training>,
+        onSaved: ((Training) -> Unit)? = null
+    ) : this(clientId, training, history, onSaved, false, null, null, null)
+
+    // New training for the same client with the exercises and sets of
+    // the given one ("Copy training"), planned for today.
+    constructor(
+        copying: Training,
+        history: List<Training>,
+        onSaved: ((Training) -> Unit)? = null
+    ) : this(copying.client.id, null, history, onSaved, false, null, null, copying)
+
+    // Form of a new template, or of the given one to edit it.
+    constructor(
+        template: TrainingTemplate?,
+        onSaved: ((TrainingTemplate) -> Unit)? = null
+    ) : this(null, null, emptyList(), null, true, template, onSaved, null)
+
+    private var name by mutableStateOf(training?.name ?: copying?.name ?: template?.name.orEmpty())
     private var date by mutableStateOf(training?.date ?: Instant.now())
-    private var note by mutableStateOf(training?.note.orEmpty())
+    private var note by mutableStateOf(training?.note ?: copying?.note ?: template?.note.orEmpty())
     private var isCompleted by mutableStateOf(training?.isCompleted ?: false)
     private var exercises by mutableStateOf(
-        training?.exercises.orEmpty().sortedBy { it.order }.map { ExerciseDraft.from(it) }
+        (training?.exercises ?: copying?.exercises ?: template?.exercises).orEmpty()
+            .sortedBy { it.order }
+            .map { ExerciseDraft.from(it) }
     )
 
     private var workouts by mutableStateOf<List<Workout>>(emptyList())
     private var isSaving by mutableStateOf(false)
     private var showDatePicker by mutableStateOf(false)
+
+    // Templates a new training can be filled from.
+    private var templates by mutableStateOf<List<TrainingTemplate>>(emptyList())
+    private var selectedTemplateId by mutableStateOf<String?>(null)
+
+    // Only a new training can be filled from a template.
+    private val canUseTemplates: Boolean
+        get() = !isTemplate && training == null
+
+    @get:StringRes
+    private val title: Int
+        get() = if (isTemplate) {
+            if (template == null) R.string.new_template else R.string.edit_template
+        } else {
+            if (training == null) R.string.new_training else R.string.edit_training
+        }
 
     private val isValid: Boolean
         get() = name.trim().isNotEmpty() && exercises.all { it.isValid }
@@ -123,14 +174,33 @@ class TrainingFormScreen(
         val navigator = LocalNavigator.current
 
         LaunchedEffect(Unit) { loadWorkouts() }
+        LaunchedEffect(Unit) { loadTemplates() }
 
         ScrollScreen(
             topBar = {
-                TopBar(title = stringResource(if (training == null) R.string.new_training else R.string.edit_training)) {
+                TopBar(title = stringResource(title)) {
                     SaveAction(enabled = isValid, isSaving = isSaving) { launch { save(navigator) } }
                 }
             }
         ) {
+            if (canUseTemplates && templates.isNotEmpty()) {
+                Section(
+                    footer = { Text(stringResource(R.string.from_template_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
+                ) {
+                    val noTemplate = stringResource(R.string.no_template)
+                    MenuPicker(
+                        label = stringResource(R.string.from_template),
+                        selectedText = templates.firstOrNull { it.id == selectedTemplateId }?.name ?: noTemplate,
+                        options = listOf<TrainingTemplate?>(null) + templates,
+                        optionText = { it?.name ?: noTemplate },
+                        onSelect = { selected ->
+                            selectedTemplateId = selected?.id
+                            if (selected != null) applyTemplate(selected)
+                        }
+                    )
+                }
+            }
+
             Section {
                 PlainTextField(
                     value = name,
@@ -141,10 +211,12 @@ class TrainingFormScreen(
                         .padding(vertical = 12.dp)
                 )
                 Divider()
-                DateRow()
-                Divider()
-                SwitchRow(stringResource(R.string.completed), isCompleted) { isCompleted = it }
-                Divider()
+                if (!isTemplate) {
+                    DateRow()
+                    Divider()
+                    SwitchRow(stringResource(R.string.completed), isCompleted) { isCompleted = it }
+                    Divider()
+                }
                 PlainTextField(
                     value = note,
                     onValueChange = { note = it },
@@ -607,6 +679,13 @@ class TrainingFormScreen(
 
     // MARK: - Editing
 
+    // Fills the name, note and exercises from the chosen template, like the web.
+    private fun applyTemplate(template: TrainingTemplate) {
+        name = template.name
+        note = template.note.orEmpty()
+        exercises = template.exercises.sortedBy { it.order }.map { ExerciseDraft.from(it) }
+    }
+
     private fun updateExercise(id: String, transform: (ExerciseDraft) -> ExerciseDraft) {
         exercises = exercises.map { if (it.id == id) transform(it) else it }
     }
@@ -669,6 +748,7 @@ class TrainingFormScreen(
     // before this one, or null when the client didn't do it yet.
     private fun previousSets(workoutId: String?): PreviousSets? {
         if (workoutId == null) return null
+        val clientId = clientId ?: return null
 
         val earlier = history
             .filter { it.client.id == clientId && it.id != training?.id && !it.date.isAfter(date) }
@@ -694,7 +774,24 @@ class TrainingFormScreen(
         }
     }
 
+    private suspend fun loadTemplates() {
+        if (!canUseTemplates || templates.isNotEmpty()) return
+        // Optional, the form works without templates.
+        templates = try {
+            TrainingTemplate.loadAll()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            emptyList()
+        }
+    }
+
     private suspend fun save(navigator: Navigator) {
+        if (isTemplate) {
+            saveTemplate(navigator)
+            return
+        }
+        val clientId = clientId ?: return
+
         isSaving = true
         try {
             val trimmedNote = note.trim()
@@ -711,6 +808,27 @@ class TrainingFormScreen(
             val saved = Training.save(request, training?.id)
             onSaved?.invoke(saved)
             ToastManager.show(R.string.training_saved_successfully, ToastType.SUCCESS)
+            navigator.pop()
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isSaving = false
+        }
+    }
+
+    private suspend fun saveTemplate(navigator: Navigator) {
+        isSaving = true
+        try {
+            val trimmedNote = note.trim()
+            val request = SaveTrainingTemplateRequest(
+                name = name.trim(),
+                note = trimmedNote.ifEmpty { null },
+                exercises = exercises.mapNotNull { it.request }
+            )
+
+            val saved = TrainingTemplate.save(request, template?.id)
+            onTemplateSaved?.invoke(saved)
+            ToastManager.show(if (template == null) R.string.template_created else R.string.template_updated, ToastType.SUCCESS)
             navigator.pop()
         } catch (e: Exception) {
             showError(e)

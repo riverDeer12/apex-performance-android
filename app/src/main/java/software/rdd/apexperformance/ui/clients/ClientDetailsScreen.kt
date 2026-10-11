@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -86,6 +87,7 @@ import software.rdd.apexperformance.ui.fms.FunctionalMovementScreenScreen
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.trainings.ClientTrainingProgressScreen
+import software.rdd.apexperformance.ui.trainings.PersonalRecordsScreen
 import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
 import software.rdd.apexperformance.ui.trainings.TrainingRows
 import java.time.Instant
@@ -391,6 +393,16 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                         title = stringResource(R.string.training_progress_title),
                         showChevron = true,
                         onClick = { navigator.push(ClientTrainingProgressScreen(client.fullName, trainings)) }
+                    )
+                    RowDivider()
+
+                    // Records come from completed trainings.
+                    SettingsRow(
+                        icon = Icons.Outlined.EmojiEvents,
+                        iconTint = ApexColors.accent,
+                        title = stringResource(R.string.personal_records),
+                        showChevron = true,
+                        onClick = { navigator.push(PersonalRecordsScreen(client.id, client.fullName)) }
                     )
                     RowDivider()
                 }
