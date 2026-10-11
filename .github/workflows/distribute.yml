@@ -47,8 +47,12 @@ jobs:
           RELEASE_NOTES: ${{ inputs.release_notes }}
         run: printf '%s\n' "$RELEASE_NOTES" > release-notes.txt
 
+      # The repository is public, so the log leaves out the plugin's
+      # temporary APK download link.
       - name: Build and upload
-        run: ./gradlew assembleRelease appDistributionUploadRelease
+        run: |
+          set -o pipefail
+          ./gradlew assembleRelease appDistributionUploadRelease 2>&1 | grep -v "Download the release binary"
 
       - name: Remove the signing key
         if: always()
