@@ -10,7 +10,10 @@
     <string name="add_set">Add set</string>
     <string name="add_superset_exercise">Add exercise to superset</string>
     <string name="add_to_appointment">Add to existing appointment</string>
+    <string name="all">All</string>
+    <string name="all_clients">All clients</string>
     <string name="all_plans">All plans</string>
+    <string name="all_trainings_subtitle">Trainings of all clients</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">en</string>
     <string name="app_name" translatable="false">Apex Performance</string>
@@ -31,6 +34,9 @@
     <string name="approve_request_question">Do you want to approve this request?</string>
     <string name="approved_appointments">Current Appointments</string>
     <string name="arms">Arms</string>
+    <string name="assign">Assign</string>
+    <string name="assign_template_hint">Each selected client gets a planned training with the exercises and sets of this template. Clients see it only after it is marked as completed.</string>
+    <string name="assign_to_clients">Assign to clients</string>
     <string name="average_reps_per_set">Average reps per set</string>
     <string name="back">Back</string>
     <string name="back_button">Back</string>
@@ -57,6 +63,7 @@
     <string name="change_username">Change Username</string>
     <string name="chest">Chest</string>
     <string name="clear">Clear</string>
+    <string name="client">Client</string>
     <string name="client_created_successfully">Client created successfully</string>
     <string name="clients">Clients</string>
     <string name="clients_added_to_appointment">Clients added to the appointment.</string>
@@ -74,6 +81,7 @@
     <string name="confirm_your_action">Please confirm your action</string>
     <string name="contact">Contact</string>
     <string name="copy">Copy</string>
+    <string name="copy_training">Copy training</string>
     <string name="created_at">Created at</string>
     <string name="credits">Credits</string>
     <string name="credits_remaining">%d credits remaining.</string>
@@ -90,6 +98,8 @@
     <string name="delete_measurement_question">Delete this measurement?</string>
     <string name="delete_monthly_review">Delete review</string>
     <string name="delete_monthly_review_question">Delete this monthly review?</string>
+    <string name="delete_template">Delete template</string>
+    <string name="delete_template_question">Are you sure that you want to delete this template?</string>
     <string name="delete_training">Delete training</string>
     <string name="delete_training_question">Delete this training?</string>
     <string name="delete_workout">Delete workout</string>
@@ -102,6 +112,7 @@
     <string name="edit">Edit</string>
     <string name="edit_goal_and_plan">Edit goal and plan</string>
     <string name="edit_profile">Edit profile</string>
+    <string name="edit_template">Edit template</string>
     <string name="edit_training">Edit training</string>
     <string name="edit_workout">Edit workout</string>
     <string name="email">Email</string>
@@ -134,10 +145,12 @@
     <string name="error_unauthorized">You are not authorized. Please log in again.</string>
     <string name="error_unexpected_response">Unexpected server response.</string>
     <string name="error_unknown_server">Unknown server error.</string>
+    <string name="estimated_one_rep_max">Estimated 1RM</string>
     <string name="exercise">Exercise</string>
     <string name="exercise_library">Exercise library</string>
     <string name="exercise_library_subtitle">All exercises with instructions and video</string>
     <string name="exercises_count">Exercises: %d</string>
+    <string name="filter_by_client">Filter by client</string>
     <string name="first_name">First name</string>
     <string name="fms">FMS</string>
     <string name="fms_created_successfully">FMS created successfully.</string>
@@ -149,6 +162,8 @@
     <string name="forgot_password">Forgot password?</string>
     <string name="forgot_password_hint">Enter your account\'s email and we\'ll send you a link to set a new password.</string>
     <string name="forgot_password_sent">If an account with that email exists, we\'ve sent a link to set a new password. Check your inbox.</string>
+    <string name="from_template">From template</string>
+    <string name="from_template_hint">Fills the name, note and exercises from the template.</string>
     <string name="generate_recurring_appointments">Generate next week appointments.</string>
     <string name="generating_recurring_appointments">Generating new appointments...</string>
     <string name="glutes">Glutes</string>
@@ -177,6 +192,7 @@
     <string name="language">Language</string>
     <string name="last_name">Last Name</string>
     <string name="last_payment">Last payment</string>
+    <string name="last_record">Last record %s</string>
     <string name="last_time">Last time</string>
     <string name="later">Later</string>
     <string name="latest_measurement">Latest measurement</string>
@@ -227,6 +243,8 @@
     <string name="new_fms">New FMS</string>
     <string name="new_monthly_review">New monthly review</string>
     <string name="new_password">New Password</string>
+    <string name="new_record">New</string>
+    <string name="new_template">New template</string>
     <string name="new_training">New training</string>
     <string name="new_username">New Username</string>
     <string name="new_workout">New workout</string>
@@ -239,6 +257,7 @@
     <string name="no_appointments_for_selected_day">No appointments for this day.</string>
     <string name="no_client">No client.</string>
     <string name="no_client_trainings">You have no trainings yet.</string>
+    <string name="no_clients">No clients.</string>
     <string name="no_completed_trainings">No completed trainings.</string>
     <string name="no_completed_trainings_in_period">No completed trainings in the selected period.</string>
     <string name="no_email">No email</string>
@@ -248,8 +267,12 @@
     <string name="no_goal_and_plan">Goal and plan aren\'t written yet.</string>
     <string name="no_measurements">No Measurements.</string>
     <string name="no_monthly_reviews">No monthly reviews yet.</string>
+    <string name="no_personal_records">No records yet. They appear when trainings with weights are marked as completed.</string>
     <string name="no_requests">No new requests.</string>
     <string name="no_sets_logged">No sets logged.</string>
+    <string name="no_template">None</string>
+    <string name="no_templates">You have no templates yet. Create one or save an existing training as a template.</string>
+    <string name="no_templates_found">No templates found.</string>
     <string name="no_time_slots">No time slots for the selected day.</string>
     <string name="no_trainings">The client has no trainings yet.</string>
     <string name="no_trainings_found">No trainings match your search.</string>
@@ -278,6 +301,8 @@
     <string name="period_three_months">3 months</string>
     <string name="period_year">12 months</string>
     <string name="personal_info">Personal Info</string>
+    <string name="personal_records">Personal records</string>
+    <string name="personal_records_hint">Records are calculated automatically from completed trainings.</string>
     <string name="phone_copied">Phone number is copied.</string>
     <string name="plan">Plan</string>
     <string name="plan_membership">Membership plan</string>
@@ -297,6 +322,7 @@
     <string name="progress">Progress</string>
     <string name="progress_summary">Progress summary</string>
     <string name="ready_for_next_training">Ready for your next training?</string>
+    <string name="record_history">Record history</string>
     <string name="recurring_appointments_generated_successfully">Appointments are successfully generated.</string>
     <string name="reject">Reject</string>
     <string name="reject_request">Reject</string>
@@ -323,7 +349,10 @@
     <string name="review_and_take_action">Review and action</string>
     <string name="rotary_stability">Rotary Stability</string>
     <string name="save">Save</string>
+    <string name="save_as_template">Save as template</string>
+    <string name="save_as_template_hint">The template gets the exercises and sets of this training.</string>
     <string name="search_clients">Search Clients</string>
+    <string name="search_templates">Search templates</string>
     <string name="search_trainings">Search trainings</string>
     <string name="search_workouts">Search by name, description or type</string>
     <string name="select_appointment_type">Select appointment type</string>
@@ -333,6 +362,7 @@
     <string name="select_exercise">Select exercise</string>
     <string name="select_time_slot">Select time slot</string>
     <string name="select_value">Select value</string>
+    <string name="selected_count">Selected: %d</string>
     <string name="send_cancelation_request">Send cancelation request</string>
     <string name="send_request">Send request</string>
     <string name="send_reset_link">Send link</string>
@@ -348,6 +378,7 @@
     <string name="show_all_measurements">Show all measurements</string>
     <string name="show_password">Show password</string>
     <string name="since_first_measurement">since first measurement</string>
+    <string name="status">Status</string>
     <string name="strength_and_conditioning">Strength and Conditioning</string>
     <string name="success">Success</string>
     <string name="successfully_canceled_appointment">Successfully canceled appointment.</string>
@@ -364,6 +395,10 @@
     <string name="tab_requests">Requests</string>
     <string name="tab_trainings">Trainings</string>
     <string name="tab_workouts">Workouts</string>
+    <string name="template_actions">Template actions</string>
+    <string name="template_created">Template has been created.</string>
+    <string name="template_deleted">Template has been deleted.</string>
+    <string name="template_updated">Template has been updated.</string>
     <string name="thigh">Thigh</string>
     <string name="thumbnail_url">Thumbnail link</string>
     <string name="thumbnail_url_hint">Leave empty to use the YouTube video thumbnail.</string>
@@ -376,7 +411,10 @@
     <string name="training_marked_planned">Training marked as planned.</string>
     <string name="training_progress_title">Training progress</string>
     <string name="training_saved_successfully">Training saved.</string>
+    <string name="training_templates">Training templates</string>
+    <string name="training_templates_subtitle">Prepare a training once and assign it to clients</string>
     <string name="trainings">Trainings</string>
+    <string name="trainings_created">Trainings created: %d</string>
     <string name="trainings_per_week">Trainings per week</string>
     <string name="trunk_stability_push_up">Trunk Stability Push-Up</string>
     <string name="unknown_coach">Unknown Coach</string>

@@ -10,7 +10,10 @@
     <string name="add_set">Dodaj seriju</string>
     <string name="add_superset_exercise">Dodaj vježbu u super seriju</string>
     <string name="add_to_appointment">Dodaj u postojeći termin</string>
+    <string name="all">Svi</string>
+    <string name="all_clients">Svi klijenti</string>
     <string name="all_plans">Svi planovi</string>
+    <string name="all_trainings_subtitle">Treninzi svih klijenata</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">hr</string>
     <string name="appearance">Izgled</string>
@@ -30,6 +33,9 @@
     <string name="approve_request_question">Želite li odoriti zahtjev?</string>
     <string name="approved_appointments">Trenutni termini</string>
     <string name="arms">Ruke</string>
+    <string name="assign">Dodijeli</string>
+    <string name="assign_template_hint">Svaki odabrani klijent dobiva planirani trening s vježbama i serijama iz ovog predloška. Klijent ga vidi tek kad se označi kao odrađen.</string>
+    <string name="assign_to_clients">Dodijeli klijentima</string>
     <string name="average_reps_per_set">Prosječno ponavljanja po seriji</string>
     <string name="back">Leđa</string>
     <string name="back_button">Natrag</string>
@@ -56,6 +62,7 @@
     <string name="change_username">Promjeni korisničko ime</string>
     <string name="chest">Prsa</string>
     <string name="clear">Očisti</string>
+    <string name="client">Klijent</string>
     <string name="client_created_successfully">Klijent je uspješno kreiran</string>
     <string name="clients">Klijenti</string>
     <string name="clients_added_to_appointment">Klijenti su dodani u termin.</string>
@@ -73,6 +80,7 @@
     <string name="confirm_your_action">Potrebno je potvrditi radnju.</string>
     <string name="contact">Kontakt</string>
     <string name="copy">Kopiraj</string>
+    <string name="copy_training">Kopiraj trening</string>
     <string name="created_at">Vrijeme kreiranja</string>
     <string name="credits">Sredstva</string>
     <string name="credits_remaining">Preostalo je %d sredstava</string>
@@ -89,6 +97,8 @@
     <string name="delete_measurement_question">Obrisati mjerenje?</string>
     <string name="delete_monthly_review">Obriši review</string>
     <string name="delete_monthly_review_question">Obrisati mjesečni review?</string>
+    <string name="delete_template">Obriši predložak</string>
+    <string name="delete_template_question">Jeste li sigurni da želite obrisati ovaj predložak?</string>
     <string name="delete_training">Obriši trening</string>
     <string name="delete_training_question">Obrisati trening?</string>
     <string name="delete_workout">Obriši vježbu</string>
@@ -101,6 +111,7 @@
     <string name="edit">Uredi</string>
     <string name="edit_goal_and_plan">Uredi cilj i plan</string>
     <string name="edit_profile">Uredi profil</string>
+    <string name="edit_template">Uredi predložak</string>
     <string name="edit_training">Uredi trening</string>
     <string name="edit_workout">Uredi vježbu</string>
     <string name="email">E-mail</string>
@@ -133,10 +144,12 @@
     <string name="error_unauthorized">Niste prijavljeni. Prijavite se ponovno.</string>
     <string name="error_unexpected_response">Neočekivan odgovor poslužitelja.</string>
     <string name="error_unknown_server">Nepoznata greška poslužitelja.</string>
+    <string name="estimated_one_rep_max">Procijenjeni 1RM</string>
     <string name="exercise">Vježba</string>
     <string name="exercise_library">Biblioteka vježbi</string>
     <string name="exercise_library_subtitle">Sve vježbe s uputama i videom</string>
     <string name="exercises_count">Vježbe: %d</string>
+    <string name="filter_by_client">Filtriraj po klijentu</string>
     <string name="first_name">Ime</string>
     <string name="fms">FMS</string>
     <string name="fms_created_successfully">FMS je uspješno kreiran.</string>
@@ -148,6 +161,8 @@
     <string name="forgot_password">Zaboravljena lozinka?</string>
     <string name="forgot_password_hint">Upiši e-mail svog računa i poslat ćemo ti poveznicu za postavljanje nove lozinke.</string>
     <string name="forgot_password_sent">Ako postoji račun s tim e-mailom, poslali smo poveznicu za novu lozinku. Provjeri poštu.</string>
+    <string name="from_template">Iz predloška</string>
+    <string name="from_template_hint">Popunjava naziv, bilješku i vježbe iz predloška.</string>
     <string name="generate_recurring_appointments">Generiraj raspored za slijedeći tjedan.</string>
     <string name="generating_recurring_appointments">Generiranje novih termina…</string>
     <string name="glutes">Gluteus</string>
@@ -176,6 +191,7 @@
     <string name="language">Jezik</string>
     <string name="last_name">Prezime</string>
     <string name="last_payment">Zadnje plaćanje</string>
+    <string name="last_record">Zadnji rekord %s</string>
     <string name="last_time">Prošli put</string>
     <string name="later">Kasnije</string>
     <string name="latest_measurement">Zadnje mjerenje</string>
@@ -226,6 +242,8 @@
     <string name="new_fms">Novi FMS</string>
     <string name="new_monthly_review">Novi mjesečni review</string>
     <string name="new_password">Nova lozinka</string>
+    <string name="new_record">Novo</string>
+    <string name="new_template">Novi predložak</string>
     <string name="new_training">Novi trening</string>
     <string name="new_username">Novo korisničko ime</string>
     <string name="new_workout">Nova vježba</string>
@@ -238,6 +256,7 @@
     <string name="no_appointments_for_selected_day">Nema termina za ovaj dan</string>
     <string name="no_client">Nema klijenta.</string>
     <string name="no_client_trainings">Još nemaš treninga.</string>
+    <string name="no_clients">Nema klijenata.</string>
     <string name="no_completed_trainings">Nema odrađenih treninga.</string>
     <string name="no_completed_trainings_in_period">U odabranom razdoblju nema odrađenih treninga.</string>
     <string name="no_email">Nema e-maila</string>
@@ -247,8 +266,12 @@
     <string name="no_goal_and_plan">Cilj i plan još nisu upisani.</string>
     <string name="no_measurements">Nema mjerenja</string>
     <string name="no_monthly_reviews">Još nema mjesečnih reviewa.</string>
+    <string name="no_personal_records">Još nema rekorda. Pojavljuju se kad se treninzi s kilažama označe kao odrađeni.</string>
     <string name="no_requests">Nema novih zahtjeva.</string>
     <string name="no_sets_logged">Nema upisanih serija.</string>
+    <string name="no_template">Bez predloška</string>
+    <string name="no_templates">Još nemate predložaka. Kreirajte novi ili spremite postojeći trening kao predložak.</string>
+    <string name="no_templates_found">Nema pronađenih predložaka.</string>
     <string name="no_time_slots">Nema slobodnih termina za odabrani dan.</string>
     <string name="no_trainings">Klijent još nema treninga.</string>
     <string name="no_trainings_found">Nema treninga koji odgovaraju pretrazi.</string>
@@ -277,6 +300,8 @@
     <string name="period_three_months">3 mjeseca</string>
     <string name="period_year">12 mjeseci</string>
     <string name="personal_info">Osobni podatci</string>
+    <string name="personal_records">Osobni rekordi</string>
+    <string name="personal_records_hint">Rekordi se automatski računaju iz odrađenih treninga.</string>
     <string name="phone_copied">Broj mobitela je kopiran</string>
     <string name="plan">Plan</string>
     <string name="plan_membership">Membership plan</string>
@@ -296,6 +321,7 @@
     <string name="progress">Napredak</string>
     <string name="progress_summary">Sažetak napretka</string>
     <string name="ready_for_next_training">Sve spremno za sljedeći trening?</string>
+    <string name="record_history">Povijest rekorda</string>
     <string name="recurring_appointments_generated_successfully">Termini su uspješno generirani.</string>
     <string name="reject">Odbij</string>
     <string name="reject_request">Odbij izmjenu</string>
@@ -322,7 +348,10 @@
     <string name="review_and_take_action">Pregled i upravljanje zahtjevom</string>
     <string name="rotary_stability">Rotacijska stabilnost</string>
     <string name="save">Spremi</string>
+    <string name="save_as_template">Spremi kao predložak</string>
+    <string name="save_as_template_hint">Predložak dobiva vježbe i serije ovog treninga.</string>
     <string name="search_clients">Pretraži klijente</string>
+    <string name="search_templates">Pretraži predloške</string>
     <string name="search_trainings">Pretraži treninge</string>
     <string name="search_workouts">Pretraži po nazivu, opisu ili vrsti</string>
     <string name="select_appointment_type">Odaberite vrstu termina</string>
@@ -332,6 +361,7 @@
     <string name="select_exercise">Odaberi vježbu</string>
     <string name="select_time_slot">Vrijeme termina</string>
     <string name="select_value">Odaberite vrijednost</string>
+    <string name="selected_count">Odabrano: %d</string>
     <string name="send_cancelation_request">Pošalji zahtjev za otkazivanje</string>
     <string name="send_request">Pošalji zahtjev</string>
     <string name="send_reset_link">Pošalji poveznicu</string>
@@ -347,6 +377,7 @@
     <string name="show_all_measurements">Prikaži sve mjere</string>
     <string name="show_password">Prikaži lozinku</string>
     <string name="since_first_measurement">od prvog mjerenja</string>
+    <string name="status">Status</string>
     <string name="strength_and_conditioning">Snaga i kondicija</string>
     <string name="success">Uspjeh</string>
     <string name="successfully_canceled_appointment">Uspješno otkazan termin.</string>
@@ -363,6 +394,10 @@
     <string name="tab_requests">Zahtjevi</string>
     <string name="tab_trainings">Treninzi</string>
     <string name="tab_workouts">Vježbe</string>
+    <string name="template_actions">Radnje s predloškom</string>
+    <string name="template_created">Predložak je kreiran.</string>
+    <string name="template_deleted">Predložak je obrisan.</string>
+    <string name="template_updated">Predložak je ažuriran.</string>
     <string name="thigh">Bedro</string>
     <string name="thumbnail_url">Poveznica na sličicu</string>
     <string name="thumbnail_url_hint">Ostavite prazno za sličicu s YouTube videa.</string>
@@ -375,7 +410,10 @@
     <string name="training_marked_planned">Trening je označen kao planiran.</string>
     <string name="training_progress_title">Trenažni napredak</string>
     <string name="training_saved_successfully">Trening je spremljen.</string>
+    <string name="training_templates">Predlošci treninga</string>
+    <string name="training_templates_subtitle">Pripremi trening jednom i dodijeli ga klijentima</string>
     <string name="trainings">Treninzi</string>
+    <string name="trainings_created">Kreirano treninga: %d</string>
     <string name="trainings_per_week">Treninzi po tjednu</string>
     <string name="trunk_stability_push_up">Stabilnost trupa - sklek</string>
     <string name="unknown_coach">Nepoznati trener</string>

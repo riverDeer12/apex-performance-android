@@ -10,7 +10,10 @@
     <string name="add_set">Aggiungi serie</string>
     <string name="add_superset_exercise">Aggiungi esercizio alla superserie</string>
     <string name="add_to_appointment">Aggiungi all\'appuntamento esistente</string>
+    <string name="all">Tutti</string>
+    <string name="all_clients">Tutti i clienti</string>
     <string name="all_plans">Tutti i piani</string>
+    <string name="all_trainings_subtitle">Allenamenti di tutti i clienti</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">it</string>
     <string name="appearance">Aspetto</string>
@@ -30,6 +33,9 @@
     <string name="approve_request_question">Vuoi approvare l\'appuntamento?</string>
     <string name="approved_appointments">Appuntamenti in corso</string>
     <string name="arms">Braccia</string>
+    <string name="assign">Assegna</string>
+    <string name="assign_template_hint">Ogni cliente selezionato riceve un allenamento pianificato con gli esercizi e le serie di questo modello. Il cliente lo vede solo dopo che è segnato come completato.</string>
+    <string name="assign_to_clients">Assegna ai clienti</string>
     <string name="average_reps_per_set">Ripetizioni medie per serie</string>
     <string name="back">Schiena</string>
     <string name="back_button">Indietro</string>
@@ -56,6 +62,7 @@
     <string name="change_username">Cambia nome utente</string>
     <string name="chest">Petto</string>
     <string name="clear">Cancella</string>
+    <string name="client">Cliente</string>
     <string name="client_created_successfully">Client creato con successo</string>
     <string name="clients">Clienti</string>
     <string name="clients_added_to_appointment">Clienti aggiunti all\'appuntamento.</string>
@@ -73,6 +80,7 @@
     <string name="confirm_your_action">Devi confermare l’azione.</string>
     <string name="contact">Contatto</string>
     <string name="copy">Copia</string>
+    <string name="copy_training">Copia allenamento</string>
     <string name="created_at">Creato a</string>
     <string name="credits">Crediti</string>
     <string name="credits_remaining">%d crediti rimasti.</string>
@@ -89,6 +97,8 @@
     <string name="delete_measurement_question">Eliminare la misurazione?</string>
     <string name="delete_monthly_review">Elimina revisione</string>
     <string name="delete_monthly_review_question">Eliminare la revisione mensile?</string>
+    <string name="delete_template">Elimina modello</string>
+    <string name="delete_template_question">Sei sicuro di voler eliminare questo modello?</string>
     <string name="delete_training">Elimina allenamento</string>
     <string name="delete_training_question">Eliminare l\'allenamento?</string>
     <string name="delete_workout">Elimina allenamento</string>
@@ -101,6 +111,7 @@
     <string name="edit">Modifica</string>
     <string name="edit_goal_and_plan">Modifica obiettivo e piano</string>
     <string name="edit_profile">Modifica profilo</string>
+    <string name="edit_template">Modifica modello</string>
     <string name="edit_training">Modifica allenamento</string>
     <string name="edit_workout">Modifica esercizio</string>
     <string name="email">Email</string>
@@ -133,10 +144,12 @@
     <string name="error_unauthorized">Non sei autorizzato. Accedi di nuovo.</string>
     <string name="error_unexpected_response">Risposta del server inattesa.</string>
     <string name="error_unknown_server">Errore del server sconosciuto.</string>
+    <string name="estimated_one_rep_max">1RM stimato</string>
     <string name="exercise">Esercizio</string>
     <string name="exercise_library">Libreria esercizi</string>
     <string name="exercise_library_subtitle">Tutti gli esercizi con istruzioni e video</string>
     <string name="exercises_count">Esercizi: %d</string>
+    <string name="filter_by_client">Filtra per cliente</string>
     <string name="first_name">Nome</string>
     <string name="fms">FMS</string>
     <string name="fms_created_successfully">FMS creato con successo.</string>
@@ -148,6 +161,8 @@
     <string name="forgot_password">Password dimenticata?</string>
     <string name="forgot_password_hint">Inserisci l\'email del tuo account e ti invieremo un link per impostare una nuova password.</string>
     <string name="forgot_password_sent">Se esiste un account con questa email, abbiamo inviato un link per impostare una nuova password. Controlla la posta.</string>
+    <string name="from_template">Da modello</string>
+    <string name="from_template_hint">Compila nome, nota ed esercizi dal modello.</string>
     <string name="generate_recurring_appointments">Generare un programma per la settimana successiva</string>
     <string name="generating_recurring_appointments">Generazione di nuovi termini…</string>
     <string name="glutes">Glutei</string>
@@ -176,6 +191,7 @@
     <string name="language">Lingua</string>
     <string name="last_name">Cognome</string>
     <string name="last_payment">Ultimo Pagamento</string>
+    <string name="last_record">Ultimo record %s</string>
     <string name="last_time">L\'ultima volta</string>
     <string name="later">Più tardi</string>
     <string name="latest_measurement">Ultima misurazione</string>
@@ -226,6 +242,8 @@
     <string name="new_fms">Nuovo FMS</string>
     <string name="new_monthly_review">Nuova revisione mensile</string>
     <string name="new_password">Nuova password</string>
+    <string name="new_record">Nuovo</string>
+    <string name="new_template">Nuovo modello</string>
     <string name="new_training">Nuovo allenamento</string>
     <string name="new_username">Nuovo nome utente</string>
     <string name="new_workout">Nuovo esercizio</string>
@@ -238,6 +256,7 @@
     <string name="no_appointments_for_selected_day">Nessun appuntamento per questo giorno</string>
     <string name="no_client">Non c\'è nessun cliente</string>
     <string name="no_client_trainings">Non hai ancora allenamenti.</string>
+    <string name="no_clients">Nessun cliente.</string>
     <string name="no_completed_trainings">Nessun allenamento completato.</string>
     <string name="no_completed_trainings_in_period">Nessun allenamento completato nel periodo selezionato.</string>
     <string name="no_email">Nessuna email</string>
@@ -247,8 +266,12 @@
     <string name="no_goal_and_plan">Obiettivo e piano non ancora scritti.</string>
     <string name="no_measurements">Nessuna misurazione</string>
     <string name="no_monthly_reviews">Ancora nessuna revisione mensile.</string>
+    <string name="no_personal_records">Ancora nessun record. Appaiono quando gli allenamenti con i pesi sono segnati come completati.</string>
     <string name="no_requests">Nessuna nuova richiesta.</string>
     <string name="no_sets_logged">Nessuna serie registrata.</string>
+    <string name="no_template">Nessuno</string>
+    <string name="no_templates">Non hai ancora modelli. Creane uno o salva un allenamento esistente come modello.</string>
+    <string name="no_templates_found">Nessun modello trovato.</string>
     <string name="no_time_slots">Nessuna fascia oraria per il giorno selezionato.</string>
     <string name="no_trainings">Il cliente non ha ancora allenamenti.</string>
     <string name="no_trainings_found">Nessun allenamento corrisponde alla ricerca.</string>
@@ -277,6 +300,8 @@
     <string name="period_three_months">3 mesi</string>
     <string name="period_year">12 mesi</string>
     <string name="personal_info">Informazioni personali</string>
+    <string name="personal_records">Record personali</string>
+    <string name="personal_records_hint">I record vengono calcolati automaticamente dagli allenamenti completati.</string>
     <string name="phone_copied">Numero di cellulare copiato.</string>
     <string name="plan">Piano</string>
     <string name="plan_membership">Membership plan</string>
@@ -296,6 +321,7 @@
     <string name="progress">Progressi</string>
     <string name="progress_summary">Riepilogo progressi</string>
     <string name="ready_for_next_training">Pronto per il prossimo allenamento?</string>
+    <string name="record_history">Storico dei record</string>
     <string name="recurring_appointments_generated_successfully">Le date sono state generate correttamente.</string>
     <string name="reject">Rifiuta</string>
     <string name="reject_request">Rifiuta richiesta</string>
@@ -322,7 +348,10 @@
     <string name="review_and_take_action">Rivedi e agisci</string>
     <string name="rotary_stability">Stabilità rotatoria</string>
     <string name="save">Salva</string>
+    <string name="save_as_template">Salva come modello</string>
+    <string name="save_as_template_hint">Il modello riceve gli esercizi e le serie di questo allenamento.</string>
     <string name="search_clients">Cerca clienti</string>
+    <string name="search_templates">Cerca modelli</string>
     <string name="search_trainings">Cerca allenamenti</string>
     <string name="search_workouts">Cerca per nome, descrizione o tipo</string>
     <string name="select_appointment_type">Seleziona il tipo di appuntamento</string>
@@ -332,6 +361,7 @@
     <string name="select_exercise">Seleziona esercizio</string>
     <string name="select_time_slot">Seleziona fascia oraria</string>
     <string name="select_value">Seleziona valore</string>
+    <string name="selected_count">Selezionati: %d</string>
     <string name="send_cancelation_request">Invia richiesta di cancellazione</string>
     <string name="send_request">Invia richiesta</string>
     <string name="send_reset_link">Invia link</string>
@@ -347,6 +377,7 @@
     <string name="show_all_measurements">Mostra tutte le misure</string>
     <string name="show_password">Mostra password</string>
     <string name="since_first_measurement">dalla prima misurazione</string>
+    <string name="status">Stato</string>
     <string name="strength_and_conditioning">Forza e condizionamento</string>
     <string name="success">Successo</string>
     <string name="successfully_canceled_appointment">Appuntamento annullato con successo.</string>
@@ -363,6 +394,10 @@
     <string name="tab_requests">Richieste</string>
     <string name="tab_trainings">Allenamenti</string>
     <string name="tab_workouts">Esercizi</string>
+    <string name="template_actions">Azioni del modello</string>
+    <string name="template_created">Il modello è stato creato.</string>
+    <string name="template_deleted">Il modello è stato eliminato.</string>
+    <string name="template_updated">Il modello è stato aggiornato.</string>
     <string name="thigh">Coscia</string>
     <string name="thumbnail_url">Link della miniatura</string>
     <string name="thumbnail_url_hint">Lascia vuoto per usare la miniatura del video YouTube.</string>
@@ -375,7 +410,10 @@
     <string name="training_marked_planned">Allenamento segnato come pianificato.</string>
     <string name="training_progress_title">Progressi di allenamento</string>
     <string name="training_saved_successfully">Allenamento salvato.</string>
+    <string name="training_templates">Modelli di allenamento</string>
+    <string name="training_templates_subtitle">Prepara un allenamento una volta e assegnalo ai clienti</string>
     <string name="trainings">Allenamenti</string>
+    <string name="trainings_created">Allenamenti creati: %d</string>
     <string name="trainings_per_week">Allenamenti per settimana</string>
     <string name="trunk_stability_push_up">Piegamento per la stabilità del tronco</string>
     <string name="unknown_coach">Allenatore sconosciuto</string>
