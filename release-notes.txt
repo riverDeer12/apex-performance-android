@@ -1,4 +1,4 @@
-Novosti iz iPhone aplikacije:
+Novosti:
 - Predlošci treninga za trenere (Vježbe > Predlošci treninga): napravite trening jednom i dodijelite ga klijentima kao planirani trening, spremite trening kao predložak ili popunite novi trening iz predloška.
 - Osobni rekordi klijenta po vježbi (maksimalna težina i procijenjeni 1RM, novi rekordi i povijest), u detaljima klijenta.
 - Kopiranje treninga: novi trening za istog klijenta s istim vježbama i setovima.
