@@ -86,6 +86,22 @@ Every release:
    ./gradlew assembleRelease appDistributionUploadRelease
    ```
 
+### From GitHub Actions
+
+The **Distribute to Firebase** workflow (`.github/workflows/distribute.yml`, started by hand
+from the Actions tab) builds the signed release APK and uploads it the same way. It needs
+these repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+| --- | --- |
+| `KEYSTORE_BASE64` | `base64 -i upload-keystore.jks` |
+| `KEYSTORE_PASSWORD` | `storePassword` from `keystore.properties` |
+| `KEY_ALIAS` | `keyAlias` from `keystore.properties` |
+| `KEY_PASSWORD` | `keyPassword` from `keystore.properties` |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the *Firebase App Distribution Admin* role |
+
+Bump `versionCode` and update `release-notes.txt` on `production` before running it.
+
 Always sign with the same upload key: an APK signed with a different key can't update the
 installed app, and users would have to uninstall it first.
 

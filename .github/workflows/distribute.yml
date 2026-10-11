@@ -1,0 +1,55 @@
+name: Distribute to Firebase
+
+# Started by hand (Actions tab or API): builds the signed release APK
+# and sends it to the android-testers group in Firebase App Distribution.
+on:
+  workflow_dispatch:
+    inputs:
+      release_notes:
+        description: Release notes (empty uses release-notes.txt)
+        required: false
+        default: ""
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Upload key and Firebase service account come from the repository
+      # secrets and only exist on the runner while the job runs.
+      - name: Write signing key and Firebase credentials
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > keystore.properties
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+
+      - name: Use the release notes from the run
+        if: ${{ inputs.release_notes != '' }}
+        env:
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: printf '%s\n' "$RELEASE_NOTES" > release-notes.txt
+
+      - name: Build and upload
+        run: ./gradlew assembleRelease appDistributionUploadRelease
+
+      - name: Remove the signing key
+        if: always()
+        run: rm -f upload-keystore.jks keystore.properties "$RUNNER_TEMP/firebase-service-account.json"
