@@ -50,6 +50,8 @@ import software.rdd.apexperformance.core.navigation.launch
 import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.util.DateFormats
+import software.rdd.apexperformance.core.util.NotificationRouter
+import software.rdd.apexperformance.core.util.Permissions
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
@@ -89,6 +91,9 @@ class AppointmentsScreen : Screen() {
 
     private val canManageRequests: Boolean get() = !isClient
 
+    private val showsRequestsButton: Boolean
+        get() = isClient || AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENT_REQUESTS)
+
     private val cancelationRequests: List<AppointmentRequest>
         get() = appointmentRequests.filter { it.type.name.lowercase() == "cancelationrequest" }
 
@@ -107,11 +112,20 @@ class AppointmentsScreen : Screen() {
         // Reloads every time the screen is shown, like .task on iOS.
         LaunchedEffect(Unit) { loadData(showInitialSpinner = true) }
 
+        // A request notification opens the requests from here when there is no requests tab.
+        LaunchedEffect(NotificationRouter.opensAppointmentRequests) {
+            if (NotificationRouter.opensAppointmentRequests) {
+                NotificationRouter.opensAppointmentRequests = false
+                navigator.push(AppointmentRequestsScreen())
+            }
+        }
+
         ScrollScreen(
             topBar = {
                 TopBar {
-                    if (isClient) {
-                        // Requests the client sent, with their status.
+                    if (showsRequestsButton) {
+                        // Clients: requests they sent, with their status.
+                        // Staff: requests waiting for approval.
                         ToolbarIcon(Icons.Outlined.PendingActions, stringResource(R.string.appointment_requests)) {
                             navigator.push(AppointmentRequestsScreen())
                         }

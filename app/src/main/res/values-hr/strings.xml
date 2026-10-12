@@ -14,6 +14,7 @@
     <string name="all_clients">Svi klijenti</string>
     <string name="all_plans">Svi planovi</string>
     <string name="all_trainings_subtitle">Treninzi svih klijenata</string>
+    <string name="already_in_appointment">Već ste u terminu</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">hr</string>
     <string name="appearance">Izgled</string>

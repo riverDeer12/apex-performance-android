@@ -25,10 +25,12 @@ data class PersonalRecord(
     val isMaxWeight: Boolean get() = type == "MaxWeight"
 
     companion object {
-        // Record history of the client, newest first (staff only).
-        suspend fun load(clientId: String): List<PersonalRecord> =
-            ApiClient.get<List<PersonalRecord>>("personal-records?clientId=$clientId")
-                .sortedByDescending { it.achievedAt }
+        // Record history of a client, newest first. Staff pass the client,
+        // clients get their own records (null).
+        suspend fun load(clientId: String?): List<PersonalRecord> =
+            ApiClient.get<List<PersonalRecord>>(
+                if (clientId != null) "personal-records?clientId=$clientId" else "personal-records"
+            ).sortedByDescending { it.achievedAt }
     }
 }
 

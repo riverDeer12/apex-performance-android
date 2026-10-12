@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material3.DatePicker
@@ -32,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import software.rdd.apexperformance.R
@@ -51,10 +56,12 @@ import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.HttpMethod
 import software.rdd.apexperformance.core.util.DateFormats
+import software.rdd.apexperformance.core.util.Permissions
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.core.util.localized
+import software.rdd.apexperformance.model.AppointmentsStatus
 import software.rdd.apexperformance.model.CatalogData
 import software.rdd.apexperformance.model.Client
 import software.rdd.apexperformance.model.Coach
@@ -72,9 +79,6 @@ import software.rdd.apexperformance.ui.components.ToggleRow
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
 
 class CreateAppointmentScreen : Screen() {
 
@@ -90,6 +94,8 @@ class CreateAppointmentScreen : Screen() {
     private var clients by mutableStateOf<List<Client>>(emptyList())
     private var coaches by mutableStateOf<List<Coach>>(emptyList())
     private var appointmentTypes by mutableStateOf<List<CatalogData>>(emptyList())
+    // Appointments the logged client is already in; those slots can't be booked again.
+    private var myAppointmentIds by mutableStateOf<Set<String>>(emptySet())
 
     // Loading flags
     private var isSaving by mutableStateOf(false)
@@ -106,7 +112,9 @@ class CreateAppointmentScreen : Screen() {
     private val selectedCoaches: List<String> get() = listOfNotNull(selectedCoachId)
 
     private val canCreateAppointment: Boolean
-        get() = selectedTimeSlot != null && selectedClients.isNotEmpty() && selectedCoaches.isNotEmpty() && !isSaving
+        get() = selectedTimeSlot != null &&
+            selectedSlot?.let { isMine(it) } != true &&
+            selectedClients.isNotEmpty() && selectedCoaches.isNotEmpty() && !isSaving
 
     private val selectedSlot: TimeSlot? get() = timeSlots.firstOrNull { it.id == selectedTimeSlot }
 
@@ -323,6 +331,7 @@ class CreateAppointmentScreen : Screen() {
     @Composable
     private fun RowScope.TimeSlotChip(slot: TimeSlot, enabled: Boolean) {
         val isSelected = selectedTimeSlot == slot.id
+        val isOwnAppointment = isMine(slot)
         val (time, slotClients) = splitTimeSlotName(slot.name ?: slot.description ?: "—")
         val contentColor = if (isSelected) ApexColors.onAccent else ApexColors.label
 
@@ -332,7 +341,9 @@ class CreateAppointmentScreen : Screen() {
                 .heightIn(min = 38.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(if (isSelected) ApexColors.accent else ApexColors.label.copy(alpha = 0.06f))
-                .clickable(enabled = enabled) { selectedTimeSlot = if (isSelected) null else slot.id }
+                // The client is already in this appointment.
+                .alpha(if (isOwnAppointment) 0.6f else 1f)
+                .clickable(enabled = enabled && !isOwnAppointment) { selectedTimeSlot = if (isSelected) null else slot.id }
                 .padding(vertical = 8.dp, horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)
@@ -345,6 +356,21 @@ class CreateAppointmentScreen : Screen() {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            if (isOwnAppointment) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = ApexColors.accent, modifier = Modifier.size(13.dp))
+                    Text(
+                        stringResource(R.string.already_in_appointment),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = ApexColors.accent,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
             if (slot.isTaken == true && slotClients != null) {
                 // Clients already in the appointment, it can be joined.
                 val clientsColor = if (isSelected) ApexColors.onAccent.copy(alpha = 0.8f) else ApexColors.secondaryLabel
@@ -372,10 +398,22 @@ class CreateAppointmentScreen : Screen() {
         val coachJob = async { if (isCoach) setCurrentCoach() else loadCoaches() }
         val clientJob = async { if (isClient) setCurrentClient() else loadClients() }
         val typesJob = async { loadAppointmentTypes() }
+        val myAppointmentsJob = async { if (isClient) loadMyAppointments() }
         coachJob.await()
         clientJob.await()
         typesJob.await()
+        myAppointmentsJob.await()
     }
+
+    private suspend fun loadMyAppointments() {
+        if (!AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENTS)) return
+        // Optional: without it the API still refuses a second join request.
+        val response = runCatching { ApiClient.get<AppointmentsStatus>("appointments") }.getOrNull() ?: return
+        val appointments = response.approvedAppointments + response.pendingAppointments + response.inProgressAppointments
+        myAppointmentIds = appointments.map { it.id }.toSet()
+    }
+
+    private fun isMine(slot: TimeSlot): Boolean = slot.appointmentId?.let { it in myAppointmentIds } ?: false
 
     private suspend fun loadTimeSlots() {
         isLoadingTimeSlots = true

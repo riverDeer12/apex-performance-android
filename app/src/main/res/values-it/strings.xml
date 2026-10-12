@@ -14,6 +14,7 @@
     <string name="all_clients">Tutti i clienti</string>
     <string name="all_plans">Tutti i piani</string>
     <string name="all_trainings_subtitle">Allenamenti di tutti i clienti</string>
+    <string name="already_in_appointment">Sei già iscritto</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">it</string>
     <string name="appearance">Aspetto</string>

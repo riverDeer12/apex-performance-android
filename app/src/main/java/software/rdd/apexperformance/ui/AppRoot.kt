@@ -5,18 +5,22 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.FitnessCenter
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Straighten
@@ -33,7 +37,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -54,6 +60,7 @@ import software.rdd.apexperformance.ui.appointments.AppointmentRequestsScreen
 import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
 import software.rdd.apexperformance.ui.clients.ClientsScreen
+import software.rdd.apexperformance.ui.components.ProfilePictureStore
 import software.rdd.apexperformance.ui.components.SplashOverlay
 import software.rdd.apexperformance.ui.components.ToastView
 import software.rdd.apexperformance.ui.home.ClientHomeScreen
@@ -62,6 +69,7 @@ import software.rdd.apexperformance.ui.profile.UserProfileScreen
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexTheme
 import software.rdd.apexperformance.ui.trainings.CompletedTrainingsScreen
+import software.rdd.apexperformance.ui.trainings.StaffTrainingsScreen
 import software.rdd.apexperformance.ui.workouts.WorkoutsScreen
 
 @Composable
@@ -159,8 +167,11 @@ class HomeState {
                     tab = AppTab.CLIENTS
                 }
             }
-            // Clients open their sent requests from appointments.
-            tab == AppTab.APPOINTMENT_REQUESTS && tab !in tabs -> tab = AppTab.APPOINTMENTS
+            // Requests open from appointments when there is no requests tab.
+            tab == AppTab.APPOINTMENT_REQUESTS && tab !in tabs -> {
+                tab = AppTab.APPOINTMENTS
+                NotificationRouter.opensAppointmentRequests = true
+            }
         }
         if (tab in tabs) selectedTab = tab
     }
@@ -177,7 +188,7 @@ class HomeState {
         AppTab.CLIENTS -> ClientsScreen()
         // Clients see their measurements in progress on home.
         AppTab.BODY_MEASUREMENTS, AppTab.PROFILE -> UserProfileScreen()
-        AppTab.TRAININGS -> CompletedTrainingsScreen()
+        AppTab.TRAININGS -> if (AuthManager.hasRole(Roles.CLIENT)) CompletedTrainingsScreen() else StaffTrainingsScreen()
     }
 
     private companion object {
@@ -192,11 +203,16 @@ class HomeState {
                     add(if (canGetAppointments) AppTab.APPOINTMENTS else AppTab.APPOINTMENT_REQUESTS)
                     add(AppTab.TRAININGS)
                 } else {
-                    if (canGetAppointments) add(AppTab.APPOINTMENTS)
-                    if (AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENT_REQUESTS)) {
+                    // Five tabs fit the tab bar, so requests open from appointments
+                    // when there are both, as for clients.
+                    if (canGetAppointments) {
+                        add(AppTab.APPOINTMENTS)
+                    } else if (AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENT_REQUESTS)) {
                         add(AppTab.APPOINTMENT_REQUESTS)
                     }
-                    // Role-based like the web: coaches and administrators manage workouts.
+                    // Role-based like the web: coaches and administrators manage
+                    // trainings (with templates and records) and workouts.
+                    add(AppTab.TRAININGS)
                     add(AppTab.WORKOUTS)
                     add(AppTab.CLIENTS)
                 }
@@ -215,6 +231,12 @@ private fun HomeView() {
         state.openPendingTab()
     }
 
+    // Small profile picture on the profile tab.
+    LaunchedEffect(state) {
+        ProfilePictureStore.image = null
+        ProfilePictureStore.refresh()
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             // Each tab keeps its own stack, like a NavigationStack per tab on iOS.
@@ -230,7 +252,21 @@ private fun HomeView() {
                 NavigationBarItem(
                     selected = tab == state.selectedTab,
                     onClick = { state.select(tab) },
-                    icon = { Icon(icon, contentDescription = label) },
+                    icon = {
+                        val picture = ProfilePictureStore.image
+                        if (tab == AppTab.PROFILE && picture != null) {
+                            Image(
+                                picture,
+                                contentDescription = label,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                            )
+                        } else {
+                            Icon(icon, contentDescription = label)
+                        }
+                    },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = ApexColors.accent,
                         unselectedIconColor = ApexColors.gray,
@@ -250,6 +286,7 @@ private fun AppTab.iconAndLabel(): Pair<ImageVector, String> = when (this) {
     AppTab.WORKOUTS -> Icons.Filled.FitnessCenter to stringResource(R.string.tab_workouts)
     AppTab.CLIENTS -> Icons.Outlined.Groups to stringResource(R.string.tab_clients)
     AppTab.BODY_MEASUREMENTS -> Icons.Outlined.Straighten to stringResource(R.string.body_measurements)
-    AppTab.TRAININGS -> Icons.Outlined.FitnessCenter to stringResource(R.string.tab_trainings)
+    AppTab.TRAININGS -> (if (AuthManager.hasRole(Roles.CLIENT)) Icons.Outlined.FitnessCenter else Icons.AutoMirrored.Outlined.Assignment) to
+        stringResource(R.string.tab_trainings)
     AppTab.PROFILE -> Icons.Outlined.Person to stringResource(R.string.tab_profile)
 }

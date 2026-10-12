@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,26 +38,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import java.text.Collator
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
+import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.showError
+import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.util.DateFormats
+import software.rdd.apexperformance.model.Client
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
+import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.SettingsRow
+import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
-import java.text.Collator
 
-// Trainings of all the coach's clients (administrators see all), with
-// search and filters, same as the web's trainings page. New trainings
-// are still made in the client's details.
+// Trainings tab of coaches and administrators, like the web's trainings
+// menu: trainings of all their clients (administrators see all) with
+// search and filters, new trainings, templates and personal records.
+// Trainings can still be made and opened in the client's details too.
 class StaffTrainingsScreen : Screen() {
 
     private enum class StatusFilter(@StringRes val title: Int) {
@@ -116,9 +126,30 @@ class StaffTrainingsScreen : Screen() {
         ) {
             ApexScreenHeader(
                 stringResource(R.string.trainings),
-                stringResource(R.string.all_trainings_subtitle),
-                showsWordmark = false
+                stringResource(R.string.all_trainings_subtitle)
             )
+
+            // New training: the client is picked first, then the form opens.
+            ApexPrimaryButton(
+                stringResource(R.string.new_training),
+                modifier = Modifier.padding(horizontal = 20.dp),
+                icon = Icons.Filled.Add
+            ) {
+                navigator.push(
+                    ClientListScreen(R.string.new_training) { listNavigator, client ->
+                        listNavigator.pop()
+                        listNavigator.push(
+                            TrainingFormScreen(
+                                clientId = client.id,
+                                history = trainings.filter { it.client.id == client.id },
+                                onSaved = { upsert(it) }
+                            )
+                        )
+                    }
+                )
+            }
+
+            LinksCard()
 
             StatusPicker()
 
@@ -165,6 +196,46 @@ class StaffTrainingsScreen : Screen() {
                     }
                 }
             }
+        }
+    }
+
+    // Templates and personal records, like the web's trainings menu.
+    @Composable
+    private fun LinksCard() {
+        val navigator = LocalNavigator.current
+
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .apexCard()
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        ) {
+            SettingsRow(
+                icon = Icons.Outlined.ContentPaste,
+                iconTint = ApexColors.accent,
+                title = stringResource(R.string.training_templates),
+                subtitle = stringResource(R.string.training_templates_subtitle),
+                showChevron = true,
+                onClick = { navigator.push(TrainingTemplatesScreen()) }
+            )
+
+            RowDivider(startIndent = 46.dp)
+
+            SettingsRow(
+                icon = Icons.Outlined.EmojiEvents,
+                iconTint = ApexColors.accent,
+                title = stringResource(R.string.personal_records),
+                subtitle = stringResource(R.string.personal_records_hint),
+                showChevron = true,
+                onClick = {
+                    navigator.push(
+                        ClientListScreen(R.string.personal_records) { listNavigator, client ->
+                            listNavigator.push(PersonalRecordsScreen(client.id, client.fullName))
+                        }
+                    )
+                }
+            )
         }
     }
 
@@ -263,6 +334,82 @@ class StaffTrainingsScreen : Screen() {
         isLoading = true
         try {
             trainings = Training.loadAll()
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isLoading = false
+        }
+    }
+}
+
+// Searchable list of the coach's clients (administrators see all) by name.
+// Tapping a client calls onPick, e.g. to start a new training for them.
+class ClientListScreen(
+    @StringRes private val title: Int,
+    private val onPick: (Navigator, Client) -> Unit
+) : Screen() {
+
+    private var clients by mutableStateOf<List<Client>>(emptyList())
+    private var searchText by mutableStateOf("")
+    private var isLoading by mutableStateOf(false)
+
+    private val filteredClients: List<Client>
+        get() {
+            val collator = Collator.getInstance()
+            val sorted = clients.sortedWith { a, b -> collator.compare(a.fullName, b.fullName) }
+            val query = searchText.trim()
+            if (query.isEmpty()) return sorted
+            return sorted.filter { it.fullName.contains(query, ignoreCase = true) }
+        }
+
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.current
+
+        LaunchedEffect(Unit) {
+            if (clients.isEmpty()) load()
+        }
+
+        ScrollScreen(
+            topBar = { TopBar(title = stringResource(title)) },
+            showLoading = isLoading && clients.isEmpty()
+        ) {
+            TrainingsSearchField(
+                text = searchText,
+                onTextChange = { searchText = it },
+                placeholder = stringResource(R.string.search_clients),
+                modifier = Modifier.padding(horizontal = 20.dp).padding(top = 8.dp)
+            )
+
+            CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
+                val list = filteredClients
+                if (list.isEmpty() && !isLoading) {
+                    EmptyText(stringResource(R.string.no_clients))
+                } else {
+                    Column {
+                        list.forEach { client ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onPick(navigator, client) }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(client.fullName, style = ApexText.body, modifier = Modifier.weight(1f))
+                                Chevron()
+                            }
+                            if (client.id != list.last().id) RowDivider(startIndent = 0.dp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun load() {
+        isLoading = true
+        try {
+            clients = ApiClient.get("clients")
         } catch (e: Exception) {
             showError(e)
         } finally {

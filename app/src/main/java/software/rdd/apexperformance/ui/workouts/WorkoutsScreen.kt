@@ -21,11 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FileDownload
@@ -79,15 +77,11 @@ import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.ScrollScreen
-import software.rdd.apexperformance.ui.components.SettingsRow
 import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.WorkoutThumbnail
-import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
-import software.rdd.apexperformance.ui.trainings.StaffTrainingsScreen
-import software.rdd.apexperformance.ui.trainings.TrainingTemplatesScreen
 
 // Workout library. Clients open it from home, limited by their plan
 // through `workoutFilter`, with their own title and subtitle.
@@ -178,8 +172,6 @@ class WorkoutsScreen(
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(importTemplateUrl)))
                     }
                 }
-
-                TrainingsLinks()
             }
 
             SearchField()
@@ -215,41 +207,6 @@ class WorkoutsScreen(
                 confirmText = stringResource(R.string.delete),
                 onConfirm = { launch { delete(workout) } },
                 onDismiss = { workoutToDelete = null }
-            )
-        }
-    }
-
-    // Trainings of all clients and training templates live next to
-    // the exercises they are made of, like the web's trainings menu.
-    @Composable
-    private fun TrainingsLinks() {
-        val navigator = LocalNavigator.current
-
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .fillMaxWidth()
-                .apexCard()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-        ) {
-            SettingsRow(
-                icon = Icons.AutoMirrored.Outlined.Assignment,
-                iconTint = ApexColors.accent,
-                title = stringResource(R.string.trainings),
-                subtitle = stringResource(R.string.all_trainings_subtitle),
-                showChevron = true,
-                onClick = { navigator.push(StaffTrainingsScreen()) }
-            )
-
-            RowDivider(startIndent = 46.dp)
-
-            SettingsRow(
-                icon = Icons.Outlined.ContentPaste,
-                iconTint = ApexColors.accent,
-                title = stringResource(R.string.training_templates),
-                subtitle = stringResource(R.string.training_templates_subtitle),
-                showChevron = true,
-                onClick = { navigator.push(TrainingTemplatesScreen()) }
             )
         }
     }

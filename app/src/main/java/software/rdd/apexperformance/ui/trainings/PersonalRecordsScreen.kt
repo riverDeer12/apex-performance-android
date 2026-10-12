@@ -54,11 +54,12 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.text.NumberFormat
 
-// Client's personal records per exercise (staff only), calculated by
-// the API from completed trainings, same as the web page.
+// Client's personal records per exercise, calculated by the API from
+// completed trainings, same as the web page. Staff open a client's
+// records, clients their own (no client id) from progress.
 class PersonalRecordsScreen(
-    private val clientId: String,
-    private val clientName: String
+    private val clientId: String? = null,
+    private val clientName: String? = null
 ) : Screen() {
 
     private var exercises by mutableStateOf<List<ExerciseRecords>>(emptyList())
@@ -85,7 +86,7 @@ class PersonalRecordsScreen(
         }
 
         ScrollScreen(
-            topBar = { TopBar(title = clientName) },
+            topBar = { TopBar(title = clientName ?: stringResource(R.string.personal_records)) },
             showLoading = isLoading && exercises.isEmpty(),
             onRefresh = { load() }
         ) {

@@ -23,6 +23,9 @@ object NotificationRouter {
 
     var pendingTab by mutableStateOf<AppTab?>(null)
 
+    // Requests open from the appointments tab when there is no requests tab.
+    var opensAppointmentRequests by mutableStateOf(false)
+
     fun handle(notificationType: String) {
         when (notificationType) {
             "appointment_request" -> pendingTab = AppTab.APPOINTMENT_REQUESTS

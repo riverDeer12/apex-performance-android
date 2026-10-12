@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import software.rdd.apexperformance.core.network.ApiClient
@@ -62,16 +63,17 @@ fun ProfilePicture(profile: Profile?, size: Dp = 60.dp, opensFullScreen: Boolean
     LaunchedEffect(profile?.hasProfilePicture, profile?.profilePictureUpdatedAt) {
         if (profile == null || !profile.hasProfilePicture) {
             image = null
+            if (profile != null) ProfilePictureStore.image = null
             return@LaunchedEffect
         }
         image = try {
-            val data = ApiClient.requestData("profile/picture", headers = mapOf("Accept" to "image/*"))
-            withContext(Dispatchers.Default) {
-                BitmapFactory.decodeByteArray(data, 0, data.size)?.asImageBitmap()
-            }
+            ProfilePictureStore.loadPicture()
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             null
         }
+        // Keeps the tab bar picture in step after a change.
+        ProfilePictureStore.image = image
     }
 
     Box(
@@ -96,6 +98,31 @@ fun ProfilePicture(profile: Profile?, size: Dp = 60.dp, opensFullScreen: Boolean
     val bitmap = image
     if (showFullScreen && bitmap != null) {
         ProfilePictureViewer(bitmap) { showFullScreen = false }
+    }
+}
+
+// Profile picture of the logged user shown small in the tab bar.
+object ProfilePictureStore {
+    var image by mutableStateOf<ImageBitmap?>(null)
+
+    // Loads the logged user's picture, or clears it when there is none.
+    suspend fun refresh() {
+        image = try {
+            val profile: Profile = ApiClient.get("profile")
+            if (profile.hasProfilePicture) loadPicture() else null
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            // The tab shows the person icon, never another user's picture.
+            null
+        }
+    }
+
+    // Picture API needs the auth header, so it goes through ApiClient.
+    suspend fun loadPicture(): ImageBitmap? {
+        val data = ApiClient.requestData("profile/picture", headers = mapOf("Accept" to "image/*"))
+        return withContext(Dispatchers.Default) {
+            BitmapFactory.decodeByteArray(data, 0, data.size)?.asImageBitmap()
+        }
     }
 }
 

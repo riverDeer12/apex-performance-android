@@ -14,6 +14,7 @@
     <string name="all_clients">All clients</string>
     <string name="all_plans">All plans</string>
     <string name="all_trainings_subtitle">Trainings of all clients</string>
+    <string name="already_in_appointment">You are already in it</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">en</string>
     <string name="app_name" translatable="false">Apex Performance</string>

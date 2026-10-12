@@ -1,5 +1,6 @@
 Novosti:
-- Predlošci treninga za trenere (Vježbe > Predlošci treninga): napravite trening jednom i dodijelite ga klijentima kao planirani trening, spremite trening kao predložak ili popunite novi trening iz predloška.
-- Osobni rekordi klijenta po vježbi (maksimalna težina i procijenjeni 1RM, novi rekordi i povijest), u detaljima klijenta.
-- Kopiranje treninga: novi trening za istog klijenta s istim vježbama i setovima.
-- Treninzi svih klijenata s filtrima po statusu, klijentu i pretrazi (Vježbe > Treninzi).
+- Treneri imaju novi tab Treninzi: svi treninzi klijenata s filtrima, novi trening (prvo se odabere klijent), predlošci treninga i osobni rekordi klijenata.
+- Zahtjevi za termine otvaraju se iz taba Termini (ikona gore desno), pa i iz obavijesti.
+- Klijenti u Napretku vide svoje osobne rekorde po vježbi i njihovu povijest.
+- U donjoj traci na tabu Profil prikazuje se vaša profilna slika.
+- Klijent ne može ponovno rezervirati termin u kojem već jest, takav termin je označen.

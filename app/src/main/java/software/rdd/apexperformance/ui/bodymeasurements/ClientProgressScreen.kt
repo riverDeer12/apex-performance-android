@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.bodymeasurements
 
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,6 +60,7 @@ import software.rdd.apexperformance.ui.home.ApexTitleTopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.trainings.ClientTrainingProgressScreen
+import software.rdd.apexperformance.ui.trainings.PersonalRecordsScreen
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -121,6 +123,22 @@ class ClientProgressScreen : Screen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     ApexSectionTitle(stringResource(R.string.training_progress_title))
+                    Spacer(Modifier.weight(1f))
+                    Chevron()
+                }
+
+                // The client's own records from completed trainings.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .apexCard()
+                        .clickable { navigator.push(PersonalRecordsScreen()) }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(Icons.Outlined.EmojiEvents, contentDescription = null, tint = ApexColors.accent, modifier = Modifier.size(20.dp))
+                    ApexSectionTitle(stringResource(R.string.personal_records))
                     Spacer(Modifier.weight(1f))
                     Chevron()
                 }
