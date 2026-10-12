@@ -30,8 +30,8 @@
     <string name="appointments_left">Appointments Left</string>
     <string name="approve">Approve</string>
     <string name="approve_request">Approve request</string>
-    <string name="approve_request_confirmation">Approve client’s request.</string>
-    <string name="approve_request_info">Approve client’s request</string>
+    <string name="approve_request_confirmation">Approve the client’s request.</string>
+    <string name="approve_request_info">Approve the client’s request.</string>
     <string name="approve_request_question">Do you want to approve this request?</string>
     <string name="approved_appointments">Current Appointments</string>
     <string name="arms">Arms</string>
@@ -43,7 +43,7 @@
     <string name="back_button">Back</string>
     <string name="body_circumferences">Body circumferences</string>
     <string name="body_mass">Body mass</string>
-    <string name="body_measurement_created_successfully">Body Measurement created successfully.</string>
+    <string name="body_measurement_created_successfully">Body measurement created successfully.</string>
     <string name="body_measurement_deleted_successfully">Measurement deleted.</string>
     <string name="body_measurement_updated_successfully">Body Measurement updated successfully.</string>
     <string name="body_measurements">Body Measurements</string>
@@ -55,7 +55,7 @@
     <string name="cancel_appointment_info">Cancel this appointment.</string>
     <string name="cancel_appointment_question">Cancel Appointment?</string>
     <string name="cancelation_comment_placeholder">Enter reason for appointment cancelation...</string>
-    <string name="cancelation_request">Cancelation Request</string>
+    <string name="cancelation_request">Cancelation request</string>
     <string name="cancelation_requests">Cancelation requests</string>
     <string name="cancelation_terms_by_agreement">Cancelation terms by agreement</string>
     <string name="cardio">Cardio</string>
@@ -117,7 +117,7 @@
     <string name="edit_training">Edit training</string>
     <string name="edit_workout">Edit workout</string>
     <string name="email">Email</string>
-    <string name="email_copied">Email is copied</string>
+    <string name="email_copied">Email copied.</string>
     <string name="english">English</string>
     <string name="enter_confirm_password">Re-enter password</string>
     <string name="enter_new_password">Enter new password</string>
@@ -142,6 +142,7 @@
     <string name="error_generic">Something went wrong.</string>
     <string name="error_network">Network error. Please try again.</string>
     <string name="error_no_internet">No internet connection.</string>
+    <string name="error_something_went_wrong">Something went wrong.</string>
     <string name="error_timed_out">The request timed out. Please try again.</string>
     <string name="error_unauthorized">You are not authorized. Please log in again.</string>
     <string name="error_unexpected_response">Unexpected server response.</string>
@@ -304,7 +305,7 @@
     <string name="personal_info">Personal Info</string>
     <string name="personal_records">Personal records</string>
     <string name="personal_records_hint">Records are calculated automatically from completed trainings.</string>
-    <string name="phone_copied">Phone number is copied.</string>
+    <string name="phone_copied">Phone number copied.</string>
     <string name="plan">Plan</string>
     <string name="plan_membership">Membership plan</string>
     <string name="plan_online_coaching">Online coaching</string>
@@ -326,9 +327,9 @@
     <string name="record_history">Record history</string>
     <string name="recurring_appointments_generated_successfully">Appointments are successfully generated.</string>
     <string name="reject">Reject</string>
-    <string name="reject_request">Reject</string>
-    <string name="reject_request_confirmation">Reject</string>
-    <string name="reject_request_info">Reject client’s request.</string>
+    <string name="reject_request">Reject request</string>
+    <string name="reject_request_confirmation">Reject the client’s request.</string>
+    <string name="reject_request_info">Reject the client’s request.</string>
     <string name="reject_request_question">Do you want to reject this appointment?</string>
     <string name="related_appointment">Appointment</string>
     <string name="remaining_includes_reserved">%1$d remaining sessions include %2$d booked</string>
@@ -347,7 +348,7 @@
     <string name="request_status_pending">Pending</string>
     <string name="request_type">Request type</string>
     <string name="reserved">Booked</string>
-    <string name="review_and_take_action">Review and action</string>
+    <string name="review_and_take_action">Review and take action</string>
     <string name="rotary_stability">Rotary Stability</string>
     <string name="save">Save</string>
     <string name="save_as_template">Save as template</string>
@@ -421,7 +422,7 @@
     <string name="unknown_coach">Unknown Coach</string>
     <string name="unknown_value">Unknown value</string>
     <string name="upcoming_appointments">Upcoming appointments</string>
-    <string name="upcoming_past_sessions">List of all registered appointments</string>
+    <string name="upcoming_past_sessions">List of all appointments</string>
     <string name="update">Update</string>
     <string name="update_available_message">Version %s of Apex Performance is available on the App Store. Update to get the latest features and fixes.</string>
     <string name="update_available_title">New version available</string>
