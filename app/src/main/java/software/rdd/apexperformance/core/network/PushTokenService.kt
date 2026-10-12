@@ -12,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.Serializable
 import software.rdd.apexperformance.ApexApp
 import software.rdd.apexperformance.BuildConfig
+import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.auth.AuthManager
 
 object PushTokenService {
@@ -26,7 +27,9 @@ object PushTokenService {
         val buildNumber: String = BuildConfig.VERSION_CODE.toString(),
         val osVersion: String = Build.VERSION.RELEASE,
         // e.g. "Google Pixel 8"
-        val deviceModel: String = "${Build.MANUFACTURER} ${Build.MODEL}"
+        val deviceModel: String = "${Build.MANUFACTURER} ${Build.MODEL}",
+        // The backend sends pushes in the app's language ("hr", "en" or "it").
+        val language: String = ApexApp.appContext.getString(R.string.app_language_code)
     )
 
     // Push works only when the app is built with google-services.json.

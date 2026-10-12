@@ -1,6 +1,5 @@
 Novosti:
-- Treneri imaju novi tab Treninzi: svi treninzi klijenata s filtrima, novi trening (prvo se odabere klijent), predlošci treninga i osobni rekordi klijenata.
-- Zahtjevi za termine otvaraju se iz taba Termini (ikona gore desno), pa i iz obavijesti.
-- Klijenti u Napretku vide svoje osobne rekorde po vježbi i njihovu povijest.
-- U donjoj traci na tabu Profil prikazuje se vaša profilna slika.
-- Klijent ne može ponovno rezervirati termin u kojem već jest, takav termin je označen.
+- Obavijesti stižu na jeziku aplikacije (hrvatski, engleski ili talijanski).
+- Poruke o greškama prevedene su na jezik aplikacije.
+- Ispravljeni su prijevodi, posebno talijanski (odobravanje i odbijanje zahtjeva).
+- U Profilu je novi red Jezik koji otvara postavke jezika aplikacije (Android 13 i noviji).

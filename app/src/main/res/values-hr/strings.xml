@@ -42,7 +42,7 @@
     <string name="back_button">Natrag</string>
     <string name="body_circumferences">Opsezi tijela</string>
     <string name="body_mass">Tjelesna masa</string>
-    <string name="body_measurement_created_successfully">Mjera je uspješno kreirana</string>
+    <string name="body_measurement_created_successfully">Mjerenje je uspješno kreirano.</string>
     <string name="body_measurement_deleted_successfully">Mjerenje je obrisano.</string>
     <string name="body_measurement_updated_successfully">Mjera je uspješno ažurirana.</string>
     <string name="body_measurements">Tjelesne mjere</string>
@@ -116,7 +116,7 @@
     <string name="edit_training">Uredi trening</string>
     <string name="edit_workout">Uredi vježbu</string>
     <string name="email">E-mail</string>
-    <string name="email_copied">Email je kopiran</string>
+    <string name="email_copied">Email je kopiran.</string>
     <string name="english">Engleski</string>
     <string name="enter_confirm_password">Ponovi unos lozinke</string>
     <string name="enter_new_password">Unesi novu lozinku</string>
@@ -139,8 +139,9 @@
     <string name="err_1401">Greška pri slanju e-pošte.</string>
     <string name="error">Greška</string>
     <string name="error_generic">Nešto je pošlo po krivu.</string>
-    <string name="error_network">Greška u mreži. Pokušajte ponovno.</string>
+    <string name="error_network">Greška mreže. Pokušajte ponovno.</string>
     <string name="error_no_internet">Nema internetske veze.</string>
+    <string name="error_something_went_wrong">Nešto je pošlo po zlu.</string>
     <string name="error_timed_out">Zahtjev je istekao. Pokušajte ponovno.</string>
     <string name="error_unauthorized">Niste prijavljeni. Prijavite se ponovno.</string>
     <string name="error_unexpected_response">Neočekivan odgovor poslužitelja.</string>
@@ -303,7 +304,7 @@
     <string name="personal_info">Osobni podatci</string>
     <string name="personal_records">Osobni rekordi</string>
     <string name="personal_records_hint">Rekordi se automatski računaju iz odrađenih treninga.</string>
-    <string name="phone_copied">Broj mobitela je kopiran</string>
+    <string name="phone_copied">Broj mobitela je kopiran.</string>
     <string name="plan">Plan</string>
     <string name="plan_membership">Membership plan</string>
     <string name="plan_online_coaching">Online coaching</string>

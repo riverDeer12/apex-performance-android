@@ -28,9 +28,9 @@
     <string name="appointments">Appuntamenti</string>
     <string name="appointments_left">Appuntamenti rimanenti</string>
     <string name="approve">Approva</string>
-    <string name="approve_request">Richiesta approvata</string>
-    <string name="approve_request_confirmation">Richiesta approvata</string>
-    <string name="approve_request_info">Richiesta approvata</string>
+    <string name="approve_request">Approva richiesta</string>
+    <string name="approve_request_confirmation">Approvazione della richiesta del cliente.</string>
+    <string name="approve_request_info">Approvazione della richiesta del cliente.</string>
     <string name="approve_request_question">Vuoi approvare l\'appuntamento?</string>
     <string name="approved_appointments">Appuntamenti in corso</string>
     <string name="arms">Braccia</string>
@@ -140,7 +140,8 @@
     <string name="error">Errore</string>
     <string name="error_generic">Qualcosa è andato storto.</string>
     <string name="error_network">Errore di rete. Riprova.</string>
-    <string name="error_no_internet">Nessuna connessione internet.</string>
+    <string name="error_no_internet">Nessuna connessione a Internet.</string>
+    <string name="error_something_went_wrong">Qualcosa è andato storto.</string>
     <string name="error_timed_out">La richiesta è scaduta. Riprova.</string>
     <string name="error_unauthorized">Non sei autorizzato. Accedi di nuovo.</string>
     <string name="error_unexpected_response">Risposta del server inattesa.</string>
@@ -326,8 +327,8 @@
     <string name="recurring_appointments_generated_successfully">Le date sono state generate correttamente.</string>
     <string name="reject">Rifiuta</string>
     <string name="reject_request">Rifiuta richiesta</string>
-    <string name="reject_request_confirmation">Rifiuta richiesta</string>
-    <string name="reject_request_info">Rifiuta richiesta</string>
+    <string name="reject_request_confirmation">Rifiuto della richiesta del cliente.</string>
+    <string name="reject_request_info">Rifiuto della richiesta del cliente.</string>
     <string name="reject_request_question">Vuoi rifiutare questa richiesta?</string>
     <string name="related_appointment">Appuntamento</string>
     <string name="remaining_includes_reserved">%1$d sessioni rimanenti includono %2$d prenotate</string>
@@ -346,7 +347,7 @@
     <string name="request_status_pending">In attesa</string>
     <string name="request_type">Tipo di richiesta</string>
     <string name="reserved">Prenotati</string>
-    <string name="review_and_take_action">Rivedi e agisci</string>
+    <string name="review_and_take_action">Rivedi e gestisci la richiesta</string>
     <string name="rotary_stability">Stabilità rotatoria</string>
     <string name="save">Salva</string>
     <string name="save_as_template">Salva come modello</string>
@@ -420,7 +421,7 @@
     <string name="unknown_coach">Allenatore sconosciuto</string>
     <string name="unknown_value">Valore sconosciuto</string>
     <string name="upcoming_appointments">Prossimi appuntamenti</string>
-    <string name="upcoming_past_sessions">Elenco degli appuntamenti registrati</string>
+    <string name="upcoming_past_sessions">Elenco di tutti gli appuntamenti</string>
     <string name="update">Aggiorna</string>
     <string name="update_available_message">La versione %s di Apex Performance è disponibile sull’App Store. Aggiorna per avere le ultime funzionalità e correzioni.</string>
     <string name="update_available_title">Nuova versione disponibile</string>

@@ -1,5 +1,9 @@
 package software.rdd.apexperformance.ui.profile
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +24,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Key
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Text
@@ -30,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -123,6 +129,25 @@ class UserProfileScreen : Screen() {
 
                     AppearanceSwitcher()
                     RowDivider()
+
+                    // Android 13+ sets the app's language in its own settings page.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val context = LocalContext.current
+                        SettingsRow(
+                            icon = Icons.Outlined.Language,
+                            iconTint = ApexColors.main,
+                            title = stringResource(R.string.language),
+                            subtitle = currentLanguageName(),
+                            showChevron = true,
+                            onClick = {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
+                                        .setData(Uri.fromParts("package", context.packageName, null))
+                                )
+                            }
+                        )
+                        RowDivider()
+                    }
 
                     SettingsRow(
                         icon = Icons.AutoMirrored.Outlined.Logout,
@@ -278,4 +303,12 @@ class UserProfileScreen : Screen() {
             isLoading = false
         }
     }
+}
+
+// Language the app runs in, from the resources Android picked.
+@Composable
+private fun currentLanguageName(): String = when (stringResource(R.string.app_language_code)) {
+    "hr" -> stringResource(R.string.croatian)
+    "it" -> stringResource(R.string.italian)
+    else -> stringResource(R.string.english)
 }
