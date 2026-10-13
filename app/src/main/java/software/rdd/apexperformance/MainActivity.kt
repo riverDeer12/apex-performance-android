@@ -55,11 +55,15 @@ class MainActivity : ComponentActivity() {
     // when shown by the system (app in background) and by ApexMessagingService.
     private fun handleNotificationTap(intent: Intent?) {
         val type = intent?.getStringExtra(EXTRA_NOTIFICATION_TYPE) ?: return
+        val conversationId = intent.getStringExtra(EXTRA_CONVERSATION_ID)
         intent.removeExtra(EXTRA_NOTIFICATION_TYPE)
-        NotificationRouter.handle(type)
+        intent.removeExtra(EXTRA_CONVERSATION_ID)
+        NotificationRouter.handle(type, conversationId)
     }
 
     companion object {
         const val EXTRA_NOTIFICATION_TYPE = "type"
+        // Chat message pushes open their conversation.
+        const val EXTRA_CONVERSATION_ID = "conversationId"
     }
 }

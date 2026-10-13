@@ -40,6 +40,9 @@ object AuthManager {
     val username: String
         get() = token?.let { JwtDecoder.getUsername(it) }.orEmpty()
 
+    val userId: String?
+        get() = token?.let { JwtDecoder.getUserId(it) }
+
     fun validateToken() {
         val current = token
         if (current == null || !JwtDecoder.isTokenValid(current)) {

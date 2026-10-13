@@ -18,17 +18,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Straighten
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,7 +61,9 @@ import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.ui.appointments.AppointmentRequestsScreen
 import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
+import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
+import software.rdd.apexperformance.ui.chat.ChatListScreen
 import software.rdd.apexperformance.ui.clients.ClientsScreen
 import software.rdd.apexperformance.ui.components.ProfilePictureStore
 import software.rdd.apexperformance.ui.components.SplashOverlay
@@ -189,19 +194,22 @@ class HomeState {
         // Clients see their measurements in progress on home.
         AppTab.BODY_MEASUREMENTS, AppTab.PROFILE -> UserProfileScreen()
         AppTab.TRAININGS -> if (AuthManager.hasRole(Roles.CLIENT)) CompletedTrainingsScreen() else StaffTrainingsScreen()
+        AppTab.CHAT -> ChatListScreen()
     }
 
     private companion object {
         fun availableTabs(): List<AppTab> {
             val isClient = AuthManager.hasRole(Roles.CLIENT)
+            val isCoach = AuthManager.hasRole(Roles.COACH)
             val canGetAppointments = AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENTS)
             return buildList {
                 if (isClient) {
-                    // Clients: home, appointments, trainings and profile. Sent requests
+                    // Clients: home, appointments, trainings, messages and profile. Sent requests
                     // open from appointments, body measurements from home (progress).
                     add(AppTab.HOME)
                     add(if (canGetAppointments) AppTab.APPOINTMENTS else AppTab.APPOINTMENT_REQUESTS)
                     add(AppTab.TRAININGS)
+                    add(AppTab.CHAT)
                 } else {
                     // Five tabs fit the tab bar, so requests open from appointments
                     // when there are both, as for clients.
@@ -211,9 +219,11 @@ class HomeState {
                         add(AppTab.APPOINTMENT_REQUESTS)
                     }
                     // Role-based like the web: coaches and administrators manage
-                    // trainings (with templates and records) and workouts.
+                    // trainings (with templates and records) and workouts. Coaches
+                    // have messages instead of the workouts tab, they open workouts
+                    // from trainings.
                     add(AppTab.TRAININGS)
-                    add(AppTab.WORKOUTS)
+                    add(if (isCoach) AppTab.CHAT else AppTab.WORKOUTS)
                     add(AppTab.CLIENTS)
                 }
                 add(AppTab.PROFILE)
@@ -229,6 +239,13 @@ private fun HomeView() {
 
     LaunchedEffect(state, NotificationRouter.pendingTab) {
         state.openPendingTab()
+    }
+
+    // Chat is between coaches and their clients; the hub keeps the
+    // unread badge fresh while logged in.
+    androidx.compose.runtime.DisposableEffect(state) {
+        if (AppTab.CHAT in state.tabs) ChatStore.start()
+        onDispose { ChatStore.stop() }
     }
 
     // Small profile picture on the profile tab.
@@ -263,6 +280,14 @@ private fun HomeView() {
                                     .size(28.dp)
                                     .clip(CircleShape)
                             )
+                        } else if (tab == AppTab.CHAT && ChatStore.unreadCount > 0) {
+                            BadgedBox(badge = {
+                                androidx.compose.material3.Badge {
+                                    Text(if (ChatStore.unreadCount > 99) "99+" else ChatStore.unreadCount.toString())
+                                }
+                            }) {
+                                Icon(icon, contentDescription = label)
+                            }
                         } else {
                             Icon(icon, contentDescription = label)
                         }
@@ -288,5 +313,6 @@ private fun AppTab.iconAndLabel(): Pair<ImageVector, String> = when (this) {
     AppTab.BODY_MEASUREMENTS -> Icons.Outlined.Straighten to stringResource(R.string.body_measurements)
     AppTab.TRAININGS -> (if (AuthManager.hasRole(Roles.CLIENT)) Icons.Outlined.FitnessCenter else Icons.AutoMirrored.Outlined.Assignment) to
         stringResource(R.string.tab_trainings)
+    AppTab.CHAT -> Icons.AutoMirrored.Outlined.Chat to stringResource(R.string.tab_chat)
     AppTab.PROFILE -> Icons.Outlined.Person to stringResource(R.string.tab_profile)
 }

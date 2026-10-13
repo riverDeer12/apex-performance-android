@@ -69,6 +69,10 @@ object JwtDecoder {
     fun getUserRole(token: String): String =
         runCatching { decodePayload(token).role }.getOrDefault("")
 
+    // User id ("sub" claim), e.g. to tell own chat messages.
+    fun getUserId(token: String): String? =
+        runCatching { decodePayload(token).sub }.getOrNull()?.takeIf { it.isNotEmpty() }
+
     fun getUsername(token: String): String =
         runCatching { decodePayload(token).name }.getOrDefault("")
 
