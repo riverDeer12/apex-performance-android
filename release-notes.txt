@@ -1,6 +1,5 @@
 Novosti:
-- Poruke: chat između trenera i klijenta, u novom tabu Poruke s brojem nepročitanih poruka.
-- Trener započinje razgovor s klijentom (u Porukama ili iz detalja klijenta) i može ga isključiti ili ponovno uključiti.
-- Poruke stižu odmah, vidi se kad je poruka pročitana, a obavijest otvara razgovor.
-- Poruke se spremaju šifrirane.
-- Treneri biblioteku vježbi otvaraju iz taba Treninzi.
+- Klijent sada može sam započeti razgovor sa svojim trenerom.
+- Trener i dalje može u bilo kojem trenutku isključiti ili ponovno uključiti chat s klijentom.
+- Poruke se otvaraju preko plutajuće tipke u donjem desnom kutu (s brojem nepročitanih poruka) umjesto taba u izborniku.
+- Treneri ponovno imaju tab Vježbe u izborniku.

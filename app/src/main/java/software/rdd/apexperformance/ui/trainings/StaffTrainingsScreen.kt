@@ -60,10 +60,6 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
-import software.rdd.apexperformance.ui.workouts.WorkoutsScreen
-import software.rdd.apexperformance.core.util.Roles
-import software.rdd.apexperformance.core.auth.AuthManager
-import androidx.compose.material.icons.outlined.FitnessCenter
 
 // Trainings tab of coaches and administrators, like the web's trainings
 // menu: trainings of all their clients (administrators see all) with
@@ -215,20 +211,6 @@ class StaffTrainingsScreen : Screen() {
                 .apexCard()
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         ) {
-            // Coaches have messages in the tab bar instead of workouts.
-            if (AuthManager.hasRole(Roles.COACH)) {
-                SettingsRow(
-                    icon = Icons.Outlined.FitnessCenter,
-                    iconTint = ApexColors.accent,
-                    title = stringResource(R.string.workouts),
-                    subtitle = stringResource(R.string.workouts_subtitle),
-                    showChevron = true,
-                    onClick = { navigator.push(WorkoutsScreen()) }
-                )
-
-                RowDivider(startIndent = 46.dp)
-            }
-
             SettingsRow(
                 icon = Icons.Outlined.ContentPaste,
                 iconTint = ApexColors.accent,
