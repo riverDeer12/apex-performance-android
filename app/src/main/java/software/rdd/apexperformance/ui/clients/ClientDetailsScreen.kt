@@ -92,9 +92,18 @@ import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
 import software.rdd.apexperformance.ui.trainings.TrainingRows
 import java.time.Instant
 import kotlin.math.roundToInt
+import software.rdd.apexperformance.ui.components.apexCard
+import software.rdd.apexperformance.ui.chat.ChatConversationScreen
+import software.rdd.apexperformance.model.ChatApi
+import software.rdd.apexperformance.core.navigation.Navigator
+import software.rdd.apexperformance.core.network.ChatStore
+import software.rdd.apexperformance.core.util.Roles
+import software.rdd.apexperformance.core.auth.AuthManager
+import androidx.compose.material.icons.automirrored.outlined.Chat
 
 class ClientDetailsScreen(private val client: Client) : Screen() {
 
+    private var isOpeningChat by mutableStateOf(false)
     private var firstName by mutableStateOf(client.firstName)
     private var lastName by mutableStateOf(client.lastName)
     private var email by mutableStateOf(client.email.orEmpty())
@@ -242,6 +251,8 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
 
             FunctionalMovementScreensCard()
 
+            if (AuthManager.hasRole(Roles.COACH)) ChatCard()
+
             GoalCard()
 
             MonthlyReviewsCard()
@@ -283,6 +294,48 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                         if (screen.id != functionalMovementScreens.last().id) RowDivider()
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun ChatCard() {
+        val navigator = LocalNavigator.current
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .apexCard()
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        ) {
+            SettingsRow(
+                icon = Icons.AutoMirrored.Outlined.Chat,
+                iconTint = ApexColors.accent,
+                title = stringResource(R.string.chat_message_client),
+                showChevron = true,
+                enabled = !isOpeningChat,
+                onClick = { openChat(navigator) }
+            )
+        }
+    }
+
+    // Opens the chat with the client; a new one is turned on, an existing
+    // one opens as it is (the coach may have turned it off on purpose).
+    private fun openChat(navigator: Navigator) {
+        ChatStore.conversations.firstOrNull { it.client.id.equals(client.id, ignoreCase = true) }?.let {
+            navigator.push(ChatConversationScreen(it.id))
+            return
+        }
+        launch {
+            isOpeningChat = true
+            try {
+                val conversation = ChatApi.setConversation(client.id, isEnabled = true)
+                ChatStore.upsert(conversation)
+                navigator.push(ChatConversationScreen(conversation.id))
+            } catch (e: Exception) {
+                showError(e)
+            } finally {
+                isOpeningChat = false
             }
         }
     }

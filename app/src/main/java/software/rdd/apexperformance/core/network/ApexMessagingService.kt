@@ -23,6 +23,11 @@ class ApexMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val notification = message.notification ?: return
 
+        // A message of the chat that is open on screen isn't shown again.
+        if (message.data[MainActivity.EXTRA_NOTIFICATION_TYPE] == "chat_message" &&
+            message.data[MainActivity.EXTRA_CONVERSATION_ID] == ChatStore.openConversationId
+        ) return
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) return
@@ -31,6 +36,9 @@ class ApexMessagingService : FirebaseMessagingService() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             message.data[MainActivity.EXTRA_NOTIFICATION_TYPE]?.let {
                 putExtra(MainActivity.EXTRA_NOTIFICATION_TYPE, it)
+            }
+            message.data[MainActivity.EXTRA_CONVERSATION_ID]?.let {
+                putExtra(MainActivity.EXTRA_CONVERSATION_ID, it)
             }
         }
         val pendingIntent = PendingIntent.getActivity(

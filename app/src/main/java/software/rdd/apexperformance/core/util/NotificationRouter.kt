@@ -14,6 +14,7 @@ enum class AppTab {
     CLIENTS,
     BODY_MEASUREMENTS,
     TRAININGS,
+    CHAT,
     PROFILE
 }
 
@@ -26,8 +27,15 @@ object NotificationRouter {
     // Requests open from the appointments tab when there is no requests tab.
     var opensAppointmentRequests by mutableStateOf(false)
 
-    fun handle(notificationType: String) {
+    // Chat conversation a tapped message push opens.
+    var pendingConversationId by mutableStateOf<String?>(null)
+
+    fun handle(notificationType: String, conversationId: String? = null) {
         when (notificationType) {
+            "chat_message" -> {
+                pendingConversationId = conversationId
+                pendingTab = AppTab.CHAT
+            }
             "appointment_request" -> pendingTab = AppTab.APPOINTMENT_REQUESTS
             "appointment_updated" -> pendingTab = AppTab.APPOINTMENTS
             "body_measurement" -> pendingTab = AppTab.BODY_MEASUREMENTS

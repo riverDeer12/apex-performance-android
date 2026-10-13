@@ -1,5 +1,6 @@
 Novosti:
-- Obavijesti stižu na jeziku aplikacije (hrvatski, engleski ili talijanski).
-- Poruke o greškama prevedene su na jezik aplikacije.
-- Ispravljeni su prijevodi, posebno talijanski (odobravanje i odbijanje zahtjeva).
-- U Profilu je novi red Jezik koji otvara postavke jezika aplikacije (Android 13 i noviji).
+- Poruke: chat između trenera i klijenta, u novom tabu Poruke s brojem nepročitanih poruka.
+- Trener započinje razgovor s klijentom (u Porukama ili iz detalja klijenta) i može ga isključiti ili ponovno uključiti.
+- Poruke stižu odmah, vidi se kad je poruka pročitana, a obavijest otvara razgovor.
+- Poruke se spremaju šifrirane.
+- Treneri biblioteku vježbi otvaraju iz taba Treninzi.
