@@ -43,6 +43,20 @@ data class ChatConversation(
         if (coach.userId.equals(userId, ignoreCase = true)) client else coach
 }
 
+// Someone the logged user can chat with: a client for a coach,
+// a coach for a client.
+@Serializable
+data class ChatContact(
+    // Client id for a coach, coach id for a client.
+    val id: String,
+    val userId: String,
+    val fullName: String = "",
+    // Null when no chat was started yet.
+    val conversationId: String? = null,
+    // False when the coach turned the chat off (read only).
+    val isEnabled: Boolean = true
+)
+
 // "MessagesRead" hub event.
 @Serializable
 data class ChatMessagesRead(
@@ -60,10 +74,21 @@ object ChatApi {
     private data class SendRequest(val content: String)
 
     @Serializable
+    private data class StartRequest(val coachId: String)
+
+    @Serializable
     private data class UnreadCountResponse(val count: Int = 0)
 
     // Conversations of the logged user, newest activity first.
     suspend fun conversations(): List<ChatConversation> = ApiClient.get("chat/conversations")
+
+    // People the logged user can start a chat with, by name.
+    suspend fun contacts(): List<ChatContact> = ApiClient.get("chat/contacts")
+
+    // Client only: opens the chat with one of their coaches, creating it when needed.
+    // A chat the coach turned off comes back read only.
+    suspend fun start(coachId: String): ChatConversation =
+        ApiClient.request("chat/conversations/start", HttpMethod.POST, StartRequest(coachId))
 
     // Coach only: creates the conversation with the client if needed and turns it on or off.
     suspend fun setConversation(clientId: String, isEnabled: Boolean): ChatConversation =

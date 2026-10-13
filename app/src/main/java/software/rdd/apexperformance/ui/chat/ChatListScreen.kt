@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.chat
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -23,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,26 +46,28 @@ import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.model.ChatApi
 import software.rdd.apexperformance.model.ChatConversation
-import software.rdd.apexperformance.model.Client
+import software.rdd.apexperformance.model.ChatContact
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.EmptyText
+import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.SmallProgress
+import software.rdd.apexperformance.ui.components.TopBar
+import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
-import software.rdd.apexperformance.ui.trainings.ClientListScreen
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-// Messages tab: conversations between a coach and their clients, newest
-// activity first. Coaches start a chat with a client, clients see the
-// chats their coach turned on.
-class ChatListScreen : Screen() {
+// Chat, opened from the floating button: conversations between a coach and
+// their clients, newest activity first. Either side can start a chat; only
+// the coach can turn it off, then it stays read only for both.
+class ChatListScreen(private val onClose: (() -> Unit)? = null) : Screen() {
 
     private var isStarting by mutableStateOf(false)
 
@@ -78,23 +84,24 @@ class ChatListScreen : Screen() {
             navigator.push(ChatConversationScreen(id))
         }
 
-        ScrollScreen(onRefresh = { ChatStore.refresh() }) {
+        ScrollScreen(
+            topBar = { TopBar(showBack = onClose != null || navigator.canPop, onBack = onClose) },
+            onRefresh = { ChatStore.refresh() }
+        ) {
             ApexScreenHeader(stringResource(R.string.chat_title), stringResource(R.string.chat_encrypted_info))
 
-            if (isCoach) {
-                ApexPrimaryButton(
-                    stringResource(R.string.chat_new),
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    icon = Icons.Filled.Add,
-                    isLoading = isStarting
-                ) {
-                    navigator.push(
-                        ClientListScreen(R.string.chat_choose_client) { listNavigator, client ->
-                            listNavigator.pop()
-                            startChat(listNavigator, client)
-                        }
-                    )
-                }
+            ApexPrimaryButton(
+                stringResource(R.string.chat_new),
+                modifier = Modifier.padding(horizontal = 20.dp),
+                icon = Icons.Filled.Add,
+                isLoading = isStarting
+            ) {
+                navigator.push(
+                    ChatContactListScreen(if (isCoach) R.string.chat_choose_client else R.string.chat_choose_coach) { contact ->
+                        navigator.pop()
+                        startChat(navigator, contact, isCoach)
+                    }
+                )
             }
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -187,11 +194,21 @@ class ChatListScreen : Screen() {
         }
     }
 
-    private fun startChat(navigator: Navigator, client: Client) {
+    // Opens the chat with the contact, starting it when there is none yet.
+    // An existing chat opens as it is, also when the coach turned it off.
+    private fun startChat(navigator: Navigator, contact: ChatContact, isCoach: Boolean) {
+        contact.conversationId?.let {
+            navigator.push(ChatConversationScreen(it))
+            return
+        }
         launch {
             isStarting = true
             try {
-                val conversation = ChatApi.setConversation(client.id, isEnabled = true)
+                val conversation = if (isCoach) {
+                    ChatApi.setConversation(contact.id, isEnabled = true)
+                } else {
+                    ChatApi.start(contact.id)
+                }
                 ChatStore.upsert(conversation)
                 navigator.push(ChatConversationScreen(conversation.id))
             } catch (e: Exception) {
@@ -228,5 +245,118 @@ fun ChatAvatar(name: String, size: Dp = 44.dp) {
             style = ApexText.subheadline.copy(fontWeight = FontWeight.Bold, fontSize = (size.value * 0.36f).sp),
             color = ApexColors.onAccent
         )
+    }
+}
+
+// People the user can chat with (clients for a coach, coaches for a client);
+// tapping one picks them.
+class ChatContactListScreen(
+    @StringRes private val title: Int,
+    private val onPick: (ChatContact) -> Unit
+) : Screen() {
+
+    private var contacts by mutableStateOf<List<ChatContact>>(emptyList())
+    private var searchText by mutableStateOf("")
+    private var isLoading by mutableStateOf(false)
+
+    @Composable
+    override fun Content() {
+        LaunchedEffect(Unit) {
+            if (contacts.isEmpty()) load()
+        }
+
+        ScrollScreen(
+            topBar = { TopBar(title = stringResource(title)) },
+            showLoading = isLoading && contacts.isEmpty()
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .apexCard()
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
+            ) {
+                PlainTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = stringResource(R.string.search),
+                    textStyle = ApexText.subheadline,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
+                val query = searchText.trim()
+                val list = if (query.isEmpty()) contacts else contacts.filter { it.fullName.contains(query, ignoreCase = true) }
+                if (list.isEmpty() && !isLoading) {
+                    EmptyText(stringResource(R.string.chat_no_contacts))
+                } else {
+                    Column {
+                        list.forEach { contact ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onPick(contact) }
+                                    .padding(vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                ChatAvatar(contact.fullName, size = 34.dp)
+                                Text(contact.fullName, style = ApexText.body, modifier = Modifier.weight(1f))
+                                if (contact.conversationId != null) {
+                                    Icon(
+                                        if (contact.isEnabled) Icons.Filled.Forum else Icons.Outlined.PauseCircle,
+                                        contentDescription = null,
+                                        tint = ApexColors.secondaryLabel,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            if (contact.id != list.last().id) RowDivider(startIndent = 46.dp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun load() {
+        isLoading = true
+        try {
+            contacts = ChatApi.contacts()
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isLoading = false
+        }
+    }
+}
+
+// Round chat button floating over the tabs, with the unread count.
+@Composable
+fun ChatFloatingButton(unreadCount: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .shadow(8.dp, CircleShape)
+                .background(ApexColors.accent, CircleShape)
+                .clickable(onClick = onClick),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.Forum, contentDescription = stringResource(R.string.tab_chat), tint = ApexColors.onAccent)
+        }
+        if (unreadCount > 0) {
+            Text(
+                if (unreadCount > 99) "99+" else unreadCount.toString(),
+                style = ApexText.caption.copy(fontWeight = FontWeight.Bold, fontSize = 11.sp),
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .background(ApexColors.red, RoundedCornerShape(50))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+        }
     }
 }

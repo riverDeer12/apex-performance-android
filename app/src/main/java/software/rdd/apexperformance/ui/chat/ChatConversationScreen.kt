@@ -393,6 +393,8 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 ChatStore.didSend(message)
             } catch (e: Exception) {
                 showError(e)
+                // The coach may have just turned the chat off: show it read only.
+                ChatStore.refresh()
             } finally {
                 isSending = false
             }

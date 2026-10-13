@@ -62,10 +62,11 @@
     <string name="change_profile_picture">Promijeni profilnu sliku</string>
     <string name="change_username">Promjeni korisničko ime</string>
     <string name="chat_choose_client">Odaberi klijenta</string>
+    <string name="chat_choose_coach">Odaberi trenera</string>
     <string name="chat_disabled">Chat isključen</string>
     <string name="chat_disabled_detail">Chat je isključen.</string>
     <string name="chat_disabled_info">Ovaj chat je isključen, nove poruke se ne mogu slati.</string>
-    <string name="chat_empty_client">Još nema razgovora. Trener može započeti razgovor s tobom.</string>
+    <string name="chat_empty_client">Još nema razgovora. Započni razgovor sa svojim trenerom.</string>
     <string name="chat_empty_coach">Još nema razgovora. Započni razgovor s klijentom.</string>
     <string name="chat_enabled">Chat uključen</string>
     <string name="chat_enabled_detail">Chat je uključen.</string>
@@ -73,6 +74,7 @@
     <string name="chat_load_older">Učitaj starije poruke</string>
     <string name="chat_message_client">Poruke</string>
     <string name="chat_new">Novi razgovor</string>
+    <string name="chat_no_contacts">Još nema nikoga s kim možeš razgovarati.</string>
     <string name="chat_no_messages">Nema poruka</string>
     <string name="chat_placeholder">Napiši poruku...</string>
     <string name="chat_read">Pročitano</string>
@@ -373,6 +375,7 @@
     <string name="save">Spremi</string>
     <string name="save_as_template">Spremi kao predložak</string>
     <string name="save_as_template_hint">Predložak dobiva vježbe i serije ovog treninga.</string>
+    <string name="search">Pretraži</string>
     <string name="search_clients">Pretraži klijente</string>
     <string name="search_templates">Pretraži predloške</string>
     <string name="search_trainings">Pretraži treninge</string>

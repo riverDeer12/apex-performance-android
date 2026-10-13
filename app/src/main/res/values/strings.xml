@@ -63,10 +63,11 @@
     <string name="change_profile_picture">Change profile picture</string>
     <string name="change_username">Change Username</string>
     <string name="chat_choose_client">Choose a client</string>
+    <string name="chat_choose_coach">Choose a coach</string>
     <string name="chat_disabled">Chat turned off</string>
     <string name="chat_disabled_detail">Chat is disabled.</string>
     <string name="chat_disabled_info">This chat is turned off, new messages can\'t be sent.</string>
-    <string name="chat_empty_client">No chats yet. Your coach can start one with you.</string>
+    <string name="chat_empty_client">No chats yet. Start one with your coach.</string>
     <string name="chat_empty_coach">No chats yet. Start one with a client.</string>
     <string name="chat_enabled">Chat enabled</string>
     <string name="chat_enabled_detail">Chat is enabled.</string>
@@ -74,6 +75,7 @@
     <string name="chat_load_older">Load older messages</string>
     <string name="chat_message_client">Messages</string>
     <string name="chat_new">New chat</string>
+    <string name="chat_no_contacts">No one to chat with yet.</string>
     <string name="chat_no_messages">No messages</string>
     <string name="chat_placeholder">Write a message...</string>
     <string name="chat_read">Read</string>
@@ -374,6 +376,7 @@
     <string name="save">Save</string>
     <string name="save_as_template">Save as template</string>
     <string name="save_as_template_hint">The template gets the exercises and sets of this training.</string>
+    <string name="search">Search</string>
     <string name="search_clients">Search Clients</string>
     <string name="search_templates">Search templates</string>
     <string name="search_trainings">Search trainings</string>

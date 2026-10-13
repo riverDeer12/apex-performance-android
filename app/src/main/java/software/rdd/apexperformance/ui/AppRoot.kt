@@ -25,13 +25,11 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Straighten
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +61,7 @@ import software.rdd.apexperformance.ui.appointments.AppointmentRequestsScreen
 import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
 import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
+import software.rdd.apexperformance.ui.chat.ChatFloatingButton
 import software.rdd.apexperformance.ui.chat.ChatListScreen
 import software.rdd.apexperformance.ui.clients.ClientsScreen
 import software.rdd.apexperformance.ui.components.ProfilePictureStore
@@ -146,6 +145,19 @@ class HomeState {
     val tabs: List<AppTab> = availableTabs()
     var selectedTab by mutableStateOf(tabs.first())
 
+    // Chat is between coaches and their clients. It opens over the tabs
+    // from a floating button, with its own stack.
+    val canChat: Boolean = AuthManager.hasRole(Roles.CLIENT) || AuthManager.hasRole(Roles.COACH)
+    var showsChat by mutableStateOf(false)
+    private var chatNavigatorOrNull: Navigator? = null
+    val chatNavigator: Navigator
+        get() = chatNavigatorOrNull ?: Navigator(ChatListScreen(onClose = ::closeChat)).also { chatNavigatorOrNull = it }
+
+    fun closeChat() {
+        chatNavigatorOrNull?.popToRoot()
+        showsChat = false
+    }
+
     private val navigators = mutableMapOf<AppTab, Navigator>()
 
     fun navigator(tab: AppTab): Navigator = navigators.getOrPut(tab) { Navigator(rootScreen(tab)) }
@@ -159,6 +171,11 @@ class HomeState {
     fun openPendingTab() {
         var tab = NotificationRouter.pendingTab ?: return
         NotificationRouter.pendingTab = null
+        if (tab == AppTab.CHAT) {
+            // Chat isn't a tab, it opens over the current one.
+            if (canChat) showsChat = true
+            return
+        }
         when {
             tab == AppTab.BODY_MEASUREMENTS -> {
                 // Clients see measurements in progress on home,
@@ -183,6 +200,7 @@ class HomeState {
 
     fun dispose() {
         navigators.values.forEach { it.disposeAll() }
+        chatNavigatorOrNull?.disposeAll()
     }
 
     private fun rootScreen(tab: AppTab): Screen = when (tab) {
@@ -200,16 +218,14 @@ class HomeState {
     private companion object {
         fun availableTabs(): List<AppTab> {
             val isClient = AuthManager.hasRole(Roles.CLIENT)
-            val isCoach = AuthManager.hasRole(Roles.COACH)
             val canGetAppointments = AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENTS)
             return buildList {
                 if (isClient) {
-                    // Clients: home, appointments, trainings, messages and profile. Sent requests
+                    // Clients: home, appointments, trainings and profile. Sent requests
                     // open from appointments, body measurements from home (progress).
                     add(AppTab.HOME)
                     add(if (canGetAppointments) AppTab.APPOINTMENTS else AppTab.APPOINTMENT_REQUESTS)
                     add(AppTab.TRAININGS)
-                    add(AppTab.CHAT)
                 } else {
                     // Five tabs fit the tab bar, so requests open from appointments
                     // when there are both, as for clients.
@@ -219,11 +235,9 @@ class HomeState {
                         add(AppTab.APPOINTMENT_REQUESTS)
                     }
                     // Role-based like the web: coaches and administrators manage
-                    // trainings (with templates and records) and workouts. Coaches
-                    // have messages instead of the workouts tab, they open workouts
-                    // from trainings.
+                    // trainings (with templates and records) and workouts.
                     add(AppTab.TRAININGS)
-                    add(if (isCoach) AppTab.CHAT else AppTab.WORKOUTS)
+                    add(AppTab.WORKOUTS)
                     add(AppTab.CLIENTS)
                 }
                 add(AppTab.PROFILE)
@@ -244,7 +258,7 @@ private fun HomeView() {
     // Chat is between coaches and their clients; the hub keeps the
     // unread badge fresh while logged in.
     androidx.compose.runtime.DisposableEffect(state) {
-        if (AppTab.CHAT in state.tabs) ChatStore.start()
+        if (state.canChat) ChatStore.start()
         onDispose { ChatStore.stop() }
     }
 
@@ -254,6 +268,7 @@ private fun HomeView() {
         ProfilePictureStore.refresh()
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             // Each tab keeps its own stack, like a NavigationStack per tab on iOS.
@@ -280,14 +295,6 @@ private fun HomeView() {
                                     .size(28.dp)
                                     .clip(CircleShape)
                             )
-                        } else if (tab == AppTab.CHAT && ChatStore.unreadCount > 0) {
-                            BadgedBox(badge = {
-                                androidx.compose.material3.Badge {
-                                    Text(if (ChatStore.unreadCount > 99) "99+" else ChatStore.unreadCount.toString())
-                                }
-                            }) {
-                                Icon(icon, contentDescription = label)
-                            }
                         } else {
                             Icon(icon, contentDescription = label)
                         }
@@ -298,6 +305,27 @@ private fun HomeView() {
                         indicatorColor = ApexColors.accent.copy(alpha = 0.14f)
                     )
                 )
+            }
+        }
+    }
+
+        // Chat opens from a floating button over every tab.
+        if (state.canChat && !state.showsChat) {
+            ChatFloatingButton(
+                unreadCount = ChatStore.unreadCount,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    // Above the tab bar.
+                    .padding(end = 16.dp, bottom = 92.dp),
+                onClick = { state.showsChat = true }
+            )
+        }
+
+        if (state.showsChat) {
+            Box(modifier = Modifier.fillMaxSize().background(ApexColors.groupedBackground)) {
+                androidx.activity.compose.BackHandler(enabled = !state.chatNavigator.canPop) { state.closeChat() }
+                NavigatorHost(state.chatNavigator)
             }
         }
     }

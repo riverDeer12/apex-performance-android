@@ -62,10 +62,11 @@
     <string name="change_profile_picture">Cambia foto profilo</string>
     <string name="change_username">Cambia nome utente</string>
     <string name="chat_choose_client">Scegli un cliente</string>
+    <string name="chat_choose_coach">Scegli un coach</string>
     <string name="chat_disabled">Chat disattivata</string>
     <string name="chat_disabled_detail">La chat è disattivata.</string>
     <string name="chat_disabled_info">Questa chat è disattivata, non si possono inviare nuovi messaggi.</string>
-    <string name="chat_empty_client">Ancora nessuna chat. Il tuo coach può iniziarne una con te.</string>
+    <string name="chat_empty_client">Ancora nessuna chat. Iniziane una con il tuo coach.</string>
     <string name="chat_empty_coach">Ancora nessuna chat. Iniziane una con un cliente.</string>
     <string name="chat_enabled">Chat attivata</string>
     <string name="chat_enabled_detail">La chat è attivata.</string>
@@ -73,6 +74,7 @@
     <string name="chat_load_older">Carica messaggi precedenti</string>
     <string name="chat_message_client">Messaggi</string>
     <string name="chat_new">Nuova chat</string>
+    <string name="chat_no_contacts">Ancora nessuno con cui chattare.</string>
     <string name="chat_no_messages">Nessun messaggio</string>
     <string name="chat_placeholder">Scrivi un messaggio...</string>
     <string name="chat_read">Letto</string>
@@ -373,6 +375,7 @@
     <string name="save">Salva</string>
     <string name="save_as_template">Salva come modello</string>
     <string name="save_as_template_hint">Il modello riceve gli esercizi e le serie di questo allenamento.</string>
+    <string name="search">Cerca</string>
     <string name="search_clients">Cerca clienti</string>
     <string name="search_templates">Cerca modelli</string>
     <string name="search_trainings">Cerca allenamenti</string>
