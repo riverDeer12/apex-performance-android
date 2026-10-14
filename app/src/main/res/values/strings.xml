@@ -77,8 +77,14 @@
     <string name="chat_new">New chat</string>
     <string name="chat_no_contacts">No one to chat with yet.</string>
     <string name="chat_no_messages">No messages</string>
+    <string name="chat_options">Chat options</string>
     <string name="chat_placeholder">Write a message...</string>
     <string name="chat_read">Read</string>
+    <string name="chat_report">Report chat</string>
+    <string name="chat_report_info">The report and the last messages of this chat are sent to the administrator, who will review them.</string>
+    <string name="chat_report_reason">Reason (optional)</string>
+    <string name="chat_report_send">Report</string>
+    <string name="chat_report_sent">Report sent. Thank you.</string>
     <string name="chat_send">Send</string>
     <string name="chat_sent">Sent</string>
     <string name="chat_start_conversation">No messages yet. Say hello!</string>

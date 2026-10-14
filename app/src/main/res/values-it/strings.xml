@@ -76,8 +76,14 @@
     <string name="chat_new">Nuova chat</string>
     <string name="chat_no_contacts">Ancora nessuno con cui chattare.</string>
     <string name="chat_no_messages">Nessun messaggio</string>
+    <string name="chat_options">Opzioni chat</string>
     <string name="chat_placeholder">Scrivi un messaggio...</string>
     <string name="chat_read">Letto</string>
+    <string name="chat_report">Segnala chat</string>
+    <string name="chat_report_info">La segnalazione e gli ultimi messaggi di questa chat vengono inviati all\'amministratore, che li esaminerà.</string>
+    <string name="chat_report_reason">Motivo (facoltativo)</string>
+    <string name="chat_report_send">Segnala</string>
+    <string name="chat_report_sent">Segnalazione inviata. Grazie.</string>
     <string name="chat_send">Invia</string>
     <string name="chat_sent">Inviato</string>
     <string name="chat_start_conversation">Ancora nessun messaggio. Saluta!</string>

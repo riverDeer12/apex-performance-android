@@ -1,2 +1,2 @@
 Novosti:
-- Novi uvodni ekran: pri pokretanju aplikacije prikazuje se animirani Apex logo.
+- Razgovor se može prijaviti: u izborniku razgovora (tri točkice) odaberi „Prijavi razgovor”. Prijava sa zadnjim porukama šalje se administratoru.
