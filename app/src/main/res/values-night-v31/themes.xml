@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The system splash has the intro video's background and no icon,
+         so it turns into the video (SplashOverlay) without a visible switch. -->
+    <style name="Theme.ApexPerformance" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/grouped_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_empty</item>
+    </style>
+</resources>

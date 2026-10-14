@@ -1,5 +1,2 @@
 Novosti:
-- Klijent sada može sam započeti razgovor sa svojim trenerom.
-- Trener i dalje može u bilo kojem trenutku isključiti ili ponovno uključiti chat s klijentom.
-- Poruke se otvaraju preko plutajuće tipke u donjem desnom kutu (s brojem nepročitanih poruka) umjesto taba u izborniku.
-- Treneri ponovno imaju tab Vježbe u izborniku.
+- Novi uvodni ekran: pri pokretanju aplikacije prikazuje se animirani Apex logo.

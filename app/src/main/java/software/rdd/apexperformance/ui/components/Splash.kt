@@ -1,82 +1,102 @@
 package software.rdd.apexperformance.ui.components
 
+import android.graphics.SurfaceTexture
+import android.media.MediaPlayer
 import android.provider.Settings
+import android.view.Surface
+import android.view.TextureView
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import software.rdd.apexperformance.R
-import software.rdd.apexperformance.ui.theme.ApexColors
 
-// Animated logo shown over the app when it starts, like SplashView on iOS:
-// the logo pulses and zooms out to reveal the app.
+// Intro video shown over the app when it starts, like SplashView on iOS.
+// The system splash has the video's background color, so the switch is
+// invisible; the video plays once without sound and fades out to the app.
 @Composable
 fun SplashOverlay(onFinished: () -> Unit) {
     val context = LocalContext.current
-    val scale = remember { Animatable(1f) }
     val opacity = remember { Animatable(1f) }
+    val ended = remember { CompletableDeferred<Unit>() }
+    val reduceMotion = remember {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+    }
+    // Null when the video can't be opened, then only the fade is shown.
+    val player = remember {
+        if (reduceMotion) null else runCatching { MediaPlayer.create(context, R.raw.splash) }.getOrNull()
+    }
+
+    DisposableEffect(player) {
+        player?.setVolume(0f, 0f)
+        player?.setOnCompletionListener { ended.complete(Unit) }
+        player?.setOnErrorListener { _, _, _ -> ended.complete(Unit); true }
+        onDispose { player?.release() }
+    }
 
     LaunchedEffect(Unit) {
-        val reduceMotion = Settings.Global.getFloat(
-            context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f
-        ) == 0f
-
-        if (reduceMotion) {
+        if (player == null) {
             delay(300)
-            opacity.animateTo(0f, tween(300))
-            onFinished()
-            return@LaunchedEffect
+        } else {
+            // Until the video ends, or the timeout when it doesn't play.
+            withTimeoutOrNull(4_000) { ended.await() }
         }
-
-        // Short pause so the first frame matches the launch screen.
-        delay(150)
-
-        // Logo "breathes in".
-        scale.animateTo(0.88f, tween(350, easing = EaseInOut))
-
-        // Logo zooms towards the user while the splash fades away.
-        launch { scale.animateTo(6f, tween(450, easing = EaseIn)) }
-        opacity.animateTo(0f, tween(450, easing = EaseIn))
-
+        opacity.animateTo(0f, tween(350))
         onFinished()
     }
 
-    // Launch background: white, black in dark mode.
-    val background = if (ApexColors.isDark) Color.Black else Color.White
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .alpha(opacity.value)
-            .background(background),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painterResource(R.drawable.logo),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(ApexColors.label),
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
             modifier = Modifier
-                .size(width = 320.dp, height = 160.dp)
-                .scale(scale.value)
+                .fillMaxSize()
+                .alpha(opacity.value)
+                .background(colorResource(R.color.splash_background))
         )
+
+        if (player != null) {
+            AndroidView(
+                factory = { viewContext ->
+                    TextureView(viewContext).apply {
+                        isOpaque = false
+                        surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+                            override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
+                                runCatching {
+                                    player.setSurface(Surface(texture))
+                                    player.start()
+                                }.onFailure { ended.complete(Unit) }
+                            }
+
+                            override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) {}
+
+                            override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean = true
+
+                            override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {}
+                        }
+                    }
+                },
+                // Faded with the view's own alpha, next to the background above.
+                update = { it.alpha = opacity.value },
+                // Square video, as wide as the screen.
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+            )
+        }
     }
 }
