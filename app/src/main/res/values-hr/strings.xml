@@ -76,8 +76,14 @@
     <string name="chat_new">Novi razgovor</string>
     <string name="chat_no_contacts">Još nema nikoga s kim možeš razgovarati.</string>
     <string name="chat_no_messages">Nema poruka</string>
+    <string name="chat_options">Opcije razgovora</string>
     <string name="chat_placeholder">Napiši poruku...</string>
     <string name="chat_read">Pročitano</string>
+    <string name="chat_report">Prijavi razgovor</string>
+    <string name="chat_report_info">Prijava i zadnje poruke ovog razgovora šalju se administratoru, koji će ih pregledati.</string>
+    <string name="chat_report_reason">Razlog (nije obavezno)</string>
+    <string name="chat_report_send">Prijavi</string>
+    <string name="chat_report_sent">Prijava je poslana. Hvala.</string>
     <string name="chat_send">Pošalji</string>
     <string name="chat_sent">Poslano</string>
     <string name="chat_start_conversation">Još nema poruka. Pozdravi!</string>

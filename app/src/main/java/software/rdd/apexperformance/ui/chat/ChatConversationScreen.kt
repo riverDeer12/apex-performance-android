@@ -23,12 +23,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PauseCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +60,7 @@ import software.rdd.apexperformance.model.ChatMessage
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.TopBar
+import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.Instant
@@ -77,6 +80,8 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
     private var hasOlder by mutableStateOf(false)
     private var isSending by mutableStateOf(false)
     private var isUpdating by mutableStateOf(false)
+    private var showReport by mutableStateOf(false)
+    private var reportReason by mutableStateOf("")
     private var hasLoaded = false
     // Message to bring into view: the newest after loading or sending.
     private var scrollToEnd by mutableStateOf(0)
@@ -114,7 +119,7 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 .imePadding()
         ) {
             TopBar(title = conversation?.otherParticipant(ChatStore.userId)?.fullName) {
-                if (isCoach && conversation != null) {
+                if (conversation != null) {
                     var menuOpen by remember { mutableStateOf(false) }
                     Box {
                         if (isUpdating) {
@@ -122,7 +127,7 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                         } else {
                             Icon(
                                 Icons.Outlined.MoreVert,
-                                contentDescription = stringResource(R.string.chat_enabled),
+                                contentDescription = stringResource(R.string.chat_options),
                                 tint = ApexColors.main,
                                 modifier = Modifier
                                     .padding(12.dp)
@@ -130,23 +135,37 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                             )
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                            if (isCoach) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.chat_enabled)) },
+                                    trailingIcon = {
+                                        Switch(
+                                            checked = conversation.isEnabled,
+                                            onCheckedChange = null,
+                                            colors = SwitchDefaults.colors(checkedTrackColor = ApexColors.accent)
+                                        )
+                                    },
+                                    onClick = {
+                                        menuOpen = false
+                                        setEnabled(!conversation.isEnabled)
+                                    }
+                                )
+                            }
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.chat_enabled)) },
-                                trailingIcon = {
-                                    Switch(
-                                        checked = conversation.isEnabled,
-                                        onCheckedChange = null,
-                                        colors = SwitchDefaults.colors(checkedTrackColor = ApexColors.accent)
-                                    )
-                                },
+                                text = { Text(stringResource(R.string.chat_report), color = ApexColors.red) },
                                 onClick = {
                                     menuOpen = false
-                                    setEnabled(!conversation.isEnabled)
+                                    reportReason = ""
+                                    showReport = true
                                 }
                             )
                         }
                     }
                 }
+            }
+
+            if (showReport) {
+                ReportDialog()
             }
 
             Box(modifier = Modifier.weight(1f)) {
@@ -411,6 +430,55 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
             if (!isOwn(message) && message.readAt == null) messages[index] = message.copy(readAt = now)
         }
         runCatching { ChatApi.markRead(conversationId) }
+    }
+
+    @Composable
+    private fun ReportDialog() {
+        AlertDialog(
+            onDismissRequest = { showReport = false },
+            containerColor = ApexColors.background,
+            title = { Text(stringResource(R.string.chat_report), style = ApexText.headline) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.chat_report_info), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
+                    PlainTextField(
+                        value = reportReason,
+                        onValueChange = { reportReason = it },
+                        placeholder = stringResource(R.string.chat_report_reason),
+                        singleLine = false,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .apexCard()
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showReport = false
+                    report()
+                }) {
+                    Text(stringResource(R.string.chat_report_send), color = ApexColors.red, fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showReport = false }) {
+                    Text(stringResource(R.string.cancel), color = ApexColors.main)
+                }
+            }
+        )
+    }
+
+    private fun report() {
+        val reason = reportReason.trim().ifEmpty { null }
+        launch {
+            try {
+                ChatApi.report(conversationId, reason)
+                ToastManager.show(R.string.chat_report_sent, ToastType.SUCCESS)
+            } catch (e: Exception) {
+                showError(e)
+            }
+        }
     }
 
     private fun setEnabled(isEnabled: Boolean) {

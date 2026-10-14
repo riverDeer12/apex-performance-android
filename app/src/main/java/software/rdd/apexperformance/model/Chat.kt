@@ -77,6 +77,9 @@ object ChatApi {
     private data class StartRequest(val coachId: String)
 
     @Serializable
+    private data class ReportRequest(val reason: String?)
+
+    @Serializable
     private data class UnreadCountResponse(val count: Int = 0)
 
     // Conversations of the logged user, newest activity first.
@@ -109,6 +112,12 @@ object ChatApi {
     // Marks the other participant's messages as read.
     suspend fun markRead(conversationId: String) {
         ApiClient.requestData("chat/conversations/$conversationId/read", HttpMethod.POST, ApiClient.jsonBody(emptyMap<String, String>()))
+    }
+
+    // Reports the conversation to the administrator, who gets the reason
+    // and the last messages by email.
+    suspend fun report(conversationId: String, reason: String?) {
+        ApiClient.requestData("chat/conversations/$conversationId/report", HttpMethod.POST, ApiClient.jsonBody(ReportRequest(reason)))
     }
 
     suspend fun unreadCount(): Int = ApiClient.get<UnreadCountResponse>("chat/unread-count").count
