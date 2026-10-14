@@ -6,4 +6,6 @@
     <color name="ic_launcher_background">#FFFFFFFF</color>
     <!-- ApexBackground from the iOS asset catalog. -->
     <color name="grouped_background">#FFF2F1EE</color>
+    <!-- Background of the intro video (splash). -->
+    <color name="splash_background">#FF090B0D</color>
 </resources>
