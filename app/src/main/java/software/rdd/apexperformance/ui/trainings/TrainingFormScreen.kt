@@ -82,6 +82,7 @@ import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.model.Workout
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.MenuPicker
+import software.rdd.apexperformance.ui.components.NotifyClientRow
 import software.rdd.apexperformance.ui.components.NumberWheelField
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SaveAction
@@ -140,6 +141,8 @@ class TrainingFormScreen private constructor(
     private var date by mutableStateOf(training?.date ?: Instant.now())
     private var note by mutableStateOf(training?.note ?: copying?.note ?: template?.note.orEmpty())
     private var isCompleted by mutableStateOf(training?.isCompleted ?: false)
+    // The client gets a push about a new training, about an edit only when asked.
+    private var notifyClient by mutableStateOf(training == null)
     private var exercises by mutableStateOf(
         (training?.exercises ?: copying?.exercises ?: template?.exercises).orEmpty()
             .sortedBy { it.order }
@@ -215,6 +218,8 @@ class TrainingFormScreen private constructor(
                     DateRow()
                     Divider()
                     SwitchRow(stringResource(R.string.completed), isCompleted) { isCompleted = it }
+                    Divider()
+                    NotifyClientRow(notifyClient) { notifyClient = it }
                     Divider()
                 }
                 PlainTextField(
@@ -802,7 +807,8 @@ class TrainingFormScreen private constructor(
                 date = date.truncatedTo(ChronoUnit.SECONDS).toString(),
                 note = trimmedNote.ifEmpty { null },
                 isCompleted = isCompleted,
-                exercises = exercises.mapNotNull { it.request }
+                exercises = exercises.mapNotNull { it.request },
+                notifyClient = notifyClient
             )
 
             val saved = Training.save(request, training?.id)

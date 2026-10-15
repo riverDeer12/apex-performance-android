@@ -62,6 +62,7 @@ import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.FormSection
+import software.rdd.apexperformance.ui.components.NotifyClientRow
 import software.rdd.apexperformance.ui.components.MenuPicker
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SaveAction
@@ -137,6 +138,7 @@ class ClientGoalFormScreen(
     private var nextAssessment by mutableStateOf(goal.nextAssessment.orEmpty())
     private var hasNextAssessmentDate by mutableStateOf(goal.nextAssessmentDate != null)
     private var nextAssessmentDate by mutableStateOf(goal.nextAssessmentDate ?: Instant.now())
+    private var notifyClient by mutableStateOf(true)
     private var isSaving by mutableStateOf(false)
     private var showDatePicker by mutableStateOf(false)
 
@@ -193,6 +195,9 @@ class ClientGoalFormScreen(
                 FormDivider()
                 FormTextField(nextAssessment, { nextAssessment = it }, stringResource(R.string.next_assessment_placeholder), minLines = 1)
             }
+            FormSection {
+                NotifyClientRow(notifyClient) { notifyClient = it }
+            }
         }
 
         if (showDatePicker) {
@@ -243,7 +248,7 @@ class ClientGoalFormScreen(
                 nextAssessment = clean(nextAssessment),
                 nextAssessmentDate = if (hasNextAssessmentDate) nextAssessmentDate else null
             )
-            val saved = request.save(clientId)
+            val saved = request.save(clientId, notifyClient)
             onSaved?.invoke(saved)
             ToastManager.show(R.string.goal_saved_successfully, ToastType.SUCCESS)
             navigator.pop()
@@ -408,6 +413,9 @@ class MonthlyReviewFormScreen(
     private val existingReview: MonthlyReview?
         get() = reviews.firstOrNull { it.year == year && it.month == month }
 
+    // The client gets a push about a new review, about a correction only when asked.
+    private var notifyClient by mutableStateOf(existingReview == null)
+
     private val trimmedContent: String get() = content.trim()
 
     private val years: List<Int>
@@ -456,6 +464,10 @@ class MonthlyReviewFormScreen(
                 FormTextField(content, { content = it }, stringResource(R.string.monthly_review_placeholder), minLines = 8)
             }
 
+            FormSection {
+                NotifyClientRow(notifyClient) { notifyClient = it }
+            }
+
             existingReview?.let { existing ->
                 FormSection(
                     footer = {
@@ -496,12 +508,13 @@ class MonthlyReviewFormScreen(
         year = newYear
         month = newMonth
         content = existingReview?.content.orEmpty()
+        notifyClient = existingReview == null
     }
 
     private suspend fun save(navigator: Navigator) {
         isSaving = true
         try {
-            MonthlyReview.save(clientId, year, month, trimmedContent)
+            MonthlyReview.save(clientId, year, month, trimmedContent, notifyClient)
             onChanged?.invoke()
             ToastManager.show(R.string.monthly_review_saved_successfully, ToastType.SUCCESS)
             navigator.pop()

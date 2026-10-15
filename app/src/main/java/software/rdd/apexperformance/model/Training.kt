@@ -117,7 +117,10 @@ data class SaveTrainingRequest(
     val date: String,
     val note: String?,
     val isCompleted: Boolean,
-    val exercises: List<Exercise>
+    val exercises: List<Exercise>,
+    // Push notification to the client. The API sends it for a new
+    // training and not for an edited one when this is null.
+    val notifyClient: Boolean? = null
 ) {
     @Serializable
     data class Exercise(

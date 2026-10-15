@@ -350,7 +350,9 @@ data class CreateBodyMeasurementRequest(
     val waist: Double,
     val thigh: Double,
     val calves: Double,
-    val glutes: Double
+    val glutes: Double,
+    // Push notification to the client, sent unless false.
+    val notifyClient: Boolean = true
 )
 
 // MARK: - Functional Movement Screen

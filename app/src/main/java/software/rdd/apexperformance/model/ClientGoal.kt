@@ -20,12 +20,13 @@ data class ClientGoal(
         get() = listOf(goal, currentBlock, focus, nextAssessment).all { it.isNullOrEmpty() } &&
             nextAssessmentDate == null
 
-    // Saves the goal and plan of a client (staff).
-    suspend fun save(clientId: String): ClientGoal =
+    // Saves the goal and plan of a client (staff); the client gets a push
+    // notification unless notifyClient is false.
+    suspend fun save(clientId: String, notifyClient: Boolean = true): ClientGoal =
         ApiClient.request(
             "client-goals/$clientId",
             HttpMethod.PUT,
-            Request(goal, currentBlock, focus, nextAssessment, nextAssessmentDate?.toString())
+            Request(goal, currentBlock, focus, nextAssessment, nextAssessmentDate?.toString(), notifyClient)
         )
 
     // Only the editable fields are sent, the date as ISO 8601 for the API.
@@ -35,7 +36,8 @@ data class ClientGoal(
         val currentBlock: String?,
         val focus: String?,
         val nextAssessment: String?,
-        val nextAssessmentDate: String?
+        val nextAssessmentDate: String?,
+        val notifyClient: Boolean
     )
 
     companion object {
@@ -62,7 +64,13 @@ data class MonthlyReview(
         get() = runCatching { LocalDate.of(year, month, 1) }.getOrElse { LocalDate.now() }
 
     @Serializable
-    private data class SaveRequest(val client: String, val year: Int, val month: Int, val content: String)
+    private data class SaveRequest(
+        val client: String,
+        val year: Int,
+        val month: Int,
+        val content: String,
+        val notifyClient: Boolean
+    )
 
     companion object {
         // Reviews newest month first. Clients get their own, staff pass the client.
@@ -70,8 +78,9 @@ data class MonthlyReview(
             ApiClient.get(if (clientId != null) "monthly-reviews?clientId=$clientId" else "monthly-reviews")
 
         // Writes or updates the review of a client's month (staff).
-        suspend fun save(clientId: String, year: Int, month: Int, content: String): MonthlyReview =
-            ApiClient.request("monthly-reviews", HttpMethod.PUT, SaveRequest(clientId, year, month, content))
+        // The client is notified when notifyClient is true.
+        suspend fun save(clientId: String, year: Int, month: Int, content: String, notifyClient: Boolean): MonthlyReview =
+            ApiClient.request("monthly-reviews", HttpMethod.PUT, SaveRequest(clientId, year, month, content, notifyClient))
 
         suspend fun delete(id: String) {
             ApiClient.requestData("monthly-reviews/$id", HttpMethod.DELETE)

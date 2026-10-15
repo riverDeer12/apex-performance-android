@@ -56,14 +56,18 @@ class MainActivity : ComponentActivity() {
     private fun handleNotificationTap(intent: Intent?) {
         val type = intent?.getStringExtra(EXTRA_NOTIFICATION_TYPE) ?: return
         val conversationId = intent.getStringExtra(EXTRA_CONVERSATION_ID)
+        val trainingId = intent.getStringExtra(EXTRA_TRAINING_ID)
         intent.removeExtra(EXTRA_NOTIFICATION_TYPE)
         intent.removeExtra(EXTRA_CONVERSATION_ID)
-        NotificationRouter.handle(type, conversationId)
+        intent.removeExtra(EXTRA_TRAINING_ID)
+        NotificationRouter.handle(type, conversationId, trainingId)
     }
 
     companion object {
         const val EXTRA_NOTIFICATION_TYPE = "type"
         // Chat message pushes open their conversation.
         const val EXTRA_CONVERSATION_ID = "conversationId"
+        // Training pushes open their training.
+        const val EXTRA_TRAINING_ID = "trainingId"
     }
 }

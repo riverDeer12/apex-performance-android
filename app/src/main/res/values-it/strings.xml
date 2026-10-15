@@ -314,6 +314,7 @@
     <string name="note">Nota</string>
     <string name="notes">Note</string>
     <string name="notification_channel_name">Notifiche</string>
+    <string name="notify_client">Avvisa il cliente</string>
     <string name="notify_coach_about_cancelation">Avvisare l\'allenatore della cancellazione.</string>
     <string name="other">Altro</string>
     <string name="out_of_credits">Crediti esauriti</string>
@@ -441,6 +442,7 @@
     <string name="training_deleted_successfully">Allenamento eliminato.</string>
     <string name="training_marked_completed">Allenamento segnato come completato.</string>
     <string name="training_marked_planned">Allenamento segnato come pianificato.</string>
+    <string name="training_not_completed_yet">L\'allenamento sarà visibile quando il tuo coach lo segnerà come completato.</string>
     <string name="training_progress_title">Progressi di allenamento</string>
     <string name="training_saved_successfully">Allenamento salvato.</string>
     <string name="training_templates">Modelli di allenamento</string>

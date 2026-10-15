@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
 import software.rdd.apexperformance.R
+import software.rdd.apexperformance.core.util.NotificationRouter
+import software.rdd.apexperformance.core.util.ToastManager
+import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.showError
@@ -84,6 +87,21 @@ class CompletedTrainingsScreen : Screen() {
             if (!hasLoaded) {
                 hasLoaded = true
                 load()
+            }
+        }
+
+        // Training of a tapped push. Clients only see trainings their
+        // coach marked as completed, a planned one shows a message.
+        val pendingTrainingId = NotificationRouter.pendingTrainingId
+        LaunchedEffect(pendingTrainingId) {
+            val id = pendingTrainingId ?: return@LaunchedEffect
+            NotificationRouter.pendingTrainingId = null
+            if (trainings.none { it.id.equals(id, ignoreCase = true) }) load()
+            val training = trainings.firstOrNull { it.id.equals(id, ignoreCase = true) }
+            if (training != null) {
+                navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl(training)))
+            } else {
+                ToastManager.show(R.string.training_not_completed_yet, ToastType.INFO)
             }
         }
 

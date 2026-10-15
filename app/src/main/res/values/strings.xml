@@ -315,6 +315,7 @@
     <string name="note">Note</string>
     <string name="notes">Notes</string>
     <string name="notification_channel_name">Notifications</string>
+    <string name="notify_client">Notify the client</string>
     <string name="notify_coach_about_cancelation">Notify coach about cancelation.</string>
     <string name="other">Other</string>
     <string name="out_of_credits">Out of Credits</string>
@@ -442,6 +443,7 @@
     <string name="training_deleted_successfully">Training deleted.</string>
     <string name="training_marked_completed">Training marked as completed.</string>
     <string name="training_marked_planned">Training marked as planned.</string>
+    <string name="training_not_completed_yet">The training will be visible once your coach marks it as completed.</string>
     <string name="training_progress_title">Training progress</string>
     <string name="training_saved_successfully">Training saved.</string>
     <string name="training_templates">Training templates</string>

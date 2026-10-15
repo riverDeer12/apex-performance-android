@@ -314,6 +314,7 @@
     <string name="note">Bilješka</string>
     <string name="notes">Bilješke</string>
     <string name="notification_channel_name">Obavijesti</string>
+    <string name="notify_client">Obavijesti klijenta</string>
     <string name="notify_coach_about_cancelation">Obavijesti trenera o otkazivanju termina.</string>
     <string name="other">Ostalo</string>
     <string name="out_of_credits">Nema sredstava</string>
@@ -441,6 +442,7 @@
     <string name="training_deleted_successfully">Trening je obrisan.</string>
     <string name="training_marked_completed">Trening je označen kao odrađen.</string>
     <string name="training_marked_planned">Trening je označen kao planiran.</string>
+    <string name="training_not_completed_yet">Trening će biti vidljiv kad ga trener označi kao završen.</string>
     <string name="training_progress_title">Trenažni napredak</string>
     <string name="training_saved_successfully">Trening je spremljen.</string>
     <string name="training_templates">Predlošci treninga</string>
