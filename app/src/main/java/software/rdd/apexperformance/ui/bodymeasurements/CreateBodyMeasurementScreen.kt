@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.bodymeasurements
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -27,6 +28,7 @@ import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Client
 import software.rdd.apexperformance.model.CreateBodyMeasurementRequest
+import software.rdd.apexperformance.ui.components.NotifyClientRow
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.SaveAction
 import software.rdd.apexperformance.ui.components.SavingOverlay
@@ -42,6 +44,7 @@ class CreateBodyMeasurementScreen(
 
     private val form = MeasurementForm()
     private var isSaving by mutableStateOf(false)
+    private var notifyClient by mutableStateOf(true)
     private var errorMessage by mutableStateOf<String?>(null)
 
     @Composable
@@ -62,9 +65,10 @@ class CreateBodyMeasurementScreen(
                 Column {
                     MeasurementField.entries.forEach { field ->
                         MeasurementRow(field, form, isEditable = true, verticalPadding = 16.dp, horizontalPadding = 8.dp)
-                        if (field != MeasurementField.entries.last()) {
-                            HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
-                        }
+                        HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
+                    }
+                    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+                        NotifyClientRow(notifyClient) { notifyClient = it }
                     }
 
                     errorMessage?.let {
@@ -82,7 +86,8 @@ class CreateBodyMeasurementScreen(
             val request = CreateBodyMeasurementRequest(
                 client = client.id,
                 height = v.height, weight = v.weight, shoulders = v.shoulders, chest = v.chest,
-                upperArm = v.upperArm, waist = v.waist, thigh = v.thigh, calves = v.calves, glutes = v.glutes
+                upperArm = v.upperArm, waist = v.waist, thigh = v.thigh, calves = v.calves, glutes = v.glutes,
+                notifyClient = notifyClient
             )
             ApiClient.send("body-measurements", HttpMethod.POST, request)
             ToastManager.show(R.string.body_measurement_created_successfully, ToastType.SUCCESS)

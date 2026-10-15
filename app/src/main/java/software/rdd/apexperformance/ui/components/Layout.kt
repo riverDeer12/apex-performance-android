@@ -363,6 +363,30 @@ fun ToggleRow(title: String, checked: Boolean, enabled: Boolean = true, onChecke
     }
 }
 
+// Coach's choice whether the client gets a push notification about what
+// is being saved (the API's "notifyClient"), like NotifyClientToggle on iOS.
+@Composable
+fun NotifyClientRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(stringResource(R.string.notify_client), style = ApexText.body, modifier = Modifier.weight(1f))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = ApexColors.main,
+                checkedBorderColor = ApexColors.main,
+                checkedThumbColor = ApexColors.card
+            )
+        )
+    }
+}
+
 @Composable
 fun LoadingRow(text: String) {
     Row(

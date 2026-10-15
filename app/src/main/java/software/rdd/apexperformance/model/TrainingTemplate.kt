@@ -23,18 +23,18 @@ data class TrainingTemplate(
 ) {
     // Creates a planned training from the template for each client.
     // Returns how many trainings were created.
-    suspend fun assign(clients: List<String>, date: Instant): Int {
+    suspend fun assign(clients: List<String>, date: Instant, notifyClient: Boolean = true): Int {
         val response: AssignResponse = ApiClient.request(
             "training-templates/$id/assign",
             HttpMethod.POST,
             // ISO 8601, as the API expects a DateTimeOffset.
-            AssignRequest(clients, date.truncatedTo(ChronoUnit.SECONDS).toString())
+            AssignRequest(clients, date.truncatedTo(ChronoUnit.SECONDS).toString(), notifyClient)
         )
         return response.trainingIds.size
     }
 
     @Serializable
-    private data class AssignRequest(val clients: List<String>, val date: String)
+    private data class AssignRequest(val clients: List<String>, val date: String, val notifyClient: Boolean)
 
     @Serializable
     private data class AssignResponse(val trainingIds: List<String> = emptyList())

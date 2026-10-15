@@ -1,2 +1,3 @@
 Novosti:
-- Razgovor se može prijaviti: u izborniku razgovora (tri točkice) odaberi „Prijavi razgovor”. Prijava sa zadnjim porukama šalje se administratoru.
+- Obavijest o treningu otvara taj trening.
+- Treneri biraju hoće li klijent dobiti obavijest (opcija „Obavijesti klijenta”) kod treninga, dodjele predloška, mjesečnog osvrta, cilja i mjerenja. Za nove stavke je uključena, za izmjene isključena.

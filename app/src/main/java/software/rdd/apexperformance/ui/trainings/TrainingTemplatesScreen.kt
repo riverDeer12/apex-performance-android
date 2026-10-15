@@ -70,6 +70,7 @@ import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.FormSection
+import software.rdd.apexperformance.ui.components.NotifyClientRow
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.ScrollScreen
@@ -393,6 +394,7 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
     private var clients by mutableStateOf<List<Client>>(emptyList())
     private var selectedClients by mutableStateOf<Set<String>>(emptySet())
     private var date by mutableStateOf(Instant.now())
+    private var notifyClient by mutableStateOf(true)
     private var searchText by mutableStateOf("")
     private var isLoading by mutableStateOf(false)
     private var isAssigning by mutableStateOf(false)
@@ -455,6 +457,8 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     )
                 }
+                HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
+                NotifyClientRow(notifyClient) { notifyClient = it }
             }
 
             TrainingsSearchField(
@@ -544,7 +548,7 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
     private suspend fun assign(context: Context, navigator: Navigator) {
         isAssigning = true
         try {
-            val count = template.assign(selectedClients.toList(), date)
+            val count = template.assign(selectedClients.toList(), date, notifyClient)
             ToastManager.show(context.getString(R.string.trainings_created, count), ToastType.SUCCESS)
             navigator.pop()
         } catch (e: Exception) {

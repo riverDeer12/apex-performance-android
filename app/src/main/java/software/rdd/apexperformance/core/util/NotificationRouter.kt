@@ -30,8 +30,15 @@ object NotificationRouter {
     // Chat conversation a tapped message push opens.
     var pendingConversationId by mutableStateOf<String?>(null)
 
-    fun handle(notificationType: String, conversationId: String? = null) {
+    // Training a tapped training push opens.
+    var pendingTrainingId by mutableStateOf<String?>(null)
+
+    fun handle(notificationType: String, conversationId: String? = null, trainingId: String? = null) {
         when (notificationType) {
+            "training" -> {
+                pendingTrainingId = trainingId
+                pendingTab = AppTab.TRAININGS
+            }
             "chat_message" -> {
                 pendingConversationId = conversationId
                 pendingTab = AppTab.CHAT
