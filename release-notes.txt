@@ -1,3 +1,2 @@
 Novosti:
-- Obavijest o treningu otvara taj trening.
-- Treneri biraju hoće li klijent dobiti obavijest (opcija „Obavijesti klijenta”) kod treninga, dodjele predloška, mjesečnog osvrta, cilja i mjerenja. Za nove stavke je uključena, za izmjene isključena.
+- Ispravak: ista obavijest više ne stiže dvaput kad Firebase uređaju dodijeli novi token.

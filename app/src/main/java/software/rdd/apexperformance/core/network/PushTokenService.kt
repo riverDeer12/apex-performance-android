@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.core.network
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.firebase.FirebaseApp
@@ -19,6 +20,12 @@ object PushTokenService {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    // Last token sent to the backend. A new one replaces it there, so the
+    // device doesn't get every push twice.
+    private const val LAST_TOKEN_KEY = "lastRegisteredFcmToken"
+    private val preferences
+        get() = ApexApp.appContext.getSharedPreferences("push", Context.MODE_PRIVATE)
+
     @Serializable
     private data class FcmTokenRequest(
         val token: String,
@@ -29,7 +36,8 @@ object PushTokenService {
         // e.g. "Google Pixel 8"
         val deviceModel: String = "${Build.MANUFACTURER} ${Build.MODEL}",
         // The backend sends pushes in the app's language ("hr", "en" or "it").
-        val language: String = ApexApp.appContext.getString(R.string.app_language_code)
+        val language: String = ApexApp.appContext.getString(R.string.app_language_code),
+        val previousToken: String? = null
     )
 
     // Push works only when the app is built with google-services.json.
@@ -41,9 +49,11 @@ object PushTokenService {
     fun register(fcmToken: String) {
         if (AuthManager.token == null) return
 
+        val previousToken = preferences.getString(LAST_TOKEN_KEY, null)?.takeIf { it != fcmToken }
         scope.launch {
             try {
-                ApiClient.send("fcm-tokens", HttpMethod.POST, FcmTokenRequest(token = fcmToken))
+                ApiClient.send("fcm-tokens", HttpMethod.POST, FcmTokenRequest(token = fcmToken, previousToken = previousToken))
+                preferences.edit().putString(LAST_TOKEN_KEY, fcmToken).apply()
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) Log.e("PushTokenService", "Failed to send FCM token to server", e)
             }
