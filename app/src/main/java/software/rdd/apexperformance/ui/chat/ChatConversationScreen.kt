@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.chat
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,7 @@ import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.ChatApi
 import software.rdd.apexperformance.model.ChatMessage
+import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.TopBar
@@ -81,6 +83,7 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
     private var isSending by mutableStateOf(false)
     private var isUpdating by mutableStateOf(false)
     private var showReport by mutableStateOf(false)
+    private var showBlockDialog by mutableStateOf(false)
     private var reportReason by mutableStateOf("")
     private var hasLoaded = false
     // Message to bring into view: the newest after loading or sending.
@@ -135,7 +138,8 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                             )
                         }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            if (isCoach) {
+                            // A chat the client blocked can't be turned on by the coach.
+                            if (isCoach && !conversation.isBlockedByClient) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.chat_enabled)) },
                                     trailingIcon = {
@@ -150,6 +154,25 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                                         setEnabled(!conversation.isEnabled)
                                     }
                                 )
+                            }
+                            if (!isCoach) {
+                                if (conversation.isBlockedByClient) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.chat_unblock)) },
+                                        onClick = {
+                                            menuOpen = false
+                                            setBlocked(false)
+                                        }
+                                    )
+                                } else {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.chat_block), color = ApexColors.red) },
+                                        onClick = {
+                                            menuOpen = false
+                                            showBlockDialog = true
+                                        }
+                                    )
+                                }
                             }
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.chat_report), color = ApexColors.red) },
@@ -166,6 +189,16 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
 
             if (showReport) {
                 ReportDialog()
+            }
+
+            if (showBlockDialog) {
+                ConfirmDialog(
+                    title = stringResource(R.string.chat_block_question),
+                    message = stringResource(R.string.chat_block_info),
+                    confirmText = stringResource(R.string.chat_block),
+                    onConfirm = { setBlocked(true) },
+                    onDismiss = { showBlockDialog = false }
+                )
             }
 
             Box(modifier = Modifier.weight(1f)) {
@@ -227,7 +260,14 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 }
             }
 
-            InputBar(isEnabled = conversation?.isEnabled != false)
+            InputBar(
+                isEnabled = conversation?.isEnabled != false,
+                disabledText = when {
+                    conversation?.isBlockedByClient != true -> R.string.chat_disabled_info
+                    isCoach -> R.string.chat_blocked_by_client
+                    else -> R.string.chat_blocked_by_you
+                }
+            )
         }
     }
 
@@ -260,7 +300,7 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
     }
 
     @Composable
-    private fun InputBar(isEnabled: Boolean) {
+    private fun InputBar(isEnabled: Boolean, @StringRes disabledText: Int) {
         if (!isEnabled) {
             Row(
                 modifier = Modifier
@@ -273,7 +313,7 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
             ) {
                 Icon(Icons.Outlined.PauseCircle, contentDescription = null, tint = ApexColors.secondaryLabel, modifier = Modifier.size(16.dp))
                 Text(
-                    stringResource(R.string.chat_disabled_info),
+                    stringResource(disabledText),
                     style = ApexText.footnote,
                     color = ApexColors.secondaryLabel,
                     modifier = Modifier.padding(start = 6.dp)
@@ -477,6 +517,23 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 ToastManager.show(R.string.chat_report_sent, ToastType.SUCCESS)
             } catch (e: Exception) {
                 showError(e)
+            }
+        }
+    }
+
+    private fun setBlocked(isBlocked: Boolean) {
+        launch {
+            isUpdating = true
+            try {
+                ChatStore.upsert(ChatApi.block(conversationId, isBlocked))
+                ToastManager.show(
+                    if (isBlocked) R.string.chat_blocked_detail else R.string.chat_unblocked_detail,
+                    ToastType.SUCCESS
+                )
+            } catch (e: Exception) {
+                showError(e)
+            } finally {
+                isUpdating = false
             }
         }
     }

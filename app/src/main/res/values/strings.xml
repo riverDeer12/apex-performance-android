@@ -62,6 +62,12 @@
     <string name="change_password">Change Password</string>
     <string name="change_profile_picture">Change profile picture</string>
     <string name="change_username">Change Username</string>
+    <string name="chat_block">Block chat</string>
+    <string name="chat_block_info">Neither you nor your coach will be able to write until you unblock it. The messages are kept.</string>
+    <string name="chat_block_question">Block this chat?</string>
+    <string name="chat_blocked_by_client">The client blocked this chat.</string>
+    <string name="chat_blocked_by_you">You blocked this chat. Unblock it from the menu to write again.</string>
+    <string name="chat_blocked_detail">Chat blocked.</string>
     <string name="chat_choose_client">Choose a client</string>
     <string name="chat_choose_coach">Choose a coach</string>
     <string name="chat_disabled">Chat turned off</string>
@@ -89,6 +95,8 @@
     <string name="chat_sent">Sent</string>
     <string name="chat_start_conversation">No messages yet. Say hello!</string>
     <string name="chat_title">Messages</string>
+    <string name="chat_unblock">Unblock chat</string>
+    <string name="chat_unblocked_detail">Chat unblocked.</string>
     <string name="chat_unreadable">Message can\'t be shown</string>
     <string name="chat_you">You</string>
     <string name="chest">Chest</string>
