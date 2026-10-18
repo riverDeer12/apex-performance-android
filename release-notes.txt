@@ -1,2 +1,2 @@
 Novosti:
-- Ispravak: ista obavijest više ne stiže dvaput kad Firebase uređaju dodijeli novi token.
+- Klijent može blokirati razgovor s trenerom (izbornik razgovora → „Blokiraj razgovor”) i kasnije ga odblokirati. Dok je blokiran, nitko ne može pisati, a trener ga ne može ponovno uključiti.

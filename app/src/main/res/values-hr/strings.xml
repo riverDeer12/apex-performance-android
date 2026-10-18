@@ -61,6 +61,12 @@
     <string name="change_password">Promjeni lozinku</string>
     <string name="change_profile_picture">Promijeni profilnu sliku</string>
     <string name="change_username">Promjeni korisničko ime</string>
+    <string name="chat_block">Blokiraj razgovor</string>
+    <string name="chat_block_info">Ni ti ni trener nećete moći pisati dok ga ne odblokiraš. Poruke ostaju sačuvane.</string>
+    <string name="chat_block_question">Blokirati ovaj razgovor?</string>
+    <string name="chat_blocked_by_client">Klijent je blokirao ovaj razgovor.</string>
+    <string name="chat_blocked_by_you">Ovaj razgovor je blokiran. Odblokiraj ga u izborniku za nastavak dopisivanja.</string>
+    <string name="chat_blocked_detail">Razgovor je blokiran.</string>
     <string name="chat_choose_client">Odaberi klijenta</string>
     <string name="chat_choose_coach">Odaberi trenera</string>
     <string name="chat_disabled">Chat isključen</string>
@@ -88,6 +94,8 @@
     <string name="chat_sent">Poslano</string>
     <string name="chat_start_conversation">Još nema poruka. Pozdravi!</string>
     <string name="chat_title">Poruke</string>
+    <string name="chat_unblock">Odblokiraj razgovor</string>
+    <string name="chat_unblocked_detail">Razgovor je odblokiran.</string>
     <string name="chat_unreadable">Poruku nije moguće prikazati</string>
     <string name="chat_you">Ti</string>
     <string name="chest">Prsa</string>

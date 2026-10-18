@@ -32,11 +32,14 @@ data class ChatConversation(
     val id: String,
     val coach: ChatParticipant,
     val client: ChatParticipant,
+    // Whether anyone can write: the coach enabled it and the client didn't block it.
     val isEnabled: Boolean = true,
     val lastMessageAt: IsoInstant? = null,
     val lastMessage: ChatMessage? = null,
     // Messages of the other participant the logged user hasn't read.
-    val unreadCount: Int = 0
+    val unreadCount: Int = 0,
+    // The client blocked the chat: read only for both, the coach can't turn it on.
+    val isBlockedByClient: Boolean = false
 ) {
     // The other side: the client for a coach, the coach for a client.
     fun otherParticipant(userId: String?): ChatParticipant =
@@ -53,7 +56,7 @@ data class ChatContact(
     val fullName: String = "",
     // Null when no chat was started yet.
     val conversationId: String? = null,
-    // False when the coach turned the chat off (read only).
+    // False when the coach turned the chat off or the client blocked it (read only).
     val isEnabled: Boolean = true
 )
 
@@ -77,6 +80,9 @@ object ChatApi {
     private data class StartRequest(val coachId: String)
 
     @Serializable
+    private data class BlockRequest(val isBlocked: Boolean)
+
+    @Serializable
     private data class ReportRequest(val reason: String?)
 
     @Serializable
@@ -92,6 +98,11 @@ object ChatApi {
     // A chat the coach turned off comes back read only.
     suspend fun start(coachId: String): ChatConversation =
         ApiClient.request("chat/conversations/start", HttpMethod.POST, StartRequest(coachId))
+
+    // Client only: blocks or unblocks the chat with their coach. A blocked
+    // chat is read only for both and the coach can't turn it back on.
+    suspend fun block(conversationId: String, isBlocked: Boolean): ChatConversation =
+        ApiClient.request("chat/conversations/$conversationId/block", HttpMethod.POST, BlockRequest(isBlocked))
 
     // Coach only: creates the conversation with the client if needed and turns it on or off.
     suspend fun setConversation(clientId: String, isEnabled: Boolean): ChatConversation =

@@ -210,7 +210,14 @@ object ChatStore {
 
     // Puts a conversation from the API (e.g. after turning it on) into the list.
     fun upsert(conversation: ChatConversation) {
-        conversations = sorted(conversations.filter { it.id != conversation.id } + conversation)
+        // Responses of changes come without the last message and unread count.
+        val existing = conversations.firstOrNull { it.id == conversation.id }
+        val merged = if (conversation.lastMessage == null && existing != null) {
+            conversation.copy(lastMessage = existing.lastMessage, unreadCount = existing.unreadCount)
+        } else {
+            conversation
+        }
+        conversations = sorted(conversations.filter { it.id != conversation.id } + merged)
         recountUnread()
     }
 
