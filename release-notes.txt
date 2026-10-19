@@ -1,2 +1,2 @@
 Novosti:
-- Klijent može blokirati razgovor s trenerom (izbornik razgovora → „Blokiraj razgovor”) i kasnije ga odblokirati. Dok je blokiran, nitko ne može pisati, a trener ga ne može ponovno uključiti.
+- Treneri i administratori mogu spremiti izmjene vježbe i bez YouTube linka i sličice.

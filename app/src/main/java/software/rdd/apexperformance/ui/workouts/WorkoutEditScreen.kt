@@ -74,8 +74,8 @@ class WorkoutEditScreen(
                 trimmedNameHr.length <= MAX_NAME_LENGTH &&
                 nameEn.trim().length <= MAX_NAME_LENGTH &&
                 descriptionHr.isNotBlank() &&
-                // The API accepts a new workout without a video, it can be added later.
-                (isVideoUrlValid || (isNew && videoUrl.isBlank()))
+                // The video and thumbnail are optional, like on the API; a link must be valid.
+                (isVideoUrlValid || videoUrl.isBlank())
         }
 
     @Composable
