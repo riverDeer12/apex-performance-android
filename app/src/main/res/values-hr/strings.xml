@@ -160,6 +160,7 @@
     <string name="done_this_month">Odrađeno (mjesec)</string>
     <string name="download_template">Predložak</string>
     <string name="drop_set">Drop set</string>
+    <string name="drop_set_short">Drop</string>
     <string name="edit">Uredi</string>
     <string name="edit_goal_and_plan">Uredi cilj i plan</string>
     <string name="edit_profile">Uredi profil</string>

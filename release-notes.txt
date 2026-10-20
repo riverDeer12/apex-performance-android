@@ -1,2 +1,2 @@
 Novosti:
-- Slika mišića ispod opisa vježbe sada je detaljan anatomski prikaz tijela sprijeda i straga. Primarni mišići su istaknuti glavnom bojom, a sekundarni svjetlije.
+- Oznaka drop seta u detaljima treninga više se ne preklapa s brojem ponavljanja.
