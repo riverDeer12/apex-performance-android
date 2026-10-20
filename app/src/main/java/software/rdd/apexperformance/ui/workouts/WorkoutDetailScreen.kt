@@ -52,6 +52,9 @@ import software.rdd.apexperformance.ui.components.YouTubePlayer
 import software.rdd.apexperformance.ui.components.YouTubeVideo
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 
 class WorkoutDetailScreen(
     workout: Workout,
@@ -132,6 +135,27 @@ class WorkoutDetailScreen(
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.description)) {
                 Text(workout.description.localized.ifEmpty { "—" }, style = ApexText.body, modifier = Modifier.fillMaxWidth())
+            }
+
+            if (workout.muscles.isNotEmpty()) {
+                val context = LocalContext.current
+                CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.worked_muscles)) {
+                    MuscleMap(
+                        workout.muscles,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 280.dp)
+                    )
+                    Text(
+                        workout.muscles.joinToString(" · ") { WorkoutMuscle.name(context, it) },
+                        style = ApexText.footnote,
+                        color = ApexColors.secondaryLabel,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
+                    )
+                }
             }
         }
 

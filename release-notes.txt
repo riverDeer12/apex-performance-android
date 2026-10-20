@@ -1,2 +1,4 @@
 Novosti:
-- Prije zatvaranja obrasca s nespremljenim promjenama (nova ili izmijenjena mjerenja, trening, cilj, osvrt, vježba, profil i drugi) aplikacija pita želiš li ih odbaciti.
+- U chatu se može poslati slika ili GIF (tipka + pored polja za poruku). Slika se otvara preko cijelog ekrana.
+- Treneri mogu u chatu podijeliti vježbu, a klijent je otvara jednim dodirom.
+- Svaka vježba ispod opisa ima sliku tijela s označenim mišićima koje vježba zahvaća. Treneri mogu ispraviti mišiće u uređivanju vježbe.

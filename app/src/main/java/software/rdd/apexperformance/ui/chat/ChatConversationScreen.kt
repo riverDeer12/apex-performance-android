@@ -69,6 +69,17 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.ui.platform.LocalContext
+import software.rdd.apexperformance.core.navigation.LocalNavigator
+import software.rdd.apexperformance.model.Workout
 
 // Messages of one conversation with the field to write. New messages come
 // live from the chat hub; "load older" fetches earlier ones. The coach can
@@ -280,16 +291,27 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 .padding(start = if (own) 48.dp else 0.dp, end = if (own) 0.dp else 48.dp),
             horizontalAlignment = if (own) Alignment.End else Alignment.Start
         ) {
-            SelectionContainer {
-                Text(
-                    message.content ?: stringResource(R.string.chat_unreadable),
-                    style = ApexText.subheadline.copy(fontStyle = if (message.content == null) FontStyle.Italic else FontStyle.Normal),
-                    color = if (own) ApexColors.onAccent else ApexColors.label,
-                    modifier = Modifier
-                        .widthIn(min = 40.dp)
-                        .background(if (own) ApexColors.accent else ApexColors.card, RoundedCornerShape(16.dp))
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                )
+            val attachment = message.attachment
+            if (message.isImage && attachment != null) {
+                ChatImageBubble(attachment, conversationId)
+            } else if (message.isWorkout) {
+                ChatWorkoutCard(message.workout)
+            }
+
+            // Text, or the caption of a picture or workout.
+            if (!(message.isImage || message.isWorkout) || message.text != null) {
+                SelectionContainer {
+                    Text(
+                        message.content ?: stringResource(R.string.chat_unreadable),
+                        style = ApexText.subheadline.copy(fontStyle = if (message.content == null) FontStyle.Italic else FontStyle.Normal),
+                        color = if (own) ApexColors.onAccent else ApexColors.label,
+                        modifier = Modifier
+                            .padding(top = if (message.isImage || message.isWorkout) 4.dp else 0.dp)
+                            .widthIn(min = 40.dp)
+                            .background(if (own) ApexColors.accent else ApexColors.card, RoundedCornerShape(16.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
+                }
             }
             val time = message.createdAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
             val status = if (own && showsStatus) {
@@ -323,6 +345,13 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
         }
 
         val canSend = draft.isNotBlank() && !isSending
+        val context = LocalContext.current
+        val navigator = LocalNavigator.current
+        val pickPicture = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) sendPicture(context, uri)
+        }
+        var attachMenuOpen by remember { mutableStateOf(false) }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -331,6 +360,38 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.Bottom
         ) {
+            // Picture (photo or GIF) for everyone, a workout for coaches.
+            Box {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .background(ApexColors.card, CircleShape)
+                        .clickable(enabled = !isSending) { attachMenuOpen = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.chat_attach), tint = ApexColors.main)
+                }
+                DropdownMenu(expanded = attachMenuOpen, onDismissRequest = { attachMenuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.chat_photo_or_gif)) },
+                        leadingIcon = { Icon(Icons.Outlined.Image, contentDescription = null) },
+                        onClick = {
+                            attachMenuOpen = false
+                            pickPicture.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        }
+                    )
+                    if (AuthManager.hasRole(Roles.COACH)) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.chat_share_workout)) },
+                            leadingIcon = { Icon(Icons.Filled.FitnessCenter, contentDescription = null) },
+                            onClick = {
+                                attachMenuOpen = false
+                                navigator.push(ChatWorkoutPickerScreen { workout -> shareWorkout(workout) })
+                            }
+                        )
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -517,6 +578,43 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 ToastManager.show(R.string.chat_report_sent, ToastType.SUCCESS)
             } catch (e: Exception) {
                 showError(e)
+            }
+        }
+    }
+
+    private fun sendPicture(context: Context, uri: Uri) {
+        launch {
+            isSending = true
+            try {
+                val upload = ChatImages.prepare(context, uri)
+                if (upload == null) {
+                    ToastManager.show(R.string.chat_picture_not_supported, ToastType.ERROR)
+                    return@launch
+                }
+                val message = ChatApi.sendImage(upload, conversationId)
+                append(message)
+                ChatStore.didSend(message)
+            } catch (e: Exception) {
+                showError(e)
+                ChatStore.refresh()
+            } finally {
+                isSending = false
+            }
+        }
+    }
+
+    private fun shareWorkout(workout: Workout) {
+        launch {
+            isSending = true
+            try {
+                val message = ChatApi.send("", conversationId, workoutId = workout.id)
+                append(message)
+                ChatStore.didSend(message)
+            } catch (e: Exception) {
+                showError(e)
+                ChatStore.refresh()
+            } finally {
+                isSending = false
             }
         }
     }

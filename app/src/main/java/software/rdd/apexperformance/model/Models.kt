@@ -406,7 +406,9 @@ data class Workout(
     val description: LocalizedText = LocalizedText(),
     val thumbnailUrl: String? = null,
     val videoUrl: String? = null,
-    val workoutTypes: List<WorkoutType> = emptyList()
+    val workoutTypes: List<WorkoutType> = emptyList(),
+    // Codes of the muscles it works (WorkoutMuscle).
+    val muscles: List<String> = emptyList()
 ) {
     // Every translation is searched, so the query language does not matter.
     fun matches(query: String): Boolean {
@@ -439,7 +441,9 @@ data class UpdateWorkoutRequest(
     val description: LocalizedText,
     val thumbnailUrl: String,
     val videoUrl: String,
-    val workoutTypes: List<String>
+    val workoutTypes: List<String>,
+    // Null for a new workout lets the API guess them from the name.
+    val muscles: List<String>? = null
 )
 
 /** Mirrors the API's LocalizedProperty, translations keyed by language code (HR, EN, IT). */

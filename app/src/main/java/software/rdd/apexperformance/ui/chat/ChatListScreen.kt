@@ -186,7 +186,12 @@ class ChatListScreen(private val onClose: (() -> Unit)? = null) : Screen() {
     @Composable
     private fun lastMessageText(conversation: ChatConversation): String {
         val message = conversation.lastMessage ?: return stringResource(R.string.chat_no_messages)
-        val content = message.content ?: stringResource(R.string.chat_unreadable)
+        val content = when {
+            message.isImage -> stringResource(if (message.attachment?.isGif == true) R.string.chat_gif else R.string.chat_photo)
+            message.isWorkout -> stringResource(R.string.chat_shared_workout) +
+                (message.workout?.let { ": " + it.name.localized } ?: "")
+            else -> message.content ?: stringResource(R.string.chat_unreadable)
+        }
         return if (message.senderUserId.equals(ChatStore.userId, ignoreCase = true)) {
             stringResource(R.string.chat_you) + ": " + content
         } else {

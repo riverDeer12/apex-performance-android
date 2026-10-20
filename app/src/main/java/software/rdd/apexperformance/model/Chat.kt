@@ -3,6 +3,9 @@ package software.rdd.apexperformance.model
 import kotlinx.serialization.Serializable
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.HttpMethod
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.URLEncoder
 import java.time.Instant
 
@@ -24,8 +27,30 @@ data class ChatMessage(
     val content: String? = null,
     val createdAt: IsoInstant,
     // When the other participant read it.
-    val readAt: IsoInstant? = null
-)
+    val readAt: IsoInstant? = null,
+    // "text", "image" or "workout"; null from an API without pictures.
+    val type: String? = null,
+    val attachment: ChatAttachment? = null,
+    // Workout a coach shared; null when it was deleted.
+    val workout: Workout? = null
+) {
+    val isImage: Boolean get() = type == "image" && attachment != null
+    val isWorkout: Boolean get() = type == "workout"
+
+    // Caption or text, null when empty.
+    val text: String? get() = content?.takeIf { it.isNotEmpty() }
+}
+
+// Picture of an image message, loaded from the API with the login token.
+@Serializable
+data class ChatAttachment(
+    val id: String,
+    val contentType: String = "image/jpeg",
+    val width: Int? = null,
+    val height: Int? = null
+) {
+    val isGif: Boolean get() = contentType == "image/gif"
+}
 
 @Serializable
 data class ChatConversation(
@@ -74,7 +99,7 @@ object ChatApi {
     private data class SetConversationRequest(val clientId: String, val isEnabled: Boolean)
 
     @Serializable
-    private data class SendRequest(val content: String)
+    private data class SendRequest(val content: String, val workoutId: String? = null)
 
     @Serializable
     private data class StartRequest(val coachId: String)
@@ -117,8 +142,23 @@ object ChatApi {
         return ApiClient.get("chat/conversations/$conversationId/messages?$query")
     }
 
-    suspend fun send(content: String, conversationId: String): ChatMessage =
-        ApiClient.request("chat/conversations/$conversationId/messages", HttpMethod.POST, SendRequest(content))
+    suspend fun send(content: String, conversationId: String, workoutId: String? = null): ChatMessage =
+        ApiClient.request("chat/conversations/$conversationId/messages", HttpMethod.POST, SendRequest(content, workoutId))
+
+    // Sends one picture (JPEG or GIF) as a message.
+    suspend fun sendImage(image: ChatImageUpload, conversationId: String): ChatMessage {
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("width", image.width.toString())
+            .addFormDataPart("height", image.height.toString())
+            .addFormDataPart("file", image.fileName, image.data.toRequestBody(image.contentType.toMediaType()))
+            .build()
+        return ApiClient.decode(ApiClient.requestData("chat/conversations/$conversationId/images", HttpMethod.POST, body))
+    }
+
+    // Bytes of an image message's picture.
+    suspend fun attachment(id: String, conversationId: String): ByteArray =
+        ApiClient.requestData("chat/conversations/$conversationId/attachments/$id")
 
     // Marks the other participant's messages as read.
     suspend fun markRead(conversationId: String) {
@@ -133,3 +173,12 @@ object ChatApi {
 
     suspend fun unreadCount(): Int = ApiClient.get<UnreadCountResponse>("chat/unread-count").count
 }
+
+// Picture ready to send: photos shrunk to JPEG, GIFs as they are.
+class ChatImageUpload(
+    val data: ByteArray,
+    val contentType: String,
+    val fileName: String,
+    val width: Int,
+    val height: Int
+)
