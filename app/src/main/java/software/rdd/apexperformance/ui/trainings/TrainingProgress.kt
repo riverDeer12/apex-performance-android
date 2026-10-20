@@ -52,6 +52,7 @@ import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.mainSetCount
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.EmptyText
@@ -152,7 +153,7 @@ private fun buildSessions(trainings: List<Training>, period: ProgressPeriod): Li
                 training = training,
                 volume = volume,
                 reps = reps.sum(),
-                sets = sets.size,
+                sets = sets.count { !it.isDropSet },
                 repSets = reps.size
             )
         }
@@ -314,7 +315,7 @@ private fun muscleGroups(sessions: List<Session>, workouts: List<Workout>, other
         .forEach { exercise ->
             val types = workoutsById[exercise.workoutId]?.workoutTypes?.map { it.name.localized }.orEmpty()
             for (type in types.ifEmpty { listOf(other) }) {
-                sets[type] = (sets[type] ?: 0) + exercise.sets.size
+                sets[type] = (sets[type] ?: 0) + exercise.sets.sortedBy { it.order }.mainSetCount
             }
         }
 

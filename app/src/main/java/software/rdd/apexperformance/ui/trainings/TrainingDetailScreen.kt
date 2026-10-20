@@ -1,6 +1,7 @@
 package software.rdd.apexperformance.ui.trainings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -30,6 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Navigator
@@ -53,6 +58,9 @@ import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.model.loadWorkout
+import software.rdd.apexperformance.model.setNumbers
+import software.rdd.apexperformance.ui.workouts.WorkoutDetailScreen
 import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.ui.components.ApexPictureBackground
 import software.rdd.apexperformance.ui.components.ApexTitle
@@ -61,6 +69,7 @@ import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.ScrollScreen
+import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
@@ -309,11 +318,44 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                 SupersetBadge(modifier = Modifier.padding(bottom = 6.dp))
             }
 
-            Text(
-                "$label ${exercise.workoutName.localized}".uppercase(),
-                style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
-                modifier = Modifier.padding(bottom = 10.dp)
-            )
+            // Opens the workout with its description, video and muscles.
+            val navigator = LocalNavigator.current
+            val scope = rememberCoroutineScope()
+            var isOpening by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = !isOpening) {
+                        isOpening = true
+                        scope.launch {
+                            try {
+                                navigator.push(WorkoutDetailScreen(loadWorkout(exercise.workoutId), canEdit = false, onSaved = {}))
+                            } catch (e: Exception) {
+                                ToastManager.show(R.string.workout_not_available, ToastType.ERROR)
+                            } finally {
+                                isOpening = false
+                            }
+                        }
+                    }
+                    .padding(bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "$label ${exercise.workoutName.localized}".uppercase(),
+                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                    modifier = Modifier.weight(1f)
+                )
+                if (isOpening) {
+                    SmallProgress(size = 14.dp)
+                } else {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = ApexColors.tertiaryLabel,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
 
             val sets = exercise.sets.sortedBy { it.order }
             if (sets.isNotEmpty()) {
@@ -324,12 +366,16 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                     isHeader = true
                 )
             }
+            val numbers = sets.setNumbers
             sets.forEachIndexed { index, set ->
+                val number = numbers[index]
                 HorizontalDivider(thickness = 0.5.dp, color = ApexColors.border)
                 TrainingSetRow(
-                    "${index + 1}",
+                    // Drop set of the set above, done right after it.
+                    number?.toString() ?: "↳ ${stringResource(R.string.drop_set)}",
                     set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
-                    set.weight?.let(::formatWeight) ?: "—"
+                    set.weight?.let(::formatWeight) ?: "—",
+                    isDropSet = number == null
                 )
             }
 
@@ -348,7 +394,7 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
 
 // Row of the sets table: set number, repetitions and weight.
 @Composable
-private fun TrainingSetRow(set: String, reps: String, weight: String, isHeader: Boolean = false) {
+private fun TrainingSetRow(set: String, reps: String, weight: String, isHeader: Boolean = false, isDropSet: Boolean = false) {
     val style = if (isHeader) {
         TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, color = ApexColors.secondaryLabel)
     } else {
@@ -362,7 +408,15 @@ private fun TrainingSetRow(set: String, reps: String, weight: String, isHeader: 
             .padding(vertical = if (isHeader) 6.dp else 9.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text(set), style = style, modifier = Modifier.width(56.dp))
+        Text(
+            text(set),
+            style = if (isDropSet) ApexText.caption.copy(fontWeight = FontWeight.SemiBold, color = ApexColors.main) else style,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier
+                .width(64.dp)
+                .padding(start = if (isDropSet) 8.dp else 0.dp)
+        )
         Text(text(reps), style = style, modifier = Modifier.weight(1f))
         Text(text(weight), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
     }

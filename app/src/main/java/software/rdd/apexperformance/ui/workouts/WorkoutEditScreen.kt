@@ -1,13 +1,18 @@
 package software.rdd.apexperformance.ui.workouts
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -62,7 +67,9 @@ class WorkoutEditScreen(
     private var videoUrl by mutableStateOf(workout?.videoUrl.orEmpty())
     private var thumbnailUrl by mutableStateOf(workout?.thumbnailUrl.orEmpty())
     private var selectedWorkoutTypeIds by mutableStateOf(workout?.workoutTypes.orEmpty().map { it.id }.toSet())
-    private var muscles by mutableStateOf(workout?.muscles.orEmpty().toSet())
+    private var muscles by mutableStateOf(rolesOf(workout))
+    // Muscle whose role menu is open.
+    private var editedMuscle by mutableStateOf<String?>(null)
     private var workoutTypes by mutableStateOf<List<WorkoutType>>(emptyList())
     private var isSaving by mutableStateOf(false)
 
@@ -72,7 +79,10 @@ class WorkoutEditScreen(
             descriptionEn != workout?.description?.value("EN").orEmpty() ||
             videoUrl != workout?.videoUrl.orEmpty() || thumbnailUrl != workout?.thumbnailUrl.orEmpty() ||
             selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet() ||
-            muscles != workout?.muscles.orEmpty().toSet()
+            muscles != rolesOf(workout)
+
+    // In the API's order, which the body map also uses.
+    private fun selectedMuscles(role: MuscleRole): List<String> = WorkoutMuscle.all.filter { muscles[it] == role }
 
     private val isNew: Boolean get() = workout == null
 
@@ -148,24 +158,61 @@ class WorkoutEditScreen(
             ) {
                 val context = LocalContext.current
                 MuscleMap(
-                    muscles,
+                    selectedMuscles(MuscleRole.PRIMARY),
+                    selectedMuscles(MuscleRole.SECONDARY),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .height(220.dp)
                         .padding(vertical = 8.dp)
                 )
+                val roleNames = mapOf(
+                    null to stringResource(R.string.muscle_not_worked),
+                    MuscleRole.PRIMARY to stringResource(R.string.primary_muscle),
+                    MuscleRole.SECONDARY to stringResource(R.string.secondary_muscle)
+                )
                 WorkoutMuscle.all.forEach { muscle ->
+                    val role = muscles[muscle]
                     Divider()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { muscles = if (muscle in muscles) muscles - muscle else muscles + muscle }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(WorkoutMuscle.name(context, muscle), style = ApexText.body, modifier = Modifier.weight(1f))
-                        if (muscle in muscles) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
+                    Box {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { editedMuscle = muscle }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(WorkoutMuscle.name(context, muscle), style = ApexText.body, modifier = Modifier.weight(1f))
+                            Text(
+                                roleNames.getValue(role),
+                                style = ApexText.body,
+                                color = if (role == null) ApexColors.secondaryLabel else ApexColors.main
+                            )
+                            Icon(
+                                Icons.Filled.UnfoldMore,
+                                contentDescription = null,
+                                tint = if (role == null) ApexColors.secondaryLabel else ApexColors.main,
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(16.dp)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = editedMuscle == muscle,
+                            onDismissRequest = { editedMuscle = null },
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            roleNames.forEach { (option, name) ->
+                                DropdownMenuItem(
+                                    text = { Text(name) },
+                                    trailingIcon = if (option == role) {
+                                        { Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main) }
+                                    } else null,
+                                    onClick = {
+                                        muscles = if (option == null) muscles - muscle else muscles + (muscle to option)
+                                        editedMuscle = null
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -256,8 +303,8 @@ class WorkoutEditScreen(
                 thumbnailUrl = thumbnailUrl.trim(),
                 videoUrl = videoUrl.trim(),
                 workoutTypes = selectedWorkoutTypeIds.toList(),
-                // In the API's order, which the body map also uses.
-                muscles = if (workout == null && muscles.isEmpty()) null else WorkoutMuscle.all.filter { it in muscles }
+                muscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.PRIMARY),
+                secondaryMuscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.SECONDARY)
             )
             val saved: Workout = if (workout == null) {
                 ApiClient.request("workouts", HttpMethod.POST, request)
@@ -284,6 +331,10 @@ class WorkoutEditScreen(
     }
 
     private companion object {
+        fun rolesOf(workout: Workout?): Map<String, MuscleRole> =
+            workout?.secondaryMuscles.orEmpty().associateWith { MuscleRole.SECONDARY } +
+                workout?.muscles.orEmpty().associateWith { MuscleRole.PRIMARY }
+
         // Same limit and link formats the web form and API accept.
         const val MAX_NAME_LENGTH = 60
         val YOUTUBE_PATTERN = Regex(

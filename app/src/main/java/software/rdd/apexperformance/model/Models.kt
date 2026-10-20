@@ -407,8 +407,10 @@ data class Workout(
     val thumbnailUrl: String? = null,
     val videoUrl: String? = null,
     val workoutTypes: List<WorkoutType> = emptyList(),
-    // Codes of the muscles it works (WorkoutMuscle).
-    val muscles: List<String> = emptyList()
+    // Codes of the muscles it works (WorkoutMuscle): primary ones doing
+    // most of the work and secondary ones helping.
+    val muscles: List<String> = emptyList(),
+    val secondaryMuscles: List<String> = emptyList()
 ) {
     // Every translation is searched, so the query language does not matter.
     fun matches(query: String): Boolean {
@@ -443,7 +445,8 @@ data class UpdateWorkoutRequest(
     val videoUrl: String,
     val workoutTypes: List<String>,
     // Null for a new workout lets the API guess them from the name.
-    val muscles: List<String>? = null
+    val muscles: List<String>? = null,
+    val secondaryMuscles: List<String>? = null
 )
 
 /** Mirrors the API's LocalizedProperty, translations keyed by language code (HR, EN, IT). */
@@ -541,6 +544,10 @@ val Workout.isMobilityOrStretching: Boolean
     }
 
 // Deletes the workout (soft delete on the API, staff only).
+// One workout, e.g. of an exercise in a training. Clients also get
+// the workouts of their trainings outside their plan.
+suspend fun loadWorkout(id: String): Workout = ApiClient.get("workouts/$id")
+
 suspend fun deleteWorkout(id: String) {
     ApiClient.requestData("workouts/$id", HttpMethod.DELETE)
 }
