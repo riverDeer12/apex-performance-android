@@ -1,4 +1,2 @@
 Novosti:
-- Dodirom na vježbu u treningu otvara se ta vježba s opisom, videom i mišićima.
-- Drop setovi: u obrascu treninga "Dodaj drop set" ili povlačenje seta udesno dodaje drop set (ista vježba odmah nakon seta, s manje kilograma). Drop setovi se prikazuju ispod svog seta.
-- Slika mišića je nova, po uzoru na anatomski prikaz. Primarni mišići su u glavnoj boji, sekundarni svjetlije. Treneri u uređivanju vježbe za svaki mišić biraju je li primarni ili sekundarni.
+- Slika mišića ispod opisa vježbe sada je detaljan anatomski prikaz tijela sprijeda i straga. Primarni mišići su istaknuti glavnom bojom, a sekundarni svjetlije.

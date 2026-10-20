@@ -17,15 +17,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,53 +58,49 @@ enum class MuscleRole {
     SECONDARY
 }
 
-private val silhouettePaths: List<Path> by lazy { BodyMapPaths.silhouette.map(::parsePath) }
-private val outlinePath: Path by lazy { Path().apply { silhouettePaths.forEach { addPath(it) } } }
-private val detailPaths: List<Path> by lazy { BodyMapPaths.details.map(::parsePath) }
-private val musclePaths: List<Pair<String, List<Path>>> by lazy {
-    BodyMapPaths.muscles.map { (code, paths) -> code to paths.map(::parsePath) }
+// Each muscle's shapes on both figures as one path.
+private val musclePaths: List<Pair<String, Path>> by lazy {
+    BodyMapPaths.muscles.map { (code, paths) ->
+        code to Path().apply { paths.forEach { addPath(PathParser().parsePathString(it).toPath()) } }
+    }
 }
 
-private fun parsePath(data: String): Path = PathParser().parsePathString(data).toPath()
-
-const val SECONDARY_MUSCLE_ALPHA = 0.4f
+const val SECONDARY_MUSCLE_ALPHA = 0.45f
 
 // Front and back of a body with the muscles a workout works highlighted:
-// primary ones in the app's main color, secondary ones lighter. Like
-// MuscleMapView on iOS.
+// primary ones in the app's main color, secondary ones lighter. The body
+// is a picture; the muscles are colored over it keeping its shading.
+// Like MuscleMapView on iOS.
 @Composable
 fun MuscleMap(primary: Collection<String>, secondary: Collection<String> = emptyList(), modifier: Modifier = Modifier) {
-    val main = ApexColors.main
-    val label = ApexColors.label
+    // The main color is white in dark mode, the muscles stay blue.
+    val main = ApexColors.mainBlue
+    val picture = ImageBitmap.imageResource(R.drawable.body_map)
 
     Canvas(modifier = modifier.aspectRatio(BodyMapPaths.WIDTH / BodyMapPaths.HEIGHT)) {
         val factor = minOf(size.width / BodyMapPaths.WIDTH, size.height / BodyMapPaths.HEIGHT)
         val offsetX = (size.width - BodyMapPaths.WIDTH * factor) / 2
-        val line = Stroke(width = 0.3f, join = StrokeJoin.Round)
         translate(left = offsetX) {
             scale(factor, factor, pivot = Offset.Zero) {
-                drawPath(outlinePath, label.copy(alpha = 0.08f))
+                // The picture is as big as the paths' coordinates.
+                drawImage(picture)
 
-                // Muscles reach over the body's edge, the outline cuts them.
-                clipPath(outlinePath) {
-                    detailPaths.forEach {
-                        drawPath(it, label.copy(alpha = 0.13f))
-                        drawPath(it, label.copy(alpha = 0.25f), style = line)
+                val bounds = Rect(0f, 0f, BodyMapPaths.WIDTH, BodyMapPaths.HEIGHT)
+                musclePaths.forEach { (code, path) ->
+                    val alpha = when (code) {
+                        in primary -> 1f
+                        in secondary -> SECONDARY_MUSCLE_ALPHA
+                        else -> return@forEach
                     }
-                    musclePaths.forEach { (code, paths) ->
-                        val color = when (code) {
-                            in primary -> main
-                            in secondary -> main.copy(alpha = SECONDARY_MUSCLE_ALPHA)
-                            else -> label.copy(alpha = 0.17f)
-                        }
-                        paths.forEach {
-                            drawPath(it, color)
-                            drawPath(it, label.copy(alpha = 0.3f), style = line)
-                        }
+                    // Secondary muscles are the same layer, more transparent.
+                    drawIntoCanvas { it.saveLayer(bounds, Paint().apply { this.alpha = alpha }) }
+                    drawPath(path, main)
+                    clipPath(path) {
+                        // The picture's shading over the color.
+                        drawImage(picture, blendMode = BlendMode.Overlay)
                     }
+                    drawIntoCanvas { it.restore() }
                 }
-
-                drawPath(outlinePath, label.copy(alpha = 0.55f), style = Stroke(width = 0.5f, join = StrokeJoin.Round))
             }
         }
     }
@@ -112,13 +112,13 @@ fun MuscleLegend(primary: List<String>, secondary: List<String>, modifier: Modif
     val context = LocalContext.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (primary.isNotEmpty()) {
-            MuscleLegendRow(stringResource(R.string.primary_muscles), primary.map { WorkoutMuscle.name(context, it) }, ApexColors.main)
+            MuscleLegendRow(stringResource(R.string.primary_muscles), primary.map { WorkoutMuscle.name(context, it) }, ApexColors.mainBlue)
         }
         if (secondary.isNotEmpty()) {
             MuscleLegendRow(
                 stringResource(R.string.secondary_muscles),
                 secondary.map { WorkoutMuscle.name(context, it) },
-                ApexColors.main.copy(alpha = SECONDARY_MUSCLE_ALPHA)
+                ApexColors.mainBlue.copy(alpha = SECONDARY_MUSCLE_ALPHA)
             )
         }
     }
