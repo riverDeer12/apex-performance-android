@@ -1,2 +1,2 @@
 Novosti:
-- Treneri i administratori mogu spremiti izmjene vježbe i bez YouTube linka i sličice.
+- Prije zatvaranja obrasca s nespremljenim promjenama (nova ili izmijenjena mjerenja, trening, cilj, osvrt, vježba, profil i drugi) aplikacija pita želiš li ih odbaciti.

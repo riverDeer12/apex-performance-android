@@ -45,6 +45,9 @@ class BodyMeasurementDetailsScreen(
     private var isDeleting by mutableStateOf(false)
     private var showDeleteDialog by mutableStateOf(false)
 
+    override val hasUnsavedChanges: Boolean
+        get() = isEditable && form.hasChanges
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current

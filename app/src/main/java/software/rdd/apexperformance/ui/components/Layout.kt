@@ -82,7 +82,7 @@ fun TopBar(
     ) {
         if (showBack) {
             IconButton(
-                onClick = { onBack?.invoke() ?: navigator.pop() },
+                onClick = { onBack?.invoke() ?: navigator.requestPop() },
                 modifier = Modifier.align(Alignment.CenterStart)
             ) {
                 Icon(

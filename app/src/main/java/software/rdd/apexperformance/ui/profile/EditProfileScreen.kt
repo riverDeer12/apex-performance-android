@@ -78,6 +78,10 @@ class EditProfileScreen(
     private var isUpdatingPicture by mutableStateOf(false)
     private var showRemovePictureDialog by mutableStateOf(false)
 
+    override val hasUnsavedChanges: Boolean
+        get() = firstName != profile.firstName.orEmpty() || lastName != profile.lastName.orEmpty() ||
+            phone != profile.phone.orEmpty() || email != profile.email
+
     private val isValid: Boolean
         get() = email.isNotBlank() &&
             (!profile.hasPersonalData || (firstName.isNotBlank() && lastName.isNotBlank())) &&

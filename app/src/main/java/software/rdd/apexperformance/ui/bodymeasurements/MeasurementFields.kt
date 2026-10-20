@@ -58,6 +58,12 @@ class MeasurementForm(initial: BodyMeasurement? = null) {
         }
     }
 
+    private val initialNumbers = numbers.toMap()
+
+    // Some value differs from the one the form started with.
+    val hasChanges: Boolean
+        get() = MeasurementField.entries.any { number(it) != (initialNumbers[it] ?: 0.0) }
+
     fun number(field: MeasurementField): Double = numbers[field] ?: 0.0
 
     fun update(field: MeasurementField, value: Double) {

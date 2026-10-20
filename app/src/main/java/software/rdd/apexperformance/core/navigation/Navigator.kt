@@ -7,9 +7,15 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.res.stringResource
+import software.rdd.apexperformance.R
+import software.rdd.apexperformance.ui.components.ConfirmDialog
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import java.util.UUID
@@ -23,6 +29,9 @@ abstract class Screen {
 
     @Composable
     abstract fun Content()
+
+    // Forms with changes not saved yet: going back asks before they are lost.
+    open val hasUnsavedChanges: Boolean get() = false
 
     open fun onDispose() {
         scope.cancel()
@@ -43,6 +52,30 @@ class Navigator(root: Screen) {
     fun push(screen: Screen) {
         isPushing = true
         stack.add(screen)
+    }
+
+    // Set while asking whether to discard the current screen's unsaved changes.
+    var isConfirmingDiscard by mutableStateOf(false)
+        private set
+
+    // Back from the user (back button or gesture): asks first when the
+    // screen has unsaved changes. Saving and similar actions use pop().
+    fun requestPop() {
+        if (!canPop) return
+        if (current.hasUnsavedChanges) {
+            isConfirmingDiscard = true
+        } else {
+            pop()
+        }
+    }
+
+    fun discardChanges() {
+        isConfirmingDiscard = false
+        pop()
+    }
+
+    fun keepEditing() {
+        isConfirmingDiscard = false
     }
 
     fun pop(): Boolean {
@@ -68,7 +101,18 @@ val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator")
 fun NavigatorHost(navigator: Navigator) {
     val stateHolder = rememberSaveableStateHolder()
 
-    BackHandler(enabled = navigator.canPop) { navigator.pop() }
+    BackHandler(enabled = navigator.canPop) { navigator.requestPop() }
+
+    if (navigator.isConfirmingDiscard) {
+        ConfirmDialog(
+            title = stringResource(R.string.discard_changes_question),
+            message = stringResource(R.string.discard_changes_info),
+            confirmText = stringResource(R.string.discard_changes),
+            dismissText = stringResource(R.string.keep_editing),
+            onConfirm = { navigator.discardChanges() },
+            onDismiss = { navigator.keepEditing() }
+        )
+    }
 
     CompositionLocalProvider(LocalNavigator provides navigator) {
         AnimatedContent(
