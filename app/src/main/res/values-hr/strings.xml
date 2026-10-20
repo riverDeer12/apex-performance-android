@@ -108,6 +108,7 @@
     <string name="chat_you">Ti</string>
     <string name="chest">Prsa</string>
     <string name="clear">Očisti</string>
+    <string name="clear_read_notifications">Obriši pročitane</string>
     <string name="client">Klijent</string>
     <string name="client_created_successfully">Klijent je uspješno kreiran</string>
     <string name="clients">Klijenti</string>
@@ -258,6 +259,7 @@
     <string name="manage_appointment_details">Upravljaj detaljima termina</string>
     <string name="manage_client_requests">Upravljanje zahtjevima za termine</string>
     <string name="manage_your_clients">Upravljaj klijentima</string>
+    <string name="mark_all_read">Označi sve kao pročitano</string>
     <string name="mark_as_completed">Označi kao odrađen</string>
     <string name="mark_as_planned">Vrati u planirane</string>
     <string name="max_weight">Maksimalna težina</string>
@@ -334,6 +336,7 @@
     <string name="no_goal_and_plan">Cilj i plan još nisu upisani.</string>
     <string name="no_measurements">Nema mjerenja</string>
     <string name="no_monthly_reviews">Još nema mjesečnih reviewa.</string>
+    <string name="no_notifications">Nema obavijesti.</string>
     <string name="no_personal_records">Još nema rekorda. Pojavljuju se kad se treninzi s kilažama označe kao odrađeni.</string>
     <string name="no_requests">Nema novih zahtjeva.</string>
     <string name="no_sets_logged">Nema upisanih serija.</string>
@@ -351,6 +354,8 @@
     <string name="note">Bilješka</string>
     <string name="notes">Bilješke</string>
     <string name="notification_channel_name">Obavijesti</string>
+    <string name="notification_options">Opcije obavijesti</string>
+    <string name="notifications">Obavijesti</string>
     <string name="notify_client">Obavijesti klijenta</string>
     <string name="notify_coach_about_cancelation">Obavijesti trenera o otkazivanju termina.</string>
     <string name="other">Ostalo</string>
@@ -490,6 +495,7 @@
     <string name="trunk_stability_push_up">Stabilnost trupa - sklek</string>
     <string name="unknown_coach">Nepoznati trener</string>
     <string name="unknown_value">Nepoznata vrijednost</string>
+    <string name="unread">Nepročitano</string>
     <string name="upcoming_appointments">Nadolazeći termini</string>
     <string name="upcoming_past_sessions">Pregled svih termina</string>
     <string name="update">Ažuriraj</string>

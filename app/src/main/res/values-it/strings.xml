@@ -108,6 +108,7 @@
     <string name="chat_you">Tu</string>
     <string name="chest">Petto</string>
     <string name="clear">Cancella</string>
+    <string name="clear_read_notifications">Elimina lette</string>
     <string name="client">Cliente</string>
     <string name="client_created_successfully">Client creato con successo</string>
     <string name="clients">Clienti</string>
@@ -258,6 +259,7 @@
     <string name="manage_appointment_details">Gestisci i dettagli dell’appuntamento</string>
     <string name="manage_client_requests">Gestisci richieste client</string>
     <string name="manage_your_clients">Gestisci i tuoi clienti</string>
+    <string name="mark_all_read">Segna tutte come lette</string>
     <string name="mark_as_completed">Segna come completato</string>
     <string name="mark_as_planned">Segna come pianificato</string>
     <string name="max_weight">Peso massimo</string>
@@ -334,6 +336,7 @@
     <string name="no_goal_and_plan">Obiettivo e piano non ancora scritti.</string>
     <string name="no_measurements">Nessuna misurazione</string>
     <string name="no_monthly_reviews">Ancora nessuna revisione mensile.</string>
+    <string name="no_notifications">Nessuna notifica.</string>
     <string name="no_personal_records">Ancora nessun record. Appaiono quando gli allenamenti con i pesi sono segnati come completati.</string>
     <string name="no_requests">Nessuna nuova richiesta.</string>
     <string name="no_sets_logged">Nessuna serie registrata.</string>
@@ -351,6 +354,8 @@
     <string name="note">Nota</string>
     <string name="notes">Note</string>
     <string name="notification_channel_name">Notifiche</string>
+    <string name="notification_options">Opzioni notifiche</string>
+    <string name="notifications">Notifiche</string>
     <string name="notify_client">Avvisa il cliente</string>
     <string name="notify_coach_about_cancelation">Avvisare l\'allenatore della cancellazione.</string>
     <string name="other">Altro</string>
@@ -490,6 +495,7 @@
     <string name="trunk_stability_push_up">Piegamento per la stabilità del tronco</string>
     <string name="unknown_coach">Allenatore sconosciuto</string>
     <string name="unknown_value">Valore sconosciuto</string>
+    <string name="unread">Non letta</string>
     <string name="upcoming_appointments">Prossimi appuntamenti</string>
     <string name="upcoming_past_sessions">Elenco di tutti gli appuntamenti</string>
     <string name="update">Aggiorna</string>

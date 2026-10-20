@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import software.rdd.apexperformance.MainActivity
+import software.rdd.apexperformance.ui.home.NotificationInbox
 import software.rdd.apexperformance.R
 
 class ApexMessagingService : FirebaseMessagingService() {
@@ -22,6 +23,11 @@ class ApexMessagingService : FirebaseMessagingService() {
     // while the app is in the foreground, where they are shown too, as on iOS.
     override fun onMessageReceived(message: RemoteMessage) {
         val notification = message.notification ?: return
+
+        // The bell shows the new notification too.
+        if (message.data[MainActivity.EXTRA_NOTIFICATION_TYPE] != "chat_message") {
+            NotificationInbox.refreshCountLater()
+        }
 
         // A message of the chat that is open on screen isn't shown again.
         if (message.data[MainActivity.EXTRA_NOTIFICATION_TYPE] == "chat_message" &&

@@ -31,7 +31,7 @@ import java.util.Locale
 // Navigation bar with the "APEX" wordmark in the middle (ApexTitleBar in the
 // principal toolbar slot on iOS) and the back chevron when a screen is pushed.
 @Composable
-fun ApexTitleTopBar(subtitle: String? = null) {
+fun ApexTitleTopBar(subtitle: String? = null, trailing: (@Composable () -> Unit)? = null) {
     val navigator = LocalNavigator.current
 
     Box(
@@ -57,6 +57,10 @@ fun ApexTitleTopBar(subtitle: String? = null) {
         }
 
         ApexTitleBar(subtitle = subtitle, modifier = Modifier.align(Alignment.Center))
+
+        if (trailing != null) {
+            Box(modifier = Modifier.align(Alignment.CenterEnd)) { trailing() }
+        }
     }
 }
 
