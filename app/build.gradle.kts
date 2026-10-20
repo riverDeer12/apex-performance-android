@@ -29,8 +29,8 @@ android {
         applicationId = "software.rdd.apexperformance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "1.15"
+        versionCode = 15
+        versionName = "1.16"
     }
 
     signingConfigs {
@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.gif)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
