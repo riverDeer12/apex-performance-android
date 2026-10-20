@@ -53,8 +53,6 @@ import software.rdd.apexperformance.ui.components.YouTubeVideo
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 
 class WorkoutDetailScreen(
     workout: Workout,
@@ -137,24 +135,16 @@ class WorkoutDetailScreen(
                 Text(workout.description.localized.ifEmpty { "—" }, style = ApexText.body, modifier = Modifier.fillMaxWidth())
             }
 
-            if (workout.muscles.isNotEmpty()) {
-                val context = LocalContext.current
+            if (workout.muscles.isNotEmpty() || workout.secondaryMuscles.isNotEmpty()) {
                 CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.worked_muscles)) {
                     MuscleMap(
                         workout.muscles,
+                        workout.secondaryMuscles,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 280.dp)
+                            .heightIn(max = 300.dp)
                     )
-                    Text(
-                        workout.muscles.joinToString(" · ") { WorkoutMuscle.name(context, it) },
-                        style = ApexText.footnote,
-                        color = ApexColors.secondaryLabel,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp)
-                    )
+                    MuscleLegend(workout.muscles, workout.secondaryMuscles, modifier = Modifier.padding(top = 12.dp))
                 }
             }
         }

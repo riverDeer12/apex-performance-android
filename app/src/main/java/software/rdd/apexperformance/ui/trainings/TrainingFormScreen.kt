@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.LibraryAdd
@@ -80,6 +81,7 @@ import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.MenuPicker
 import software.rdd.apexperformance.ui.components.NotifyClientRow
@@ -434,9 +436,10 @@ class TrainingFormScreen private constructor(
                 SetsHeader(previous)
             }
 
+            val setNumbers = setNumbers(exercise.sets.map { it.isDropSet })
             exercise.sets.forEachIndexed { setIndex, set ->
                 key(set.id) {
-                    SetRow(exercise.id, setIndex, set, previous)
+                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous)
                 }
             }
 
@@ -447,6 +450,16 @@ class TrainingFormScreen private constructor(
                 enabled = exercise.sets.size < ExerciseDraft.MAX_SETS
             ) {
                 updateExercise(exercise.id) { it.addingSet() }
+            }
+
+            // Same exercise right after the last set, with less weight.
+            Divider()
+            ButtonRow(
+                Icons.Filled.SubdirectoryArrowRight,
+                stringResource(R.string.add_drop_set),
+                enabled = exercise.sets.isNotEmpty() && exercise.sets.size < ExerciseDraft.MAX_SETS
+            ) {
+                updateExercise(exercise.id) { it.addingDropSet(after = it.sets.lastIndex) }
             }
 
             if (previous != null) {
@@ -585,28 +598,46 @@ class TrainingFormScreen private constructor(
     // to the left to delete it.
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    private fun SetRow(exerciseId: String, setIndex: Int, set: SetDraft, previous: PreviousSets?) {
+    private fun SetRow(exerciseId: String, setIndex: Int, number: Int?, set: SetDraft, previous: PreviousSets?) {
         val dismissState = rememberSwipeToDismissBoxState(
             confirmValueChange = { value ->
-                if (value == SwipeToDismissBoxValue.EndToStart) {
-                    updateExercise(exerciseId) { draft -> draft.copy(sets = draft.sets.filter { it.id != set.id }) }
-                    true
-                } else false
+                when (value) {
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        updateExercise(exerciseId) { it.removingSet(set.id) }
+                        true
+                    }
+                    // Swiping right adds a drop set after this set; the row stays.
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        updateExercise(exerciseId) { draft ->
+                            draft.addingDropSet(after = draft.sets.indexOfFirst { it.id == set.id })
+                        }
+                        false
+                    }
+                    else -> false
+                }
             }
         )
 
         SwipeToDismissBox(
             state = dismissState,
-            enableDismissFromStartToEnd = false,
             backgroundContent = {
+                val isAddingDrop = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(ApexColors.red)
+                        .background(if (isAddingDrop) ApexColors.main else ApexColors.red)
                         .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterEnd
+                    contentAlignment = if (isAddingDrop) Alignment.CenterStart else Alignment.CenterEnd
                 ) {
-                    Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White)
+                    if (isAddingDrop) {
+                        Icon(
+                            Icons.Filled.SubdirectoryArrowRight,
+                            contentDescription = stringResource(R.string.add_drop_set),
+                            tint = Color.White
+                        )
+                    } else {
+                        Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White)
+                    }
                 }
             }
         ) {
@@ -618,7 +649,19 @@ class TrainingFormScreen private constructor(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("${setIndex + 1}", style = ApexText.body, color = ApexColors.secondaryLabel, modifier = Modifier.width(22.dp))
+                if (number != null) {
+                    Text("$number", style = ApexText.body, color = ApexColors.secondaryLabel, modifier = Modifier.width(22.dp))
+                } else {
+                    // Drop set of the set above.
+                    Icon(
+                        Icons.Filled.SubdirectoryArrowRight,
+                        contentDescription = stringResource(R.string.drop_set),
+                        tint = ApexColors.main,
+                        modifier = Modifier
+                            .width(22.dp)
+                            .size(18.dp)
+                    )
+                }
                 NumberWheelField(
                     value = set.repsValue,
                     onValueChange = { value -> updateSet(exerciseId, set.id) { it.withRepsValue(value) } },
@@ -864,12 +907,31 @@ private data class ExerciseDraft(
     val isValid: Boolean
         get() = workoutId != null && note.length <= 500 && sets.size <= MAX_SETS && sets.all { it.isValid }
 
-    // Adds a set copying the last one, as sets usually repeat
-    // or change only a little.
+    // Adds a set copying the last one that isn't a drop set, as sets
+    // usually repeat or change only a little.
     fun addingSet(): ExerciseDraft {
         if (sets.size >= MAX_SETS) return this
-        val last = sets.lastOrNull()
+        val last = sets.lastOrNull { !it.isDropSet } ?: sets.lastOrNull()
         return copy(sets = sets + SetDraft(reps = last?.reps.orEmpty(), weight = last?.weight.orEmpty()))
+    }
+
+    // Adds a drop set after the set at the index and its drop sets:
+    // the same reps with about a fifth less weight.
+    fun addingDropSet(after: Int): ExerciseDraft {
+        if (after !in sets.indices || sets.size >= MAX_SETS) return this
+        var end = after + 1
+        while (end < sets.size && sets[end].isDropSet) end += 1
+        val previous = sets[end - 1]
+        val drop = SetDraft(reps = previous.reps, isDropSet = true)
+            // Rounded to half a kilogram, like the weight wheel.
+            .withWeightValue(previous.weightValue?.let { Math.round(it * 0.8 * 2) / 2.0 })
+        return copy(sets = sets.toMutableList().apply { add(end, drop) })
+    }
+
+    // Removes a set; the first one left can't be a drop set.
+    fun removingSet(id: String): ExerciseDraft {
+        val left = sets.filter { it.id != id }
+        return copy(sets = left.mapIndexed { index, set -> if (index == 0) set.copy(isDropSet = false) else set })
     }
 
     val request: SaveTrainingRequest.Exercise?
@@ -900,7 +962,9 @@ private data class ExerciseDraft(
 private data class SetDraft(
     val id: String = UUID.randomUUID().toString(),
     val reps: String = "",
-    val weight: String = ""
+    val weight: String = "",
+    // Done right after the previous set with less weight.
+    val isDropSet: Boolean = false
 ) {
     private val trimmedReps: String get() = reps.trim()
 
@@ -934,11 +998,12 @@ private data class SetDraft(
         get() {
             val reps = trimmedReps
             if (reps.isEmpty() && parsedWeight == null) return null
-            return SaveTrainingRequest.ExerciseSet(reps = reps.ifEmpty { null }, weight = parsedWeight)
+            return SaveTrainingRequest.ExerciseSet(reps = reps.ifEmpty { null }, weight = parsedWeight, isDropSet = isDropSet)
         }
 
     companion object {
         fun from(set: Training.ExerciseSet) = SetDraft(
+            isDropSet = set.isDropSet,
             reps = set.reps.orEmpty(),
             weight = set.weight?.let { plainNumber(it) }.orEmpty()
         )

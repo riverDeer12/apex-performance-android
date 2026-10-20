@@ -44,7 +44,9 @@ data class Training(
         val id: String,
         val order: Int = 0,
         val reps: String? = null,
-        val weight: Double? = null
+        val weight: Double? = null,
+        // Done right after the previous set with less weight (drop set).
+        val isDropSet: Boolean = false
     )
 
     // Marks the training as completed or planned (staff only).
@@ -80,6 +82,27 @@ data class Training(
         }
     }
 }
+
+// Numbers of sets in order: 1, 2... for sets and null for their drop
+// sets, which belong to the set before them.
+val List<Training.ExerciseSet>.setNumbers: List<Int?>
+    get() = setNumbers(map { it.isDropSet })
+
+fun setNumbers(isDropSet: List<Boolean>): List<Int?> {
+    var number = 0
+    return isDropSet.map { isDrop ->
+        if (isDrop && number > 0) {
+            null
+        } else {
+            number += 1
+            number
+        }
+    }
+}
+
+// Sets without their drop sets.
+val List<Training.ExerciseSet>.mainSetCount: Int
+    get() = setNumbers.count { it != null }
 
 object SupersetLabels {
     // Labels of exercises in order: "1.", "2." for single exercises and
@@ -131,5 +154,5 @@ data class SaveTrainingRequest(
     )
 
     @Serializable
-    data class ExerciseSet(val reps: String?, val weight: Double?)
+    data class ExerciseSet(val reps: String?, val weight: Double?, val isDropSet: Boolean = false)
 }

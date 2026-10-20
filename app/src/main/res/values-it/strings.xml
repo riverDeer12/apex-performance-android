@@ -6,6 +6,7 @@
     <string name="actions">Azioni</string>
     <string name="active_package">Pacchetto attivo</string>
     <string name="active_straight_leg_raise">Sollevamento attivo della gamba tesa</string>
+    <string name="add_drop_set">Aggiungi drop set</string>
     <string name="add_exercise">Aggiungi esercizio</string>
     <string name="add_set">Aggiungi serie</string>
     <string name="add_superset_exercise">Aggiungi esercizio alla superserie</string>
@@ -158,6 +159,7 @@
     <string name="done">Fatto</string>
     <string name="done_this_month">Completati (mese)</string>
     <string name="download_template">Modello</string>
+    <string name="drop_set">Drop set</string>
     <string name="edit">Modifica</string>
     <string name="edit_goal_and_plan">Modifica obiettivo e piano</string>
     <string name="edit_profile">Modifica profilo</string>
@@ -290,6 +292,7 @@
     <string name="muscle_hamstrings">Femorali</string>
     <string name="muscle_lats">Dorsali</string>
     <string name="muscle_lower_back">Zona lombare</string>
+    <string name="muscle_not_worked">Non coinvolto</string>
     <string name="muscle_obliques">Obliqui</string>
     <string name="muscle_quads">Quadricipiti</string>
     <string name="muscle_shoulders">Spalle</string>
@@ -384,6 +387,8 @@
     <string name="planned">Pianificato</string>
     <string name="play_video">Riproduci video</string>
     <string name="previous_reviews">Revisioni precedenti</string>
+    <string name="primary_muscle">Primario</string>
+    <string name="primary_muscles">Muscoli primari</string>
     <string name="profile">Profilo</string>
     <string name="profile_is_not_provided">Profilo non fornito.</string>
     <string name="profile_management">Gestione del profilo</string>
@@ -429,6 +434,8 @@
     <string name="search_templates">Cerca modelli</string>
     <string name="search_trainings">Cerca allenamenti</string>
     <string name="search_workouts">Cerca per nome, descrizione o tipo</string>
+    <string name="secondary_muscle">Secondario</string>
+    <string name="secondary_muscles">Muscoli secondari</string>
     <string name="select_appointment_type">Seleziona il tipo di appuntamento</string>
     <string name="select_clients">Selezionare i clienti</string>
     <string name="select_coaches">Selezionare l\'allenatore</string>
@@ -520,6 +527,7 @@
     <string name="workout_created_successfully">Esercizio aggiunto.</string>
     <string name="workout_deleted_successfully">Allenamento eliminato.</string>
     <string name="workout_duplicate">Esiste già un esercizio con lo stesso nome e descrizione.</string>
+    <string name="workout_not_available">Esercizio non disponibile</string>
     <string name="workout_types">Tipi di esercizio</string>
     <string name="workout_updated_successfully">Esercizio aggiornato con successo.</string>
     <string name="workouts">Allenamenti</string>

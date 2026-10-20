@@ -6,6 +6,7 @@
     <string name="actions">Upravljanje</string>
     <string name="active_package">Aktivan paket</string>
     <string name="active_straight_leg_raise">Aktivno podizanje ispružene noge</string>
+    <string name="add_drop_set">Dodaj drop set</string>
     <string name="add_exercise">Dodaj vježbu</string>
     <string name="add_set">Dodaj seriju</string>
     <string name="add_superset_exercise">Dodaj vježbu u super seriju</string>
@@ -158,6 +159,7 @@
     <string name="done">Gotovo</string>
     <string name="done_this_month">Odrađeno (mjesec)</string>
     <string name="download_template">Predložak</string>
+    <string name="drop_set">Drop set</string>
     <string name="edit">Uredi</string>
     <string name="edit_goal_and_plan">Uredi cilj i plan</string>
     <string name="edit_profile">Uredi profil</string>
@@ -290,6 +292,7 @@
     <string name="muscle_hamstrings">Stražnja loža</string>
     <string name="muscle_lats">Latisimus</string>
     <string name="muscle_lower_back">Donja leđa</string>
+    <string name="muscle_not_worked">Nije uključen</string>
     <string name="muscle_obliques">Kosi trbušni mišići</string>
     <string name="muscle_quads">Kvadricepsi</string>
     <string name="muscle_shoulders">Ramena</string>
@@ -384,6 +387,8 @@
     <string name="planned">Planiran</string>
     <string name="play_video">Pokreni video</string>
     <string name="previous_reviews">Prethodni osvrti</string>
+    <string name="primary_muscle">Primarni</string>
+    <string name="primary_muscles">Primarni mišići</string>
     <string name="profile">Profil</string>
     <string name="profile_is_not_provided">Profil nije unesen.</string>
     <string name="profile_management">Upravljanje profilom</string>
@@ -429,6 +434,8 @@
     <string name="search_templates">Pretraži predloške</string>
     <string name="search_trainings">Pretraži treninge</string>
     <string name="search_workouts">Pretraži po nazivu, opisu ili vrsti</string>
+    <string name="secondary_muscle">Sekundarni</string>
+    <string name="secondary_muscles">Sekundarni mišići</string>
     <string name="select_appointment_type">Odaberite vrstu termina</string>
     <string name="select_clients">Odaberite klijente</string>
     <string name="select_coaches">Odaberite trenera</string>
@@ -520,6 +527,7 @@
     <string name="workout_created_successfully">Vježba je dodana.</string>
     <string name="workout_deleted_successfully">Vježba je obrisana.</string>
     <string name="workout_duplicate">Vježba s istim nazivom i opisom već postoji.</string>
+    <string name="workout_not_available">Vježba nije dostupna</string>
     <string name="workout_types">Vrste vježbi</string>
     <string name="workout_updated_successfully">Vježba je uspješno ažurirana.</string>
     <string name="workouts">Treninzi</string>
