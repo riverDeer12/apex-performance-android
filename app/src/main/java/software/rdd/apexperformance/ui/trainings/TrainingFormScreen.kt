@@ -149,6 +149,13 @@ class TrainingFormScreen private constructor(
             .map { ExerciseDraft.from(it) }
     )
 
+    // What the form saves, as it was when it opened.
+    private val initialState = formState()
+
+    private fun formState(): List<Any?> = listOf(name, date, note, isCompleted, exercises)
+
+    override val hasUnsavedChanges: Boolean get() = formState() != initialState
+
     private var workouts by mutableStateOf<List<Workout>>(emptyList())
     private var isSaving by mutableStateOf(false)
     private var showDatePicker by mutableStateOf(false)

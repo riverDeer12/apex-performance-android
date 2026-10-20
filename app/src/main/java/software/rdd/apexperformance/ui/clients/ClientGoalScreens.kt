@@ -128,7 +128,8 @@ private fun GoalLabel(title: String, icon: ImageVector) {
 // Coach writes the client's goal and plan.
 class ClientGoalFormScreen(
     private val clientId: String,
-    goal: ClientGoal,
+    // Saved goal, to tell unsaved changes.
+    private val goal: ClientGoal,
     private val onSaved: ((ClientGoal) -> Unit)? = null
 ) : Screen() {
 
@@ -141,6 +142,12 @@ class ClientGoalFormScreen(
     private var notifyClient by mutableStateOf(true)
     private var isSaving by mutableStateOf(false)
     private var showDatePicker by mutableStateOf(false)
+
+    override val hasUnsavedChanges: Boolean
+        get() = goalText != goal.goal.orEmpty() || currentBlock != goal.currentBlock.orEmpty() ||
+            focus != goal.focus.orEmpty() || nextAssessment != goal.nextAssessment.orEmpty() ||
+            hasNextAssessmentDate != (goal.nextAssessmentDate != null) ||
+            (hasNextAssessmentDate && goal.nextAssessmentDate != null && nextAssessmentDate != goal.nextAssessmentDate)
 
     private val isValid: Boolean
         get() = goalText.length <= 1000 && currentBlock.length <= 1000 &&
@@ -417,6 +424,9 @@ class MonthlyReviewFormScreen(
     private var notifyClient by mutableStateOf(existingReview == null)
 
     private val trimmedContent: String get() = content.trim()
+
+    override val hasUnsavedChanges: Boolean
+        get() = trimmedContent != existingReview?.content.orEmpty().trim()
 
     private val years: List<Int>
         get() {

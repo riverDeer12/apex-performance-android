@@ -50,6 +50,14 @@ class FunctionalMovementScreenScreen(
     private var descriptionText by mutableStateOf(screen?.description.orEmpty())
     private var isSaving by mutableStateOf(false)
 
+    override val hasUnsavedChanges: Boolean
+        get() = listOf(
+            deepSquat to screen?.deepSquat, hurdleStep to screen?.hurdleStep, inLineLunge to screen?.inLineLunge,
+            activeStraightLegRaise to screen?.activeStraightLegRaise,
+            trunkStabilityPushUp to screen?.trunkStabilityPushUp, rotaryStability to screen?.rotaryStability,
+            shoulderMobility to screen?.shoulderMobility, xTest to screen?.xTest, descriptionText to screen?.description
+        ).any { (value, saved) -> value != saved.orEmpty() }
+
     private val isNew: Boolean get() = screen == null
 
     // API requires a result for every test, description is optional.

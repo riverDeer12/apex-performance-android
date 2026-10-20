@@ -56,6 +56,10 @@ class CreateClientScreen : Screen() {
     private var isLoadingCoaches by mutableStateOf(false)
     private var coaches by mutableStateOf<List<Coach>>(emptyList())
     private var selectedCoaches by mutableStateOf<List<String>>(emptyList())
+
+    override val hasUnsavedChanges: Boolean
+        get() = listOf(firstName, lastName, email, phone).any { it.isNotBlank() } ||
+            credits != null || selectedCoaches.isNotEmpty()
     private var hasLoaded = false
 
     // API always adds the coach who creates the client as

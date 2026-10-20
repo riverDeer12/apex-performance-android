@@ -63,6 +63,13 @@ class WorkoutEditScreen(
     private var workoutTypes by mutableStateOf<List<WorkoutType>>(emptyList())
     private var isSaving by mutableStateOf(false)
 
+    override val hasUnsavedChanges: Boolean
+        get() = nameHr != workout?.name?.value("HR").orEmpty() || nameEn != workout?.name?.value("EN").orEmpty() ||
+            descriptionHr != workout?.description?.value("HR").orEmpty() ||
+            descriptionEn != workout?.description?.value("EN").orEmpty() ||
+            videoUrl != workout?.videoUrl.orEmpty() || thumbnailUrl != workout?.thumbnailUrl.orEmpty() ||
+            selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet()
+
     private val isNew: Boolean get() = workout == null
 
     private val isVideoUrlValid: Boolean get() = YOUTUBE_PATTERN.containsMatchIn(videoUrl.trim())

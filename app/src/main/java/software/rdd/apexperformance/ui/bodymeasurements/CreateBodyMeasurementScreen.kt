@@ -47,6 +47,9 @@ class CreateBodyMeasurementScreen(
     private var notifyClient by mutableStateOf(true)
     private var errorMessage by mutableStateOf<String?>(null)
 
+    override val hasUnsavedChanges: Boolean
+        get() = form.hasChanges
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current

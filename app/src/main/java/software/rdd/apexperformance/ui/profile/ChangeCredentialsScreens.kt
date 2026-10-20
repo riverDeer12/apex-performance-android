@@ -53,6 +53,9 @@ class ChangePasswordScreen : Screen() {
     private var showNewPassword by mutableStateOf(false)
     private var showConfirmPassword by mutableStateOf(false)
 
+    override val hasUnsavedChanges: Boolean
+        get() = newPassword.isNotEmpty() || confirmPassword.isNotEmpty()
+
     private val canSave: Boolean
         get() = !isSaving && newPassword.isNotEmpty() && confirmPassword.isNotEmpty() && newPassword == confirmPassword
 
@@ -133,6 +136,9 @@ class ChangePasswordScreen : Screen() {
 class ChangeUsernameScreen : Screen() {
 
     private var newUsername by mutableStateOf("")
+
+    override val hasUnsavedChanges: Boolean
+        get() = newUsername.isNotBlank()
     private var isSaving by mutableStateOf(false)
     private var errorMessage by mutableStateOf<UiText?>(null)
 

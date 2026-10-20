@@ -143,6 +143,9 @@
     <string name="delete_workout_question">Obrisati ovu vježbu?</string>
     <string name="description">Opis</string>
     <string name="details">Detalji</string>
+    <string name="discard_changes">Odbaci promjene</string>
+    <string name="discard_changes_info">Promjene nisu spremljene i bit će izgubljene.</string>
+    <string name="discard_changes_question">Odbaciti promjene?</string>
     <string name="done">Gotovo</string>
     <string name="done_this_month">Odrađeno (mjesec)</string>
     <string name="download_template">Predložak</string>
@@ -225,6 +228,7 @@
     <string name="join_request">Pridruživanje terminu</string>
     <string name="join_requests">Zahtjevi za pridruživanje</string>
     <string name="keep">Zadrži</string>
+    <string name="keep_editing">Nastavi uređivati</string>
     <string name="key">Ključ</string>
     <string name="kg">kg</string>
     <string name="language">Jezik</string>

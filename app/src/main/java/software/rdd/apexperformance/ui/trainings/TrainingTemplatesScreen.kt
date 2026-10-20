@@ -400,6 +400,8 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
     private var isAssigning by mutableStateOf(false)
     private var showDatePicker by mutableStateOf(false)
 
+    override val hasUnsavedChanges: Boolean get() = selectedClients.isNotEmpty()
+
     private val filteredClients: List<Client>
         get() {
             val query = searchText.trim()

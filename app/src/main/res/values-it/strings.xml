@@ -143,6 +143,9 @@
     <string name="delete_workout_question">Eliminare questo allenamento?</string>
     <string name="description">Descrizione</string>
     <string name="details">Dettagli</string>
+    <string name="discard_changes">Annulla modifiche</string>
+    <string name="discard_changes_info">Le modifiche non sono state salvate e andranno perse.</string>
+    <string name="discard_changes_question">Annullare le modifiche?</string>
     <string name="done">Fatto</string>
     <string name="done_this_month">Completati (mese)</string>
     <string name="download_template">Modello</string>
@@ -225,6 +228,7 @@
     <string name="join_request">Richiesta di partecipazione</string>
     <string name="join_requests">Richieste di partecipazione</string>
     <string name="keep">Mantieni</string>
+    <string name="keep_editing">Continua a modificare</string>
     <string name="key">Chiave</string>
     <string name="kg">kg</string>
     <string name="language">Lingua</string>
