@@ -1,2 +1,5 @@
 Novosti:
 - Zvonce u gornjem desnom kutu početnog ekrana prikazuje sve primljene obavijesti, s brojem nepročitanih. Dodirom se obavijest otvara, a u izborniku se sve mogu označiti kao pročitane ili se pročitane mogu obrisati.
+- U chatu se može poslati slika ili GIF (tipka + pored polja za poruku). Slika se otvara preko cijelog ekrana.
+- Treneri mogu u chatu podijeliti vježbu, a klijent je otvara jednim dodirom.
+- Svaka vježba ispod opisa ima sliku tijela s označenim mišićima koje vježba zahvaća. Treneri mogu ispraviti mišiće u uređivanju vježbe.

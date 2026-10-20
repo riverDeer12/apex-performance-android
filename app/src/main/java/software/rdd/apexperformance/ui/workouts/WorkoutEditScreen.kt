@@ -45,6 +45,8 @@ import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.platform.LocalContext
 
 // Edits a workout, or creates a new one when no workout is given.
 class WorkoutEditScreen(
@@ -60,6 +62,7 @@ class WorkoutEditScreen(
     private var videoUrl by mutableStateOf(workout?.videoUrl.orEmpty())
     private var thumbnailUrl by mutableStateOf(workout?.thumbnailUrl.orEmpty())
     private var selectedWorkoutTypeIds by mutableStateOf(workout?.workoutTypes.orEmpty().map { it.id }.toSet())
+    private var muscles by mutableStateOf(workout?.muscles.orEmpty().toSet())
     private var workoutTypes by mutableStateOf<List<WorkoutType>>(emptyList())
     private var isSaving by mutableStateOf(false)
 
@@ -68,7 +71,8 @@ class WorkoutEditScreen(
             descriptionHr != workout?.description?.value("HR").orEmpty() ||
             descriptionEn != workout?.description?.value("EN").orEmpty() ||
             videoUrl != workout?.videoUrl.orEmpty() || thumbnailUrl != workout?.thumbnailUrl.orEmpty() ||
-            selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet()
+            selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet() ||
+            muscles != workout?.muscles.orEmpty().toSet()
 
     private val isNew: Boolean get() = workout == null
 
@@ -134,6 +138,37 @@ class WorkoutEditScreen(
                 footer = { Text(stringResource(R.string.thumbnail_url_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
             ) {
                 Field(thumbnailUrl, { thumbnailUrl = it }, stringResource(R.string.thumbnail_url), keyboardType = KeyboardType.Uri)
+            }
+
+            FormSection(
+                header = stringResource(R.string.worked_muscles),
+                footer = if (workout == null) {
+                    { Text(stringResource(R.string.muscles_guess_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
+                } else null
+            ) {
+                val context = LocalContext.current
+                MuscleMap(
+                    muscles,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(vertical = 8.dp)
+                )
+                WorkoutMuscle.all.forEach { muscle ->
+                    Divider()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { muscles = if (muscle in muscles) muscles - muscle else muscles + muscle }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(WorkoutMuscle.name(context, muscle), style = ApexText.body, modifier = Modifier.weight(1f))
+                        if (muscle in muscles) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
+                        }
+                    }
+                }
             }
 
             FormSection(header = stringResource(R.string.workout_types)) {
@@ -220,7 +255,9 @@ class WorkoutEditScreen(
                 // An empty thumbnail is generated from the YouTube video on the API.
                 thumbnailUrl = thumbnailUrl.trim(),
                 videoUrl = videoUrl.trim(),
-                workoutTypes = selectedWorkoutTypeIds.toList()
+                workoutTypes = selectedWorkoutTypeIds.toList(),
+                // In the API's order, which the body map also uses.
+                muscles = if (workout == null && muscles.isEmpty()) null else WorkoutMuscle.all.filter { it in muscles }
             )
             val saved: Workout = if (workout == null) {
                 ApiClient.request("workouts", HttpMethod.POST, request)
