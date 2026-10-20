@@ -33,6 +33,9 @@ object ApexColors {
 
     // ApexMainColor: deep blue, white in dark mode.
     val main get() = pick(Color(0xFF0034C4), Color.White)
+    // Main color as in light mode; for colors that must stay blue in dark
+    // mode too, like the worked muscles on the body map.
+    val mainBlue = Color(0xFF0034C4)
 
     // ApexAccent: sky blue of buttons, progress and highlights.
     val accent get() = pick(Color(0xFF3A98E4), Color(0xFF5CB5F5))

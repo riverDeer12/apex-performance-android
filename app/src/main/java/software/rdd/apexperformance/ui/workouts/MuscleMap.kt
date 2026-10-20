@@ -73,7 +73,8 @@ const val SECONDARY_MUSCLE_ALPHA = 0.45f
 // Like MuscleMapView on iOS.
 @Composable
 fun MuscleMap(primary: Collection<String>, secondary: Collection<String> = emptyList(), modifier: Modifier = Modifier) {
-    val main = ApexColors.main
+    // The main color is white in dark mode, the muscles stay blue.
+    val main = ApexColors.mainBlue
     val picture = ImageBitmap.imageResource(R.drawable.body_map)
 
     Canvas(modifier = modifier.aspectRatio(BodyMapPaths.WIDTH / BodyMapPaths.HEIGHT)) {
@@ -111,13 +112,13 @@ fun MuscleLegend(primary: List<String>, secondary: List<String>, modifier: Modif
     val context = LocalContext.current
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (primary.isNotEmpty()) {
-            MuscleLegendRow(stringResource(R.string.primary_muscles), primary.map { WorkoutMuscle.name(context, it) }, ApexColors.main)
+            MuscleLegendRow(stringResource(R.string.primary_muscles), primary.map { WorkoutMuscle.name(context, it) }, ApexColors.mainBlue)
         }
         if (secondary.isNotEmpty()) {
             MuscleLegendRow(
                 stringResource(R.string.secondary_muscles),
                 secondary.map { WorkoutMuscle.name(context, it) },
-                ApexColors.main.copy(alpha = SECONDARY_MUSCLE_ALPHA)
+                ApexColors.mainBlue.copy(alpha = SECONDARY_MUSCLE_ALPHA)
             )
         }
     }
