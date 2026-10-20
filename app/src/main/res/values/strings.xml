@@ -101,6 +101,7 @@
     <string name="chat_you">You</string>
     <string name="chest">Chest</string>
     <string name="clear">Clear</string>
+    <string name="clear_read_notifications">Clear read</string>
     <string name="client">Client</string>
     <string name="client_created_successfully">Client created successfully</string>
     <string name="clients">Clients</string>
@@ -251,6 +252,7 @@
     <string name="manage_appointment_details">Manage appointment details</string>
     <string name="manage_client_requests">Manage appointment requests</string>
     <string name="manage_your_clients">Manage your clients</string>
+    <string name="mark_all_read">Mark all as read</string>
     <string name="mark_as_completed">Mark as completed</string>
     <string name="mark_as_planned">Mark as planned</string>
     <string name="max_weight">Max weight</string>
@@ -310,6 +312,7 @@
     <string name="no_goal_and_plan">Goal and plan aren\'t written yet.</string>
     <string name="no_measurements">No Measurements.</string>
     <string name="no_monthly_reviews">No monthly reviews yet.</string>
+    <string name="no_notifications">No notifications.</string>
     <string name="no_personal_records">No records yet. They appear when trainings with weights are marked as completed.</string>
     <string name="no_requests">No new requests.</string>
     <string name="no_sets_logged">No sets logged.</string>
@@ -327,6 +330,8 @@
     <string name="note">Note</string>
     <string name="notes">Notes</string>
     <string name="notification_channel_name">Notifications</string>
+    <string name="notification_options">Notification options</string>
+    <string name="notifications">Notifications</string>
     <string name="notify_client">Notify the client</string>
     <string name="notify_coach_about_cancelation">Notify coach about cancelation.</string>
     <string name="other">Other</string>
@@ -466,6 +471,7 @@
     <string name="trunk_stability_push_up">Trunk Stability Push-Up</string>
     <string name="unknown_coach">Unknown Coach</string>
     <string name="unknown_value">Unknown value</string>
+    <string name="unread">Unread</string>
     <string name="upcoming_appointments">Upcoming appointments</string>
     <string name="upcoming_past_sessions">List of all appointments</string>
     <string name="update">Update</string>

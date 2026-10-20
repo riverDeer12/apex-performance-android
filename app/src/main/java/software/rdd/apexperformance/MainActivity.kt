@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.util.NotificationRouter
+import software.rdd.apexperformance.ui.home.NotificationInbox
 import software.rdd.apexperformance.ui.AppRoot
 
 class MainActivity : ComponentActivity() {
@@ -44,6 +45,8 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // A token can expire while the app is in the background.
         AuthManager.checkSession()
+        // Notifications may have come while the app was in the background.
+        NotificationInbox.refreshCountLater()
     }
 
     override fun onNewIntent(intent: Intent) {

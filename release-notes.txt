@@ -1,2 +1,2 @@
 Novosti:
-- Prije zatvaranja obrasca s nespremljenim promjenama (nova ili izmijenjena mjerenja, trening, cilj, osvrt, vježba, profil i drugi) aplikacija pita želiš li ih odbaciti.
+- Zvonce u gornjem desnom kutu početnog ekrana prikazuje sve primljene obavijesti, s brojem nepročitanih. Dodirom se obavijest otvara, a u izborniku se sve mogu označiti kao pročitane ili se pročitane mogu obrisati.

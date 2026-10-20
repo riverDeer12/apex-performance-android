@@ -62,6 +62,7 @@ import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
 import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
 import software.rdd.apexperformance.ui.chat.ChatFloatingButton
+import software.rdd.apexperformance.ui.home.NotificationInbox
 import software.rdd.apexperformance.ui.chat.ChatListScreen
 import software.rdd.apexperformance.ui.clients.ClientsScreen
 import software.rdd.apexperformance.ui.components.ProfilePictureStore
@@ -259,7 +260,10 @@ private fun HomeView() {
     // unread badge fresh while logged in.
     androidx.compose.runtime.DisposableEffect(state) {
         if (state.canChat) ChatStore.start()
-        onDispose { ChatStore.stop() }
+        onDispose {
+            ChatStore.stop()
+            NotificationInbox.reset()
+        }
     }
 
     // Small profile picture on the profile tab.
