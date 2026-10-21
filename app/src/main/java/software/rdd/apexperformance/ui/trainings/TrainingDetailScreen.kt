@@ -372,7 +372,7 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                 HorizontalDivider(thickness = 0.5.dp, color = ApexColors.border)
                 TrainingSetRow(
                     // Drop set of the set above, done right after it.
-                    number?.toString() ?: "↳ ${stringResource(R.string.drop_set)}",
+                    number?.toString() ?: "↳ ${stringResource(R.string.drop_set_short)}",
                     set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
                     set.weight?.let(::formatWeight) ?: "—",
                     isDropSet = number == null

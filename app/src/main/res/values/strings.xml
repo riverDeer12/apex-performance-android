@@ -161,6 +161,7 @@
     <string name="done_this_month">Done (month)</string>
     <string name="download_template">Template</string>
     <string name="drop_set">Drop set</string>
+    <string name="drop_set_short">Drop</string>
     <string name="edit">Edit</string>
     <string name="edit_goal_and_plan">Edit goal and plan</string>
     <string name="edit_profile">Edit profile</string>
