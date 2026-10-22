@@ -410,7 +410,9 @@ data class Workout(
     // Codes of the muscles it works (WorkoutMuscle): primary ones doing
     // most of the work and secondary ones helping.
     val muscles: List<String> = emptyList(),
-    val secondaryMuscles: List<String> = emptyList()
+    val secondaryMuscles: List<String> = emptyList(),
+    // Done for a time (e.g. plank): sets record a duration instead of repetitions.
+    val isTimed: Boolean = false
 ) {
     // Every translation is searched, so the query language does not matter.
     fun matches(query: String): Boolean {
@@ -446,7 +448,8 @@ data class UpdateWorkoutRequest(
     val workoutTypes: List<String>,
     // Null for a new workout lets the API guess them from the name.
     val muscles: List<String>? = null,
-    val secondaryMuscles: List<String>? = null
+    val secondaryMuscles: List<String>? = null,
+    val isTimed: Boolean? = null
 )
 
 /** Mirrors the API's LocalizedProperty, translations keyed by language code (HR, EN, IT). */

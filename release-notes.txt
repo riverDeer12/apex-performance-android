@@ -1,2 +1,4 @@
 Novosti:
-- Oznaka drop seta u detaljima treninga više se ne preklapa s brojem ponavljanja.
+- Vježbe na vrijeme (npr. plank): u treningu se za njih unosi trajanje (min:s) umjesto ponavljanja, a trajanje se prikazuje u detaljima treninga (npr. 1:30 · 10 kg).
+- Treneri u uređivanju vježbe uključuju "Vježba na vrijeme".
+- Osobni rekordi prikazuju najduže trajanje za vježbe na vrijeme.

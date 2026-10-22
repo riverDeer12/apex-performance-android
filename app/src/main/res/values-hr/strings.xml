@@ -259,6 +259,7 @@
     <string name="login">Prijava</string>
     <string name="logout">Odjava</string>
     <string name="logout_question">Želite li se odjaviti?</string>
+    <string name="longest_duration">Najduže trajanje</string>
     <string name="manage_appointment_details">Upravljaj detaljima termina</string>
     <string name="manage_client_requests">Upravljanje zahtjevima za termine</string>
     <string name="manage_your_clients">Upravljaj klijentima</string>
@@ -485,7 +486,10 @@
     <string name="thigh">Bedro</string>
     <string name="thumbnail_url">Poveznica na sličicu</string>
     <string name="thumbnail_url_hint">Ostavite prazno za sličicu s YouTube videa.</string>
+    <string name="time">Vrijeme</string>
     <string name="time_slot">Vrijeme termina</string>
+    <string name="timed_workout">Vježba na vrijeme</string>
+    <string name="timed_workout_hint">Setovi bilježe trajanje (npr. plank) umjesto ponavljanja.</string>
     <string name="to_book">Za rezervaciju</string>
     <string name="total_reps_per_training">Ukupno ponavljanja po treningu</string>
     <string name="training_actions">Radnje treninga</string>

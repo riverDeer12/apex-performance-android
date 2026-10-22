@@ -29,6 +29,7 @@ import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.SettingsRow
@@ -173,6 +174,8 @@ internal fun formatWeight(weight: Double): String =
 internal fun setDescription(set: Training.ExerciseSet): String {
     val reps = set.reps?.trim()?.takeIf { it.isNotEmpty() }
     val weight = set.weight?.let { "${formatWeight(it)} kg" }
+    // A timed set, e.g. "1:30 · 10 kg".
+    set.durationSeconds?.let { return listOfNotNull(setDuration(it), weight).joinToString(" · ") }
     return when {
         reps != null && weight != null -> "$reps × $weight"
         reps != null -> reps

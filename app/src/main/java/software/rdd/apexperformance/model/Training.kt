@@ -46,7 +46,9 @@ data class Training(
         val reps: String? = null,
         val weight: Double? = null,
         // Done right after the previous set with less weight (drop set).
-        val isDropSet: Boolean = false
+        val isDropSet: Boolean = false,
+        // How long the set lasted, for workouts done for a time (e.g. plank).
+        val durationSeconds: Int? = null
     )
 
     // Marks the training as completed or planned (staff only).
@@ -104,6 +106,14 @@ fun setNumbers(isDropSet: List<Boolean>): List<Int?> {
 val List<Training.ExerciseSet>.mainSetCount: Int
     get() = setNumbers.count { it != null }
 
+// Duration of a set as minutes and seconds, e.g. "1:30" or "1:02:30".
+fun setDuration(seconds: Int): String {
+    val hours = seconds / 3600
+    val minutes = seconds % 3600 / 60
+    val rest = seconds % 60
+    return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, rest) else "%d:%02d".format(minutes, rest)
+}
+
 object SupersetLabels {
     // Labels of exercises in order: "1.", "2." for single exercises and
     // "3a", "3b" for exercises done together in a superset, like the web.
@@ -154,5 +164,10 @@ data class SaveTrainingRequest(
     )
 
     @Serializable
-    data class ExerciseSet(val reps: String?, val weight: Double?, val isDropSet: Boolean = false)
+    data class ExerciseSet(
+        val reps: String?,
+        val weight: Double?,
+        val isDropSet: Boolean = false,
+        val durationSeconds: Int? = null
+    )
 }

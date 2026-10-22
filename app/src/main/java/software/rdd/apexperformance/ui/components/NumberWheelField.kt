@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import software.rdd.apexperformance.R
+import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.text.DecimalFormatSymbols
@@ -187,6 +188,116 @@ private fun NumberWheelSheet(
                 if (unit != null) {
                     Text(unit, style = ApexText.headline, color = ApexColors.secondaryLabel, modifier = Modifier.padding(start = 12.dp))
                 }
+            }
+        }
+    }
+}
+
+// Duration shown like a field ("1:30"); tapping it opens minutes and
+// seconds wheels, e.g. how long a plank lasted. Like DurationWheelField on iOS.
+@Composable
+fun DurationWheelField(
+    seconds: Int?,
+    onSecondsChange: (Int?) -> Unit,
+    modifier: Modifier = Modifier,
+    // Value the wheels start at when there is no value yet.
+    defaultSeconds: Int = 60,
+    title: String? = null
+) {
+    var isPresented by remember { mutableStateOf(false) }
+
+    Text(
+        seconds?.let { setDuration(it) } ?: "—",
+        style = ApexText.body,
+        color = if (seconds == null) ApexColors.secondaryLabel else ApexColors.label,
+        maxLines = 1,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .widthIn(min = 44.dp)
+            .clip(RoundedCornerShape(7.dp))
+            .background(ApexColors.label.copy(alpha = 0.06f))
+            .clickable { isPresented = true }
+            .padding(horizontal = 8.dp, vertical = 5.dp)
+    )
+
+    if (isPresented) {
+        DurationWheelSheet(
+            seconds = seconds ?: defaultSeconds,
+            title = title,
+            onDone = {
+                onSecondsChange(it)
+                isPresented = false
+            },
+            onDismiss = { isPresented = false }
+        )
+    }
+}
+
+// Bottom sheet with minutes (0–59) and seconds (in steps of 5) wheels.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DurationWheelSheet(
+    seconds: Int,
+    title: String?,
+    onDone: (Int?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val start = seconds.coerceIn(0, 59 * 60 + 55)
+    var minutes by remember { mutableIntStateOf(start / 60) }
+    // Rounded down to the wheel's steps of 5 seconds.
+    var secondsIndex by remember { mutableIntStateOf(start % 60 / 5) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = ApexColors.card
+    ) {
+        Column(modifier = Modifier.navigationBarsPadding().padding(bottom = 16.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = { onDone(null) }) {
+                    Text(stringResource(R.string.clear), color = ApexColors.red)
+                }
+                Text(
+                    title.orEmpty(),
+                    style = ApexText.headline,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(onClick = {
+                    val total = minutes * 60 + secondsIndex * 5
+                    // The API takes 1 second at least.
+                    onDone(if (total > 0) total else null)
+                }) {
+                    Text(stringResource(R.string.done), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                WheelPicker(
+                    items = (0 until 60).map { it.toString() },
+                    selectedIndex = minutes,
+                    onSelect = { minutes = it },
+                    modifier = Modifier.weight(1f)
+                )
+                Text("min", style = ApexText.headline, color = ApexColors.secondaryLabel, modifier = Modifier.padding(horizontal = 12.dp))
+                WheelPicker(
+                    items = (0 until 12).map { "%02d".format(it * 5) },
+                    selectedIndex = secondsIndex,
+                    onSelect = { secondsIndex = it },
+                    modifier = Modifier.weight(1f)
+                )
+                Text("s", style = ApexText.headline, color = ApexColors.secondaryLabel, modifier = Modifier.padding(start = 12.dp))
             }
         }
     }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Functions
 import androidx.compose.material.icons.outlined.Scale
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,6 +42,7 @@ import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.model.ExerciseRecords
 import software.rdd.apexperformance.model.PersonalRecord
+import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
@@ -164,14 +166,20 @@ class PersonalRecordsScreen(
                     .border(1.dp, ApexColors.border, RoundedCornerShape(8.dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RecordStat(stringResource(R.string.max_weight), exercise.maxWeight, Modifier.weight(1f))
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                        .background(ApexColors.border)
-                )
-                RecordStat(stringResource(R.string.estimated_one_rep_max), exercise.oneRepMax, Modifier.weight(1f))
+                val longestDuration = exercise.longestDuration
+                if (longestDuration != null) {
+                    // A workout done for a time has no weight records.
+                    RecordStat(stringResource(R.string.longest_duration), longestDuration, Modifier.weight(1f))
+                } else {
+                    RecordStat(stringResource(R.string.max_weight), exercise.maxWeight, Modifier.weight(1f))
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .fillMaxHeight()
+                            .background(ApexColors.border)
+                    )
+                    RecordStat(stringResource(R.string.estimated_one_rep_max), exercise.oneRepMax, Modifier.weight(1f))
+                }
             }
 
             ApexLabel(stringResource(R.string.last_record, DateFormats.date(exercise.lastAchievedAt)))
@@ -186,7 +194,7 @@ class PersonalRecordsScreen(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                record?.let { PersonalRecordFormat.kilograms(it.value) } ?: "—",
+                record?.let { PersonalRecordFormat.value(it) } ?: "—",
                 style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
                 maxLines = 1
             )
@@ -201,6 +209,12 @@ class PersonalRecordsScreen(
             if (record != null && record.isMaxWeight && reps != null) {
                 Text(
                     "× ${PersonalRecordFormat.number(reps)}",
+                    style = ApexText.caption2,
+                    color = ApexColors.secondaryLabel
+                )
+            } else if (record != null && record.isLongestDuration && record.weight > 0) {
+                Text(
+                    "· ${PersonalRecordFormat.kilograms(record.weight)}",
                     style = ApexText.caption2,
                     color = ApexColors.secondaryLabel
                 )
@@ -252,26 +266,40 @@ class PersonalRecordHistoryScreen(private val exercise: ExerciseRecords) : Scree
         ) {
             Box(modifier = Modifier.width(24.dp), contentAlignment = Alignment.Center) {
                 Icon(
-                    if (record.isMaxWeight) Icons.Outlined.Scale else Icons.Outlined.Functions,
+                    when {
+                        record.isLongestDuration -> Icons.Outlined.Timer
+                        record.isMaxWeight -> Icons.Outlined.Scale
+                        else -> Icons.Outlined.Functions
+                    },
                     contentDescription = null,
                     tint = ApexColors.accent
                 )
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    stringResource(if (record.isMaxWeight) R.string.max_weight else R.string.estimated_one_rep_max),
+                    stringResource(
+                        when {
+                            record.isLongestDuration -> R.string.longest_duration
+                            record.isMaxWeight -> R.string.max_weight
+                            else -> R.string.estimated_one_rep_max
+                        }
+                    ),
                     style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold)
                 )
                 Text(DateFormats.date(record.achievedAt), style = ApexText.caption, color = ApexColors.secondaryLabel)
             }
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    PersonalRecordFormat.kilograms(record.value),
+                    PersonalRecordFormat.value(record),
                     style = ApexText.subheadline.copy(fontWeight = FontWeight.Bold)
                 )
                 // The set the record comes from.
                 Text(
-                    PersonalRecordFormat.set(record.weight, record.reps),
+                    if (record.isLongestDuration) {
+                        if (record.weight > 0) PersonalRecordFormat.kilograms(record.weight) else "—"
+                    } else {
+                        PersonalRecordFormat.set(record.weight, record.reps)
+                    },
                     style = ApexText.caption,
                     color = ApexColors.secondaryLabel
                 )
@@ -289,6 +317,10 @@ internal object PersonalRecordFormat {
         }.format(value)
 
     fun kilograms(value: Double): String = "${number(value)} kg"
+
+    // Kilograms, or minutes and seconds for the longest duration.
+    fun value(record: PersonalRecord): String =
+        if (record.isLongestDuration) setDuration(record.value.toInt()) else kilograms(record.value)
 
     // "10 × 40 kg" or "40 kg".
     fun set(weight: Double, reps: Double?): String =

@@ -79,7 +79,7 @@ data class SaveTrainingTemplateRequest(
                         note = exercise.note,
                         sets = exercise.sets
                             .sortedBy { it.order }
-                            .map { SaveTrainingRequest.ExerciseSet(it.reps, it.weight, it.isDropSet) },
+                            .map { SaveTrainingRequest.ExerciseSet(it.reps, it.weight, it.isDropSet, it.durationSeconds) },
                         isSupersetWithPrevious = exercise.isSupersetWithPrevious
                     )
                 }

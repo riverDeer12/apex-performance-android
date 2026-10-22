@@ -367,6 +367,12 @@ fun ToggleRow(title: String, checked: Boolean, enabled: Boolean = true, onChecke
 // is being saved (the API's "notifyClient"), like NotifyClientToggle on iOS.
 @Composable
 fun NotifyClientRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    ToggleRow(stringResource(R.string.notify_client), checked, onCheckedChange)
+}
+
+// Title with a switch; the whole row toggles it.
+@Composable
+fun ToggleRow(title: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -374,7 +380,7 @@ fun NotifyClientRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(stringResource(R.string.notify_client), style = ApexText.body, modifier = Modifier.weight(1f))
+        Text(title, style = ApexText.body, modifier = Modifier.weight(1f))
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
