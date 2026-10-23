@@ -1,6 +1,7 @@
 package software.rdd.apexperformance
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import software.rdd.apexperformance.core.auth.AuthManager
+import software.rdd.apexperformance.core.util.AppLanguage
 import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.ui.home.CooperationRulesGate
 import software.rdd.apexperformance.ui.home.NotificationInbox
@@ -33,6 +35,11 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) handleNotificationTap(intent)
 
         setContent { AppRoot() }
+    }
+
+    // The language picked in the app (AppLanguage).
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
     }
 
     // Light or dark status and navigation bar icons for the app's appearance.

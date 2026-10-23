@@ -1,9 +1,5 @@
 package software.rdd.apexperformance.ui.profile
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +46,7 @@ import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.PushTokenService
+import software.rdd.apexperformance.core.util.AppLanguage
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.model.ClientPlan
 import software.rdd.apexperformance.model.Profile
@@ -136,24 +133,17 @@ class UserProfileScreen : Screen() {
                     AppearanceSwitcher()
                     RowDivider()
 
-                    // Android 13+ sets the app's language in its own settings page.
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val context = LocalContext.current
+                    LanguageMenu { open ->
                         SettingsRow(
                             icon = Icons.Outlined.Language,
                             iconTint = ApexColors.main,
                             title = stringResource(R.string.language),
                             subtitle = currentLanguageName(),
                             showChevron = true,
-                            onClick = {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
-                                        .setData(Uri.fromParts("package", context.packageName, null))
-                                )
-                            }
+                            onClick = open
                         )
-                        RowDivider()
                     }
+                    RowDivider()
 
                     SettingsRow(
                         icon = Icons.AutoMirrored.Outlined.Logout,
@@ -311,10 +301,9 @@ class UserProfileScreen : Screen() {
     }
 }
 
-// Language the app runs in, from the resources Android picked.
+// Picked language, or "Device language" when the app follows the device.
 @Composable
-private fun currentLanguageName(): String = when (stringResource(R.string.app_language_code)) {
-    "hr" -> stringResource(R.string.croatian)
-    "it" -> stringResource(R.string.italian)
-    else -> stringResource(R.string.english)
+private fun currentLanguageName(): String {
+    val language = AppLanguage.selected(LocalContext.current)
+    return if (language == AppLanguage.SYSTEM) stringResource(R.string.device_language) else language.nativeName
 }

@@ -154,6 +154,7 @@
     <string name="delete_workout_question">Delete this workout?</string>
     <string name="description">Description</string>
     <string name="details">Details</string>
+    <string name="device_language">Device language</string>
     <string name="discard_changes">Discard changes</string>
     <string name="discard_changes_info">Your changes haven\'t been saved and will be lost.</string>
     <string name="discard_changes_question">Discard changes?</string>

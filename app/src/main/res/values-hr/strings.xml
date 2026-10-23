@@ -153,6 +153,7 @@
     <string name="delete_workout_question">Obrisati ovu vježbu?</string>
     <string name="description">Opis</string>
     <string name="details">Detalji</string>
+    <string name="device_language">Jezik uređaja</string>
     <string name="discard_changes">Odbaci promjene</string>
     <string name="discard_changes_info">Promjene nisu spremljene i bit će izgubljene.</string>
     <string name="discard_changes_question">Odbaciti promjene?</string>

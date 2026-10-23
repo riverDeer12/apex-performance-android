@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -65,6 +66,7 @@ import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.PushTokenService
 import software.rdd.apexperformance.ui.components.PlainTextField
+import software.rdd.apexperformance.ui.profile.LanguageMenu
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
@@ -229,6 +231,26 @@ fun LoginScreen() {
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
+            }
+        }
+
+        // Language can be changed before logging in, like on iOS.
+        LanguageMenu(modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)) { open ->
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(ApexColors.background)
+                    .clickable(onClick = open)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Outlined.Language, contentDescription = stringResource(R.string.language), tint = ApexColors.main, modifier = Modifier.size(18.dp))
+                Text(
+                    stringResource(R.string.app_language_code).uppercase(),
+                    style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                    color = ApexColors.main
+                )
             }
         }
     }
