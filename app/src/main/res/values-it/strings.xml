@@ -259,6 +259,7 @@
     <string name="login">Accedi</string>
     <string name="logout">Esci</string>
     <string name="logout_question">Vuoi uscire?</string>
+    <string name="longest_duration">Durata massima</string>
     <string name="manage_appointment_details">Gestisci i dettagli dell’appuntamento</string>
     <string name="manage_client_requests">Gestisci richieste client</string>
     <string name="manage_your_clients">Gestisci i tuoi clienti</string>
@@ -485,7 +486,10 @@
     <string name="thigh">Coscia</string>
     <string name="thumbnail_url">Link della miniatura</string>
     <string name="thumbnail_url_hint">Lascia vuoto per usare la miniatura del video YouTube.</string>
+    <string name="time">Tempo</string>
     <string name="time_slot">Fascia oraria</string>
+    <string name="timed_workout">Esercizio a tempo</string>
+    <string name="timed_workout_hint">Le serie registrano la durata (es. plank) invece delle ripetizioni.</string>
     <string name="to_book">Da prenotare</string>
     <string name="total_reps_per_training">Ripetizioni totali per allenamento</string>
     <string name="training_actions">Azioni allenamento</string>

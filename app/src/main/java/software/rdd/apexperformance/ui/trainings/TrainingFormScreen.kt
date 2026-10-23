@@ -85,6 +85,7 @@ import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.MenuPicker
 import software.rdd.apexperformance.ui.components.NotifyClientRow
+import software.rdd.apexperformance.ui.components.DurationWheelField
 import software.rdd.apexperformance.ui.components.NumberWheelField
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SaveAction
@@ -400,6 +401,8 @@ class TrainingFormScreen private constructor(
     @Composable
     private fun ExerciseSection(index: Int, exercise: ExerciseDraft, label: String, navigator: Navigator) {
         val previous = previousSets(exercise.workoutId)
+        // Done for a time (e.g. plank): a duration instead of repetitions.
+        val isTimed = workouts.firstOrNull { it.id == exercise.workoutId }?.isTimed == true
 
         Section(header = { ExerciseHeader(index, exercise, label) }) {
             // Exercise picker.
@@ -433,13 +436,13 @@ class TrainingFormScreen private constructor(
 
             if (exercise.sets.isNotEmpty()) {
                 Divider()
-                SetsHeader(previous)
+                SetsHeader(previous, isTimed)
             }
 
             val setNumbers = setNumbers(exercise.sets.map { it.isDropSet })
             exercise.sets.forEachIndexed { setIndex, set ->
                 key(set.id) {
-                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous)
+                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous, isTimed)
                 }
             }
 
@@ -568,7 +571,7 @@ class TrainingFormScreen private constructor(
 
     // Column titles of the sets, with the previous training's date.
     @Composable
-    private fun SetsHeader(previous: PreviousSets?) {
+    private fun SetsHeader(previous: PreviousSets?, isTimed: Boolean) {
         val style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
         Row(
             modifier = Modifier
@@ -578,7 +581,12 @@ class TrainingFormScreen private constructor(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("#", style = style, modifier = Modifier.width(22.dp))
-            Text(stringResource(R.string.reps).uppercase(), style = style, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+            Text(
+                stringResource(if (isTimed) R.string.time else R.string.reps).uppercase(),
+                style = style,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
             Text("×", style = style.copy(color = Color.Transparent))
             Text(stringResource(R.string.kg).uppercase(), style = style, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
             if (previous != null) {
@@ -598,7 +606,7 @@ class TrainingFormScreen private constructor(
     // to the left to delete it.
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    private fun SetRow(exerciseId: String, setIndex: Int, number: Int?, set: SetDraft, previous: PreviousSets?) {
+    private fun SetRow(exerciseId: String, setIndex: Int, number: Int?, set: SetDraft, previous: PreviousSets?, isTimed: Boolean) {
         val dismissState = rememberSwipeToDismissBoxState(
             confirmValueChange = { value ->
                 when (value) {
@@ -662,17 +670,26 @@ class TrainingFormScreen private constructor(
                             .size(18.dp)
                     )
                 }
-                NumberWheelField(
-                    value = set.repsValue,
-                    onValueChange = { value -> updateSet(exerciseId, set.id) { it.withRepsValue(value) } },
-                    range = 1..100,
-                    defaultValue = 10.0,
-                    allowsEmpty = true,
-                    title = stringResource(R.string.reps),
-                    // Reps written as text earlier (e.g. "8-10") are kept as they are.
-                    displayText = if (set.repsValue == null && set.reps.isNotEmpty()) set.reps else null,
-                    modifier = Modifier.weight(1f)
-                )
+                if (isTimed) {
+                    DurationWheelField(
+                        seconds = set.durationSeconds,
+                        onSecondsChange = { value -> updateSet(exerciseId, set.id) { it.copy(durationSeconds = value) } },
+                        title = stringResource(R.string.time),
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    NumberWheelField(
+                        value = set.repsValue,
+                        onValueChange = { value -> updateSet(exerciseId, set.id) { it.withRepsValue(value) } },
+                        range = 1..100,
+                        defaultValue = 10.0,
+                        allowsEmpty = true,
+                        title = stringResource(R.string.reps),
+                        // Reps written as text earlier (e.g. "8-10") are kept as they are.
+                        displayText = if (set.repsValue == null && set.reps.isNotEmpty()) set.reps else null,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
                 Text("×", style = ApexText.body, color = ApexColors.secondaryLabel)
                 NumberWheelField(
                     value = set.weightValue,
@@ -912,7 +929,13 @@ private data class ExerciseDraft(
     fun addingSet(): ExerciseDraft {
         if (sets.size >= MAX_SETS) return this
         val last = sets.lastOrNull { !it.isDropSet } ?: sets.lastOrNull()
-        return copy(sets = sets + SetDraft(reps = last?.reps.orEmpty(), weight = last?.weight.orEmpty()))
+        return copy(
+            sets = sets + SetDraft(
+                reps = last?.reps.orEmpty(),
+                weight = last?.weight.orEmpty(),
+                durationSeconds = last?.durationSeconds
+            )
+        )
     }
 
     // Adds a drop set after the set at the index and its drop sets:
@@ -922,7 +945,7 @@ private data class ExerciseDraft(
         var end = after + 1
         while (end < sets.size && sets[end].isDropSet) end += 1
         val previous = sets[end - 1]
-        val drop = SetDraft(reps = previous.reps, isDropSet = true)
+        val drop = SetDraft(reps = previous.reps, isDropSet = true, durationSeconds = previous.durationSeconds)
             // Rounded to half a kilogram, like the weight wheel.
             .withWeightValue(previous.weightValue?.let { Math.round(it * 0.8 * 2) / 2.0 })
         return copy(sets = sets.toMutableList().apply { add(end, drop) })
@@ -964,7 +987,9 @@ private data class SetDraft(
     val reps: String = "",
     val weight: String = "",
     // Done right after the previous set with less weight.
-    val isDropSet: Boolean = false
+    val isDropSet: Boolean = false,
+    // How long the set lasted, for timed workouts (e.g. plank).
+    val durationSeconds: Int? = null
 ) {
     private val trimmedReps: String get() = reps.trim()
 
@@ -997,13 +1022,19 @@ private data class SetDraft(
     val request: SaveTrainingRequest.ExerciseSet?
         get() {
             val reps = trimmedReps
-            if (reps.isEmpty() && parsedWeight == null) return null
-            return SaveTrainingRequest.ExerciseSet(reps = reps.ifEmpty { null }, weight = parsedWeight, isDropSet = isDropSet)
+            if (reps.isEmpty() && parsedWeight == null && durationSeconds == null) return null
+            return SaveTrainingRequest.ExerciseSet(
+                reps = reps.ifEmpty { null },
+                weight = parsedWeight,
+                isDropSet = isDropSet,
+                durationSeconds = durationSeconds
+            )
         }
 
     companion object {
         fun from(set: Training.ExerciseSet) = SetDraft(
             isDropSet = set.isDropSet,
+            durationSeconds = set.durationSeconds,
             reps = set.reps.orEmpty(),
             weight = set.weight?.let { plainNumber(it) }.orEmpty()
         )

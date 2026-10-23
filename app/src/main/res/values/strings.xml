@@ -260,6 +260,7 @@
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="logout_question">Logout?</string>
+    <string name="longest_duration">Longest time</string>
     <string name="manage_appointment_details">Manage appointment details</string>
     <string name="manage_client_requests">Manage appointment requests</string>
     <string name="manage_your_clients">Manage your clients</string>
@@ -486,7 +487,10 @@
     <string name="thigh">Thigh</string>
     <string name="thumbnail_url">Thumbnail link</string>
     <string name="thumbnail_url_hint">Leave empty to use the YouTube video thumbnail.</string>
+    <string name="time">Time</string>
     <string name="time_slot">Time Slot</string>
+    <string name="timed_workout">Timed exercise</string>
+    <string name="timed_workout_hint">Sets record a duration (e.g. plank) instead of repetitions.</string>
     <string name="to_book">To book</string>
     <string name="total_reps_per_training">Total reps per training</string>
     <string name="training_actions">Training actions</string>

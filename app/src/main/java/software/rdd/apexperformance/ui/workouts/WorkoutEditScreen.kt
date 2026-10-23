@@ -47,6 +47,7 @@ import software.rdd.apexperformance.ui.components.FormSection
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.ScrollScreen
+import software.rdd.apexperformance.ui.components.ToggleRow
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
@@ -68,6 +69,8 @@ class WorkoutEditScreen(
     private var thumbnailUrl by mutableStateOf(workout?.thumbnailUrl.orEmpty())
     private var selectedWorkoutTypeIds by mutableStateOf(workout?.workoutTypes.orEmpty().map { it.id }.toSet())
     private var muscles by mutableStateOf(rolesOf(workout))
+    // Sets record a duration instead of repetitions (e.g. plank).
+    private var isTimed by mutableStateOf(workout?.isTimed ?: false)
     // Muscle whose role menu is open.
     private var editedMuscle by mutableStateOf<String?>(null)
     private var workoutTypes by mutableStateOf<List<WorkoutType>>(emptyList())
@@ -79,7 +82,8 @@ class WorkoutEditScreen(
             descriptionEn != workout?.description?.value("EN").orEmpty() ||
             videoUrl != workout?.videoUrl.orEmpty() || thumbnailUrl != workout?.thumbnailUrl.orEmpty() ||
             selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet() ||
-            muscles != rolesOf(workout)
+            muscles != rolesOf(workout) ||
+            isTimed != (workout?.isTimed ?: false)
 
     // In the API's order, which the body map also uses.
     private fun selectedMuscles(role: MuscleRole): List<String> = WorkoutMuscle.all.filter { muscles[it] == role }
@@ -218,6 +222,12 @@ class WorkoutEditScreen(
                 }
             }
 
+            FormSection(
+                footer = { Text(stringResource(R.string.timed_workout_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
+            ) {
+                ToggleRow(stringResource(R.string.timed_workout), isTimed) { isTimed = it }
+            }
+
             FormSection(header = stringResource(R.string.workout_types)) {
                 if (workoutTypes.isEmpty()) {
                     CircularProgressIndicator(
@@ -303,6 +313,7 @@ class WorkoutEditScreen(
                 thumbnailUrl = thumbnailUrl.trim(),
                 videoUrl = videoUrl.trim(),
                 workoutTypes = selectedWorkoutTypeIds.toList(),
+                isTimed = isTimed,
                 muscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.PRIMARY),
                 secondaryMuscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.SECONDARY)
             )

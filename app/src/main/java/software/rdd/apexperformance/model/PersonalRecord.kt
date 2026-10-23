@@ -15,7 +15,8 @@ data class PersonalRecord(
     // Persisted JSON with the workout name translations.
     val workoutName: LocalizedText = LocalizedText(),
     val trainingId: String,
-    // "MaxWeight" or "EstimatedOneRepMax".
+    // "MaxWeight", "EstimatedOneRepMax" or "LongestDuration" (value in
+    // seconds, for workouts done for a time).
     val type: String,
     val value: Double = 0.0,
     val weight: Double = 0.0,
@@ -23,6 +24,8 @@ data class PersonalRecord(
     val achievedAt: IsoInstant
 ) {
     val isMaxWeight: Boolean get() = type == "MaxWeight"
+    val isOneRepMax: Boolean get() = type == "EstimatedOneRepMax"
+    val isLongestDuration: Boolean get() = type == "LongestDuration"
 
     companion object {
         // Record history of a client, newest first. Staff pass the client,
@@ -40,6 +43,8 @@ data class ExerciseRecords(
     val name: String,
     val maxWeight: PersonalRecord?,
     val oneRepMax: PersonalRecord?,
+    // Longest set of a workout done for a time (e.g. plank).
+    val longestDuration: PersonalRecord?,
     // Newest first.
     val history: List<PersonalRecord>
 ) {
@@ -62,7 +67,8 @@ data class ExerciseRecords(
                         name = history.first().workoutName.localized,
                         // History is newest first, so the first record of a type is the current one.
                         maxWeight = history.firstOrNull { it.isMaxWeight },
-                        oneRepMax = history.firstOrNull { !it.isMaxWeight },
+                        oneRepMax = history.firstOrNull { it.isOneRepMax },
+                        longestDuration = history.firstOrNull { it.isLongestDuration },
                         history = history
                     )
                 }

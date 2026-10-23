@@ -59,6 +59,7 @@ import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.loadWorkout
+import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.workouts.WorkoutDetailScreen
 import software.rdd.apexperformance.model.TrainingTemplate
@@ -361,7 +362,8 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
             if (sets.isNotEmpty()) {
                 TrainingSetRow(
                     stringResource(R.string.set),
-                    stringResource(R.string.reps),
+                    // Sets of a timed workout (e.g. plank) have a duration instead of reps.
+                    stringResource(if (sets.any { it.durationSeconds != null }) R.string.time else R.string.reps),
                     stringResource(R.string.kg),
                     isHeader = true
                 )
@@ -373,7 +375,7 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                 TrainingSetRow(
                     // Drop set of the set above, done right after it.
                     number?.toString() ?: "↳ ${stringResource(R.string.drop_set_short)}",
-                    set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
+                    set.durationSeconds?.let { setDuration(it) } ?: set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
                     set.weight?.let(::formatWeight) ?: "—",
                     isDropSet = number == null
                 )
