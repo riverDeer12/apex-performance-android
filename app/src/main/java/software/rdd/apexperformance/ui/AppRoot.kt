@@ -48,6 +48,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import software.rdd.apexperformance.MainActivity
 import software.rdd.apexperformance.R
+import software.rdd.apexperformance.core.network.PushTokenService
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.NavigatorHost
@@ -62,6 +63,8 @@ import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
 import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
 import software.rdd.apexperformance.ui.chat.ChatFloatingButton
+import software.rdd.apexperformance.ui.home.CooperationRulesGate
+import software.rdd.apexperformance.ui.home.CooperationRulesPopup
 import software.rdd.apexperformance.ui.home.NotificationInbox
 import software.rdd.apexperformance.ui.chat.ChatListScreen
 import software.rdd.apexperformance.ui.clients.ClientsScreen
@@ -263,7 +266,13 @@ private fun HomeView() {
         onDispose {
             ChatStore.stop()
             NotificationInbox.reset()
+            CooperationRulesGate.reset()
         }
+    }
+
+    // Clients on private coaching accept the cooperation rules first.
+    LaunchedEffect(state) {
+        CooperationRulesGate.checkLater()
     }
 
     // Small profile picture on the profile tab.
@@ -331,6 +340,19 @@ private fun HomeView() {
                 androidx.activity.compose.BackHandler(enabled = !state.chatNavigator.canPop) { state.closeChat() }
                 NavigatorHost(state.chatNavigator)
             }
+        }
+
+        // Over everything, also the chat: accepting or logging out are the only ways out.
+        CooperationRulesGate.pending?.let { rules ->
+            CooperationRulesPopup(
+                rules = rules,
+                onAccepted = { CooperationRulesGate.reset() },
+                onLogout = {
+                    CooperationRulesGate.reset()
+                    PushTokenService.unregister()
+                    AuthManager.logout()
+                }
+            )
         }
     }
 }

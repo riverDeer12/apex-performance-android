@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import software.rdd.apexperformance.R
+import software.rdd.apexperformance.ui.home.CooperationRulesRow
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Screen
@@ -126,6 +127,11 @@ class UserProfileScreen : Screen() {
                         onClick = { navigator.push(ChangePasswordScreen()) }
                     )
                     RowDivider()
+
+                    if (isClient) {
+                        // Accepted cooperation rules, shown once they are.
+                        CooperationRulesRow()
+                    }
 
                     AppearanceSwitcher()
                     RowDivider()

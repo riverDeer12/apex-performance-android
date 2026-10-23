@@ -428,6 +428,16 @@
     <string name="reserved">Prenotati</string>
     <string name="review_and_take_action">Rivedi e gestisci la richiesta</string>
     <string name="rotary_stability">Stabilità rotatoria</string>
+    <string name="rules_accept">Accetto</string>
+    <string name="rules_accepted_version">Versione %s</string>
+    <string name="rules_checkbox">Ho letto e accetto le Regole di collaborazione per gli allenamenti individuali, versione %s.</string>
+    <string name="rules_guardian">Accetto come genitore/tutore di un cliente minorenne</string>
+    <string name="rules_guardian_name">Nome e cognome del genitore/tutore</string>
+    <string name="rules_independent_travel">Approvo che il cliente (14–18 anni) arrivi agli allenamenti e li lasci da solo</string>
+    <string name="rules_message">Per usare l\'app, leggi e accetta le Regole di collaborazione per gli allenamenti individuali.</string>
+    <string name="rules_new_version">Le regole sono cambiate, leggi la nuova versione.</string>
+    <string name="rules_open_document">Apri le regole (PDF)</string>
+    <string name="rules_title">Regole di collaborazione</string>
     <string name="save">Salva</string>
     <string name="save_as_template">Salva come modello</string>
     <string name="save_as_template_hint">Il modello riceve gli esercizi e le serie di questo allenamento.</string>

@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.util.NotificationRouter
+import software.rdd.apexperformance.ui.home.CooperationRulesGate
 import software.rdd.apexperformance.ui.home.NotificationInbox
 import software.rdd.apexperformance.ui.AppRoot
 
@@ -47,6 +48,8 @@ class MainActivity : ComponentActivity() {
         AuthManager.checkSession()
         // Notifications may have come while the app was in the background.
         NotificationInbox.refreshCountLater()
+        // A new version of the cooperation rules can come any time.
+        CooperationRulesGate.checkLater()
     }
 
     override fun onNewIntent(intent: Intent) {
