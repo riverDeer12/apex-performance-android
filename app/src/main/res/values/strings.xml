@@ -429,6 +429,16 @@
     <string name="reserved">Booked</string>
     <string name="review_and_take_action">Review and take action</string>
     <string name="rotary_stability">Rotary Stability</string>
+    <string name="rules_accept">Accept</string>
+    <string name="rules_accepted_version">Version %s</string>
+    <string name="rules_checkbox">I have read and accept the Cooperation rules for individual trainings, version %s.</string>
+    <string name="rules_guardian">I am accepting as the parent/guardian of a minor client</string>
+    <string name="rules_guardian_name">Parent\'s/guardian\'s full name</string>
+    <string name="rules_independent_travel">I approve the client (aged 14–18) coming to and leaving trainings alone</string>
+    <string name="rules_message">To use the app, read and accept the Cooperation rules for individual trainings.</string>
+    <string name="rules_new_version">The rules have changed, please read the new version.</string>
+    <string name="rules_open_document">Open the rules (PDF)</string>
+    <string name="rules_title">Cooperation rules</string>
     <string name="save">Save</string>
     <string name="save_as_template">Save as template</string>
     <string name="save_as_template_hint">The template gets the exercises and sets of this training.</string>

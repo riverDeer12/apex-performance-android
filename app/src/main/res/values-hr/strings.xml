@@ -428,6 +428,16 @@
     <string name="reserved">Rezervirano</string>
     <string name="review_and_take_action">Pregled i upravljanje zahtjevom</string>
     <string name="rotary_stability">Rotacijska stabilnost</string>
+    <string name="rules_accept">Prihvaćam</string>
+    <string name="rules_accepted_version">Verzija %s</string>
+    <string name="rules_checkbox">Pročitao/la sam i prihvaćam Pravila suradnje za individualne treninge, verzija %s.</string>
+    <string name="rules_guardian">Prihvaćam kao roditelj/skrbnik maloljetnog klijenta</string>
+    <string name="rules_guardian_name">Ime i prezime roditelja/skrbnika</string>
+    <string name="rules_independent_travel">Odobravam da klijent (14–18 godina) samostalno dolazi na treninge i odlazi s njih</string>
+    <string name="rules_message">Za korištenje aplikacije potrebno je pročitati i prihvatiti Pravila suradnje za individualne treninge.</string>
+    <string name="rules_new_version">Pravila su u međuvremenu promijenjena, pročitaj novu verziju.</string>
+    <string name="rules_open_document">Otvori pravila (PDF)</string>
+    <string name="rules_title">Pravila suradnje</string>
     <string name="save">Spremi</string>
     <string name="save_as_template">Spremi kao predložak</string>
     <string name="save_as_template_hint">Predložak dobiva vježbe i serije ovog treninga.</string>

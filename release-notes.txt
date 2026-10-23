@@ -1,4 +1,3 @@
 Novosti:
-- Vježbe na vrijeme (npr. plank): u treningu se za njih unosi trajanje (min:s) umjesto ponavljanja, a trajanje se prikazuje u detaljima treninga (npr. 1:30 · 10 kg).
-- Treneri u uređivanju vježbe uključuju "Vježba na vrijeme".
-- Osobni rekordi prikazuju najduže trajanje za vježbe na vrijeme.
+- Klijenti na individualnim treninzima (private coaching) pri ulasku u aplikaciju prihvaćaju Pravila suradnje: skočni prozor s poveznicom na pravila (PDF), potvrdom i dijelom za roditelja/skrbnika maloljetnog klijenta. Bez prihvaćanja moguća je samo odjava.
+- Prihvaćena verzija pravila vidi se u profilu.
