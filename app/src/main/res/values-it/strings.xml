@@ -153,6 +153,7 @@
     <string name="delete_workout_question">Eliminare questo allenamento?</string>
     <string name="description">Descrizione</string>
     <string name="details">Dettagli</string>
+    <string name="device_language">Lingua del dispositivo</string>
     <string name="discard_changes">Annulla modifiche</string>
     <string name="discard_changes_info">Le modifiche non sono state salvate e andranno perse.</string>
     <string name="discard_changes_question">Annullare le modifiche?</string>

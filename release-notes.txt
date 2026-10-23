@@ -1,3 +1,2 @@
 Novosti:
-- Klijenti na individualnim treninzima (private coaching) pri ulasku u aplikaciju prihvaćaju Pravila suradnje: skočni prozor s poveznicom na pravila (PDF), potvrdom i dijelom za roditelja/skrbnika maloljetnog klijenta. Bez prihvaćanja moguća je samo odjava.
-- Prihvaćena verzija pravila vidi se u profilu.
+- Jezik aplikacije (hrvatski, engleski, talijanski ili jezik uređaja) može se promijeniti u bilo kojem trenutku: u profilu i na ekranu za prijavu. Promjena vrijedi odmah, a obavijesti stižu na odabranom jeziku.
