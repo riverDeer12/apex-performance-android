@@ -219,6 +219,8 @@
     <string name="forgot_password_sent">If an account with that email exists, we\'ve sent a link to set a new password. Check your inbox.</string>
     <string name="from_template">From template</string>
     <string name="from_template_hint">Fills the name, note and exercises from the template.</string>
+    <string name="full_body_muscles_hint">When you pick a full body type (e.g. Full body), the muscles are marked from the exercise\'s name.</string>
+    <string name="full_body_muscles_marked">Muscles of the full body exercise are marked.</string>
     <string name="generate_recurring_appointments">Generate next week appointments.</string>
     <string name="generating_recurring_appointments">Generating new appointments...</string>
     <string name="glutes">Glutes</string>

@@ -1,2 +1,2 @@
 Novosti:
-- Jezik aplikacije (hrvatski, engleski, talijanski ili jezik uređaja) može se promijeniti u bilo kojem trenutku: u profilu i na ekranu za prijavu. Promjena vrijedi odmah, a obavijesti stižu na odabranom jeziku.
+- Kad trener u obrascu vježbe odabere tip za cijelo tijelo (npr. Full body), mišići koje vježba radi automatski se označe prema nazivu vježbe (burpee, thruster, zamah, skokovi…). Već označeni mišići ostaju kako jesu.

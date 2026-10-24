@@ -218,6 +218,8 @@
     <string name="forgot_password_sent">Se esiste un account con questa email, abbiamo inviato un link per impostare una nuova password. Controlla la posta.</string>
     <string name="from_template">Da modello</string>
     <string name="from_template_hint">Compila nome, nota ed esercizi dal modello.</string>
+    <string name="full_body_muscles_hint">Quando scegli un tipo total body (es. Full body), i muscoli vengono segnati in base al nome dell\'esercizio.</string>
+    <string name="full_body_muscles_marked">I muscoli dell\'esercizio total body sono stati segnati.</string>
     <string name="generate_recurring_appointments">Generare un programma per la settimana successiva</string>
     <string name="generating_recurring_appointments">Generazione di nuovi termini…</string>
     <string name="glutes">Glutei</string>

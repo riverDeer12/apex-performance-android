@@ -452,6 +452,21 @@ data class UpdateWorkoutRequest(
     val isTimed: Boolean? = null
 )
 
+// POST workouts/guess-muscles: muscles guessed from the name, with the
+// whole body ones when a type is for the full body.
+@Serializable
+data class GuessMusclesRequest(
+    val name: LocalizedText,
+    val workoutTypes: List<String>
+)
+
+@Serializable
+data class GuessMusclesResponse(
+    val isFullBody: Boolean,
+    val muscles: List<String> = emptyList(),
+    val secondaryMuscles: List<String> = emptyList()
+)
+
 /** Mirrors the API's LocalizedProperty, translations keyed by language code (HR, EN, IT). */
 @Serializable(with = LocalizedTextSerializer::class)
 data class LocalizedText(val translations: Map<String, String> = emptyMap()) {
