@@ -218,6 +218,8 @@
     <string name="forgot_password_sent">Ako postoji račun s tim e-mailom, poslali smo poveznicu za novu lozinku. Provjeri poštu.</string>
     <string name="from_template">Iz predloška</string>
     <string name="from_template_hint">Popunjava naziv, bilješku i vježbe iz predloška.</string>
+    <string name="full_body_muscles_hint">Kad odabereš tip za cijelo tijelo (npr. Full body), mišići se označe prema nazivu vježbe.</string>
+    <string name="full_body_muscles_marked">Označeni su mišići vježbe za cijelo tijelo.</string>
     <string name="generate_recurring_appointments">Generiraj raspored za slijedeći tjedan.</string>
     <string name="generating_recurring_appointments">Generiranje novih termina…</string>
     <string name="glutes">Gluteus</string>

@@ -39,6 +39,8 @@ import software.rdd.apexperformance.core.network.ApiException
 import software.rdd.apexperformance.core.network.HttpMethod
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
+import software.rdd.apexperformance.model.GuessMusclesRequest
+import software.rdd.apexperformance.model.GuessMusclesResponse
 import software.rdd.apexperformance.model.LocalizedText
 import software.rdd.apexperformance.model.UpdateWorkoutRequest
 import software.rdd.apexperformance.model.Workout
@@ -156,9 +158,14 @@ class WorkoutEditScreen(
 
             FormSection(
                 header = stringResource(R.string.worked_muscles),
-                footer = if (workout == null) {
-                    { Text(stringResource(R.string.muscles_guess_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
-                } else null
+                footer = {
+                    val hint = if (workout == null) {
+                        stringResource(R.string.muscles_guess_hint) + "\n" + stringResource(R.string.full_body_muscles_hint)
+                    } else {
+                        stringResource(R.string.full_body_muscles_hint)
+                    }
+                    Text(hint, style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                }
             ) {
                 val context = LocalContext.current
                 MuscleMap(
@@ -282,7 +289,33 @@ class WorkoutEditScreen(
     }
 
     private fun toggle(id: String) {
-        selectedWorkoutTypeIds = if (id in selectedWorkoutTypeIds) selectedWorkoutTypeIds - id else selectedWorkoutTypeIds + id
+        if (id in selectedWorkoutTypeIds) {
+            selectedWorkoutTypeIds = selectedWorkoutTypeIds - id
+        } else {
+            selectedWorkoutTypeIds = selectedWorkoutTypeIds + id
+            launch { markFullBodyMuscles() }
+        }
+    }
+
+    // A full body type was picked: marks the muscles the exercise works,
+    // guessed by the API from the name. Muscles already marked stay.
+    private suspend fun markFullBodyMuscles() {
+        val request = GuessMusclesRequest(
+            name = localizedText(workout?.name ?: LocalizedText(), nameHr, nameEn),
+            workoutTypes = selectedWorkoutTypeIds.toList()
+        )
+        val guessed = runCatching {
+            ApiClient.request<GuessMusclesRequest, GuessMusclesResponse>("workouts/guess-muscles", HttpMethod.POST, request)
+        }.getOrNull() ?: return
+        if (!guessed.isFullBody) return
+
+        val marked = muscles.toMutableMap()
+        guessed.muscles.forEach { if (it in WorkoutMuscle.all) marked.putIfAbsent(it, MuscleRole.PRIMARY) }
+        guessed.secondaryMuscles.forEach { if (it in WorkoutMuscle.all) marked.putIfAbsent(it, MuscleRole.SECONDARY) }
+        if (marked != muscles) {
+            muscles = marked
+            ToastManager.show(R.string.full_body_muscles_marked, ToastType.SUCCESS)
+        }
     }
 
     // Only HR and EN are editable; other translations (e.g. IT) are kept.
