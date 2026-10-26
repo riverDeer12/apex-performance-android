@@ -44,7 +44,9 @@ import software.rdd.apexperformance.model.GuessMusclesResponse
 import software.rdd.apexperformance.model.LocalizedText
 import software.rdd.apexperformance.model.UpdateWorkoutRequest
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.WorkoutCategory
 import software.rdd.apexperformance.model.WorkoutType
+import software.rdd.apexperformance.model.isMobilityOrStretching
 import software.rdd.apexperformance.ui.components.FormSection
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SmallProgress
@@ -73,6 +75,9 @@ class WorkoutEditScreen(
     private var muscles by mutableStateOf(rolesOf(workout))
     // Sets record a duration instead of repetitions (e.g. plank).
     private var isTimed by mutableStateOf(workout?.isTimed ?: false)
+    private var category by mutableStateOf(workout?.workoutCategory ?: WorkoutCategory.STRENGTH_CONDITIONING)
+    // Picked by the coach, then picking a type no longer changes it.
+    private var isCategoryPicked = workout != null
     // Muscle whose role menu is open.
     private var editedMuscle by mutableStateOf<String?>(null)
     private var workoutTypes by mutableStateOf<List<WorkoutType>>(emptyList())
@@ -85,7 +90,8 @@ class WorkoutEditScreen(
             videoUrl != workout?.videoUrl.orEmpty() || thumbnailUrl != workout?.thumbnailUrl.orEmpty() ||
             selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet() ||
             muscles != rolesOf(workout) ||
-            isTimed != (workout?.isTimed ?: false)
+            isTimed != (workout?.isTimed ?: false) ||
+            category != (workout?.workoutCategory ?: WorkoutCategory.STRENGTH_CONDITIONING)
 
     // In the API's order, which the body map also uses.
     private fun selectedMuscles(role: MuscleRole): List<String> = WorkoutMuscle.all.filter { muscles[it] == role }
@@ -235,6 +241,27 @@ class WorkoutEditScreen(
                 ToggleRow(stringResource(R.string.timed_workout), isTimed) { isTimed = it }
             }
 
+            FormSection(header = stringResource(R.string.category)) {
+                WorkoutCategory.entries.forEach { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                category = option
+                                isCategoryPicked = true
+                            }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(option.title), style = ApexText.body, modifier = Modifier.weight(1f))
+                        if (option == category) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
+                        }
+                    }
+                    if (option != WorkoutCategory.entries.last()) Divider()
+                }
+            }
+
             FormSection(header = stringResource(R.string.workout_types)) {
                 if (workoutTypes.isEmpty()) {
                     CircularProgressIndicator(
@@ -294,6 +321,10 @@ class WorkoutEditScreen(
         } else {
             selectedWorkoutTypeIds = selectedWorkoutTypeIds + id
             launch { markFullBodyMuscles() }
+            // A new workout with a mobility or stretching type is in that category.
+            if (!isCategoryPicked && workoutTypes.firstOrNull { it.id == id }?.isMobilityOrStretching == true) {
+                category = WorkoutCategory.MOBILITY_FLEXIBILITY
+            }
         }
     }
 
@@ -347,6 +378,7 @@ class WorkoutEditScreen(
                 videoUrl = videoUrl.trim(),
                 workoutTypes = selectedWorkoutTypeIds.toList(),
                 isTimed = isTimed,
+                category = category.value,
                 muscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.PRIMARY),
                 secondaryMuscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.SECONDARY)
             )

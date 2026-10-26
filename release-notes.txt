@@ -1,2 +1,3 @@
 Novosti:
-- Kad trener u obrascu vježbe odabere tip za cijelo tijelo (npr. Full body), mišići koje vježba radi automatski se označe prema nazivu vježbe (burpee, thruster, zamah, skokovi…). Već označeni mišići ostaju kako jesu.
+- Vježbe su podijeljene u dvije kategorije: Mobilnost i fleksibilnost te Snaga i kondicija. Popis vježbi ima dvije tipke za filtriranje po kategoriji (ponovni dodir prikazuje sve vježbe).
+- U obrascu vježbe trener bira kategoriju. Nova vježba s tipom za mobilnost ili istezanje automatski dobiva kategoriju Mobilnost i fleksibilnost.

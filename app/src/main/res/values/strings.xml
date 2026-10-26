@@ -60,6 +60,9 @@
     <string name="cancelation_requests">Cancelation requests</string>
     <string name="cancelation_terms_by_agreement">Cancelation terms by agreement</string>
     <string name="cardio">Cardio</string>
+    <string name="category">Category</string>
+    <string name="category_mobility_flexibility">Mobility and flexibility</string>
+    <string name="category_strength_conditioning">Strength and conditioning</string>
     <string name="change_password">Change Password</string>
     <string name="change_profile_picture">Change profile picture</string>
     <string name="change_username">Change Username</string>

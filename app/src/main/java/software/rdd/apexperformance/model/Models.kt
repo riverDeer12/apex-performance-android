@@ -412,8 +412,15 @@ data class Workout(
     val muscles: List<String> = emptyList(),
     val secondaryMuscles: List<String> = emptyList(),
     // Done for a time (e.g. plank): sets record a duration instead of repetitions.
-    val isTimed: Boolean = false
+    val isTimed: Boolean = false,
+    // WorkoutCategory value; null from an API without categories.
+    val category: String? = null
 ) {
+    // Category for filtering; before the API had them, taken from the types.
+    val workoutCategory: WorkoutCategory
+        get() = WorkoutCategory.entries.firstOrNull { it.value == category }
+            ?: if (isMobilityOrStretching) WorkoutCategory.MOBILITY_FLEXIBILITY else WorkoutCategory.STRENGTH_CONDITIONING
+
     // Every translation is searched, so the query language does not matter.
     fun matches(query: String): Boolean {
         val q = query.trim()
@@ -449,7 +456,8 @@ data class UpdateWorkoutRequest(
     // Null for a new workout lets the API guess them from the name.
     val muscles: List<String>? = null,
     val secondaryMuscles: List<String>? = null,
-    val isTimed: Boolean? = null
+    val isTimed: Boolean? = null,
+    val category: String? = null
 )
 
 // POST workouts/guess-muscles: muscles guessed from the name, with the
@@ -554,12 +562,19 @@ private val mobilityAndStretchingKeywords = listOf("mobil", "stretch", "istez", 
 
 // True when one of the workout's types is mobility or stretching.
 val Workout.isMobilityOrStretching: Boolean
-    get() = workoutTypes.any { type ->
-        type.name.allValues.any { name ->
-            val lowercased = name.lowercase()
-            mobilityAndStretchingKeywords.any { lowercased.contains(it) }
-        }
+    get() = workoutTypes.any { it.isMobilityOrStretching }
+
+val WorkoutType.isMobilityOrStretching: Boolean
+    get() = name.allValues.any { name ->
+        val lowercased = name.lowercase()
+        mobilityAndStretchingKeywords.any { lowercased.contains(it) }
     }
+
+// Workouts are mobility and flexibility, or strength and conditioning.
+enum class WorkoutCategory(val value: String, @StringRes val title: Int) {
+    MOBILITY_FLEXIBILITY("MobilityFlexibility", R.string.category_mobility_flexibility),
+    STRENGTH_CONDITIONING("StrengthConditioning", R.string.category_strength_conditioning)
+}
 
 // Deletes the workout (soft delete on the API, staff only).
 // One workout, e.g. of an exercise in a training. Clients also get

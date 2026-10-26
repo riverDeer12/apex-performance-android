@@ -14,12 +14,16 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
@@ -27,6 +31,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.outlined.SelfImprovement
+import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,6 +53,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +76,7 @@ import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.ImportWorkoutsResponse
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.WorkoutCategory
 import software.rdd.apexperformance.model.deleteWorkout
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
@@ -93,6 +102,8 @@ class WorkoutsScreen(
 
     private var workouts by mutableStateOf<List<Workout>>(emptyList())
     private var searchText by mutableStateOf("")
+    // Null shows all workouts.
+    private var category by mutableStateOf<WorkoutCategory?>(null)
     private var isLoading by mutableStateOf(false)
     private var isImporting by mutableStateOf(false)
     private var hasLoaded = false
@@ -102,9 +113,17 @@ class WorkoutsScreen(
     // Same audience as the web: coaches and administrators manage workouts.
     private val canManageWorkouts: Boolean get() = !AuthManager.hasRole(Roles.CLIENT)
 
+    // Workouts the user may see, before the category and search.
+    private val visibleWorkouts: List<Workout>
+        get() = workouts.filter { workoutFilter?.invoke(it) ?: true }
+
+    // Clients who see only mobility workouts don't need the filter.
+    private val showsCategoryFilter: Boolean
+        get() = visibleWorkouts.map { it.workoutCategory }.toSet().size > 1
+
     private val filteredWorkouts: List<Workout>
-        get() = workouts
-            .filter { workoutFilter?.invoke(it) ?: true }
+        get() = visibleWorkouts
+            .filter { category == null || it.workoutCategory == category }
             .filter { it.matches(searchText) }
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.localized })
 
@@ -176,10 +195,12 @@ class WorkoutsScreen(
 
             SearchField()
 
+            if (showsCategoryFilter) CategoryFilter()
+
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredWorkouts
                 if (list.isEmpty() && !isLoading) {
-                    EmptyText(stringResource(if (searchText.isEmpty()) R.string.no_workouts else R.string.no_workouts_found))
+                    EmptyText(stringResource(if (searchText.isEmpty() && category == null) R.string.no_workouts else R.string.no_workouts_found))
                 } else {
                     Column {
                         list.forEach { workout ->
@@ -238,6 +259,51 @@ class WorkoutsScreen(
                 Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
             }
             Text(text, color = content, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
+        }
+    }
+
+    @Composable
+    private fun CategoryFilter() {
+        // Two buttons, one per category: a tapped one shows only its workouts,
+        // tapped again all of them.
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            WorkoutCategory.entries.forEach { option ->
+                val isSelected = category == option
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .heightIn(min = 44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isSelected) ApexColors.main else ApexColors.main.copy(alpha = 0.1f))
+                        .selectable(selected = isSelected, role = Role.Tab) { category = if (isSelected) null else option }
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // The main color is white in dark mode, so the selected
+                    // button's text takes the background color.
+                    val color = if (isSelected) ApexColors.background else ApexColors.main
+                    Icon(
+                        if (option == WorkoutCategory.MOBILITY_FLEXIBILITY) Icons.Outlined.SelfImprovement else Icons.Outlined.FitnessCenter,
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        stringResource(option.title),
+                        style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                        color = color,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
         }
     }
 
