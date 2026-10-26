@@ -59,6 +59,9 @@
     <string name="cancelation_requests">Zahtjevi za otkazivanje</string>
     <string name="cancelation_terms_by_agreement">Uvjeti otkazivanja prema dogovoru</string>
     <string name="cardio">Kardio</string>
+    <string name="category">Kategorija</string>
+    <string name="category_mobility_flexibility">Mobilnost i fleksibilnost</string>
+    <string name="category_strength_conditioning">Snaga i kondicija</string>
     <string name="change_password">Promjeni lozinku</string>
     <string name="change_profile_picture">Promijeni profilnu sliku</string>
     <string name="change_username">Promjeni korisničko ime</string>

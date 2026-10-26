@@ -59,6 +59,9 @@
     <string name="cancelation_requests">Richieste di cancellazione</string>
     <string name="cancelation_terms_by_agreement">Condizioni di cancellazione come concordato</string>
     <string name="cardio">Cardio</string>
+    <string name="category">Categoria</string>
+    <string name="category_mobility_flexibility">Mobilità e flessibilità</string>
+    <string name="category_strength_conditioning">Forza e condizionamento</string>
     <string name="change_password">Cambia password</string>
     <string name="change_profile_picture">Cambia foto profilo</string>
     <string name="change_username">Cambia nome utente</string>
