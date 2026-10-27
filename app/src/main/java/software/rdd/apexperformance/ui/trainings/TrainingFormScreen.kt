@@ -61,6 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -75,12 +76,14 @@ import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
+import software.rdd.apexperformance.model.PaceType
 import software.rdd.apexperformance.model.SaveTrainingRequest
 import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.formatPace
 import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.MenuPicker
@@ -401,8 +404,10 @@ class TrainingFormScreen private constructor(
     @Composable
     private fun ExerciseSection(index: Int, exercise: ExerciseDraft, label: String, navigator: Navigator) {
         val previous = previousSets(exercise.workoutId)
+        // Done over a distance (e.g. rowing): a distance instead of the weight, with the pace.
+        val paceType = paceTypeOf(exercise)
         // Done for a time (e.g. plank): a duration instead of repetitions.
-        val isTimed = workouts.firstOrNull { it.id == exercise.workoutId }?.isTimed == true
+        val isTimed = workouts.firstOrNull { it.id == exercise.workoutId }?.isTimed == true || paceType != null
 
         Section(header = { ExerciseHeader(index, exercise, label) }) {
             // Exercise picker.
@@ -414,7 +419,7 @@ class TrainingFormScreen private constructor(
                             WorkoutPickerScreen(
                                 workouts = { workouts },
                                 selection = exercise.workoutId
-                            ) { id -> updateExercise(exercise.id) { it.copy(workoutId = id) } }
+                            ) { id -> updateExercise(exercise.id) { it.copy(workoutId = id, paceType = null) } }
                         )
                     }
                     .padding(vertical = 12.dp),
@@ -436,13 +441,13 @@ class TrainingFormScreen private constructor(
 
             if (exercise.sets.isNotEmpty()) {
                 Divider()
-                SetsHeader(previous, isTimed)
+                SetsHeader(previous, isTimed, paceType)
             }
 
             val setNumbers = setNumbers(exercise.sets.map { it.isDropSet })
             exercise.sets.forEachIndexed { setIndex, set ->
                 key(set.id) {
-                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous, isTimed)
+                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous, isTimed, paceType)
                 }
             }
 
@@ -467,7 +472,7 @@ class TrainingFormScreen private constructor(
 
             if (previous != null) {
                 Divider()
-                PreviousSetsView(previous, currentCount = exercise.sets.size) {
+                PreviousSetsView(previous, currentCount = exercise.sets.size, paceType = paceType) {
                     updateExercise(exercise.id) { draft -> draft.copy(sets = previous.sets.map { SetDraft.from(it) }) }
                 }
             }
@@ -571,7 +576,7 @@ class TrainingFormScreen private constructor(
 
     // Column titles of the sets, with the previous training's date.
     @Composable
-    private fun SetsHeader(previous: PreviousSets?, isTimed: Boolean) {
+    private fun SetsHeader(previous: PreviousSets?, isTimed: Boolean, paceType: String?) {
         val style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
         Row(
             modifier = Modifier
@@ -588,7 +593,14 @@ class TrainingFormScreen private constructor(
                 modifier = Modifier.weight(1f)
             )
             Text("×", style = style.copy(color = Color.Transparent))
-            Text(stringResource(R.string.kg).uppercase(), style = style, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+            Text(
+                stringResource(if (paceType != null) R.string.distance_meters else R.string.kg).uppercase(),
+                style = style,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f)
+            )
             if (previous != null) {
                 Text(
                     stringResource(R.string.last_time).uppercase(),
@@ -606,7 +618,15 @@ class TrainingFormScreen private constructor(
     // to the left to delete it.
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    private fun SetRow(exerciseId: String, setIndex: Int, number: Int?, set: SetDraft, previous: PreviousSets?, isTimed: Boolean) {
+    private fun SetRow(
+        exerciseId: String,
+        setIndex: Int,
+        number: Int?,
+        set: SetDraft,
+        previous: PreviousSets?,
+        isTimed: Boolean,
+        paceType: String?
+    ) {
         val dismissState = rememberSwipeToDismissBoxState(
             confirmValueChange = { value ->
                 when (value) {
@@ -690,22 +710,57 @@ class TrainingFormScreen private constructor(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                Text("×", style = ApexText.body, color = ApexColors.secondaryLabel)
-                NumberWheelField(
-                    value = set.weightValue,
-                    onValueChange = { value -> updateSet(exerciseId, set.id) { it.withWeightValue(value) } },
-                    range = 0..300,
-                    step = 0.5,
-                    unit = stringResource(R.string.kg),
-                    defaultValue = 20.0,
-                    allowsEmpty = true,
-                    title = stringResource(R.string.weight),
-                    modifier = Modifier.weight(1f)
-                )
+                if (paceType != null) {
+                    // Distance in metres instead of the weight, like the web,
+                    // with the pace shown as it is typed.
+                    Text("·", style = ApexText.body, color = ApexColors.secondaryLabel)
+                    Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        PlainTextField(
+                            value = set.distance,
+                            onValueChange = { value ->
+                                updateSet(exerciseId, set.id) { it.copy(distance = value.filter(Char::isDigit).take(6)) }
+                            },
+                            placeholder = "m",
+                            textAlign = TextAlign.Center,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        val pace = formatPace(paceType, set.distanceMeters, set.durationSeconds)
+                        if (!set.isDistanceValid) {
+                            // Same limits as the API.
+                            Text(
+                                "1–${SetDraft.MAX_DISTANCE_METERS} m",
+                                style = ApexText.caption2,
+                                color = ApexColors.red,
+                                maxLines = 1
+                            )
+                        } else if (pace.isNotEmpty()) {
+                            Text(
+                                pace,
+                                style = ApexText.caption2.copy(fontWeight = FontWeight.SemiBold),
+                                color = ApexColors.main,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                } else {
+                    Text("×", style = ApexText.body, color = ApexColors.secondaryLabel)
+                    NumberWheelField(
+                        value = set.weightValue,
+                        onValueChange = { value -> updateSet(exerciseId, set.id) { it.withWeightValue(value) } },
+                        range = 0..300,
+                        step = 0.5,
+                        unit = stringResource(R.string.kg),
+                        defaultValue = 20.0,
+                        allowsEmpty = true,
+                        title = stringResource(R.string.weight),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
                 if (previous != null) {
                     // Same set on the previous training, shown on the side.
                     Text(
-                        previous.sets.getOrNull(setIndex)?.let(::setDescription) ?: "—",
+                        previous.sets.getOrNull(setIndex)?.let { setDescription(it, paceType) } ?: "—",
                         style = ApexText.footnote,
                         color = ApexColors.secondaryLabel,
                         maxLines = 1,
@@ -721,14 +776,14 @@ class TrainingFormScreen private constructor(
     // Copies the previous training's sets. Sets the current exercise
     // doesn't have yet are listed so they aren't missed.
     @Composable
-    private fun PreviousSetsView(previous: PreviousSets, currentCount: Int, onUse: () -> Unit) {
+    private fun PreviousSetsView(previous: PreviousSets, currentCount: Int, paceType: String?, onUse: () -> Unit) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             previous.sets.forEachIndexed { index, set ->
                 if (index >= currentCount) {
-                    Text("${index + 1}. ${setDescription(set)}", style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                    Text("${index + 1}. ${setDescription(set, paceType)}", style = ApexText.footnote, color = ApexColors.secondaryLabel)
                 }
             }
 
@@ -757,6 +812,14 @@ class TrainingFormScreen private constructor(
         note = template.note.orEmpty()
         exercises = template.exercises.sortedBy { it.order }.map { ExerciseDraft.from(it) }
     }
+
+    // Pace type of the exercise's workout: its sets record a distance and show
+    // a pace. Sets that already have a distance keep it shown (also when the
+    // workout was changed since), like the web.
+    private fun paceTypeOf(exercise: ExerciseDraft): String? =
+        workouts.firstOrNull { it.id == exercise.workoutId }?.paceType
+            ?: exercise.paceType
+            ?: if (exercise.sets.any { it.distance.isNotBlank() }) PaceType.PER_KM else null
 
     private fun updateExercise(id: String, transform: (ExerciseDraft) -> ExerciseDraft) {
         exercises = exercises.map { if (it.id == id) transform(it) else it }
@@ -919,7 +982,9 @@ private data class ExerciseDraft(
     val note: String = "",
     // New exercise starts with one empty set.
     val sets: List<SetDraft> = listOf(SetDraft()),
-    val isSupersetWithPrevious: Boolean = false
+    val isSupersetWithPrevious: Boolean = false,
+    // Workout's pace type from the saved training, until the workouts are loaded.
+    val paceType: String? = null
 ) {
     val isValid: Boolean
         get() = workoutId != null && note.length <= 500 && sets.size <= MAX_SETS && sets.all { it.isValid }
@@ -933,7 +998,8 @@ private data class ExerciseDraft(
             sets = sets + SetDraft(
                 reps = last?.reps.orEmpty(),
                 weight = last?.weight.orEmpty(),
-                durationSeconds = last?.durationSeconds
+                durationSeconds = last?.durationSeconds,
+                distance = last?.distance.orEmpty()
             )
         )
     }
@@ -945,7 +1011,12 @@ private data class ExerciseDraft(
         var end = after + 1
         while (end < sets.size && sets[end].isDropSet) end += 1
         val previous = sets[end - 1]
-        val drop = SetDraft(reps = previous.reps, isDropSet = true, durationSeconds = previous.durationSeconds)
+        val drop = SetDraft(
+            reps = previous.reps,
+            isDropSet = true,
+            durationSeconds = previous.durationSeconds,
+            distance = previous.distance
+        )
             // Rounded to half a kilogram, like the weight wheel.
             .withWeightValue(previous.weightValue?.let { Math.round(it * 0.8 * 2) / 2.0 })
         return copy(sets = sets.toMutableList().apply { add(end, drop) })
@@ -964,7 +1035,7 @@ private data class ExerciseDraft(
             return SaveTrainingRequest.Exercise(
                 workout = workoutId,
                 note = note.ifEmpty { null },
-                // Sets without repetitions and weight are not saved.
+                // Sets without repetitions, weight, duration and distance are not saved.
                 sets = sets.mapNotNull { it.request },
                 isSupersetWithPrevious = isSupersetWithPrevious
             )
@@ -977,6 +1048,7 @@ private data class ExerciseDraft(
             workoutId = exercise.workoutId,
             note = exercise.note.orEmpty(),
             isSupersetWithPrevious = exercise.isSupersetWithPrevious,
+            paceType = exercise.paceType,
             sets = exercise.sets.sortedBy { it.order }.map { SetDraft.from(it) }
         )
     }
@@ -989,7 +1061,9 @@ private data class SetDraft(
     // Done right after the previous set with less weight.
     val isDropSet: Boolean = false,
     // How long the set lasted, for timed workouts (e.g. plank).
-    val durationSeconds: Int? = null
+    val durationSeconds: Int? = null,
+    // Metres as typed, for workouts with a pace type (e.g. rowing).
+    val distance: String = ""
 ) {
     private val trimmedReps: String get() = reps.trim()
 
@@ -1017,24 +1091,36 @@ private data class SetDraft(
             return parsed in 0.0..9999.0
         }
 
-    val isValid: Boolean get() = trimmedReps.length <= 50 && isWeightValid
+    // Distance in metres, null when empty or not a number.
+    val distanceMeters: Int? get() = distance.trim().toIntOrNull()
+
+    // Same limits as the API.
+    val isDistanceValid: Boolean
+        get() = distance.isBlank() || distanceMeters?.let { it in 1..MAX_DISTANCE_METERS } == true
+
+    val isValid: Boolean get() = trimmedReps.length <= 50 && isWeightValid && isDistanceValid
 
     val request: SaveTrainingRequest.ExerciseSet?
         get() {
             val reps = trimmedReps
-            if (reps.isEmpty() && parsedWeight == null && durationSeconds == null) return null
+            val meters = distanceMeters
+            if (reps.isEmpty() && parsedWeight == null && durationSeconds == null && meters == null) return null
             return SaveTrainingRequest.ExerciseSet(
                 reps = reps.ifEmpty { null },
                 weight = parsedWeight,
                 isDropSet = isDropSet,
-                durationSeconds = durationSeconds
+                durationSeconds = durationSeconds,
+                distanceMeters = meters
             )
         }
 
     companion object {
+        const val MAX_DISTANCE_METERS = 500_000
+
         fun from(set: Training.ExerciseSet) = SetDraft(
             isDropSet = set.isDropSet,
             durationSeconds = set.durationSeconds,
+            distance = set.distanceMeters?.toString().orEmpty(),
             reps = set.reps.orEmpty(),
             weight = set.weight?.let { plainNumber(it) }.orEmpty()
         )

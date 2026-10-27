@@ -59,6 +59,7 @@ import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.loadWorkout
+import software.rdd.apexperformance.model.distanceSetParts
 import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.workouts.WorkoutDetailScreen
@@ -362,8 +363,15 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
             if (sets.isNotEmpty()) {
                 TrainingSetRow(
                     stringResource(R.string.set),
-                    // Sets of a timed workout (e.g. plank) have a duration instead of reps.
-                    stringResource(if (sets.any { it.durationSeconds != null }) R.string.time else R.string.reps),
+                    // Sets of a timed workout (e.g. plank) have a duration instead of reps,
+                    // sets over a distance (e.g. rowing) the distance, duration and pace.
+                    stringResource(
+                        when {
+                            sets.any { it.distanceMeters != null } -> R.string.distance
+                            sets.any { it.durationSeconds != null } -> R.string.time
+                            else -> R.string.reps
+                        }
+                    ),
                     stringResource(R.string.kg),
                     isHeader = true
                 )
@@ -375,7 +383,10 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                 TrainingSetRow(
                     // Drop set of the set above, done right after it.
                     number?.toString() ?: "↳ ${stringResource(R.string.drop_set_short)}",
-                    set.durationSeconds?.let { setDuration(it) } ?: set.reps?.trim()?.takeIf { it.isNotEmpty() } ?: "—",
+                    distanceSetParts(set, exercise.paceType).takeIf { it.isNotEmpty() }?.joinToString(" · ")
+                        ?: set.durationSeconds?.let { setDuration(it) }
+                        ?: set.reps?.trim()?.takeIf { it.isNotEmpty() }
+                        ?: "—",
                     set.weight?.let(::formatWeight) ?: "—",
                     isDropSet = number == null
                 )

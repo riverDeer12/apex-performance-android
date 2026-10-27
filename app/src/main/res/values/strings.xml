@@ -161,6 +161,8 @@
     <string name="discard_changes">Discard changes</string>
     <string name="discard_changes_info">Your changes haven\'t been saved and will be lost.</string>
     <string name="discard_changes_question">Discard changes?</string>
+    <string name="distance">Distance</string>
+    <string name="distance_meters">Distance (m)</string>
     <string name="done">Done</string>
     <string name="done_this_month">Done (month)</string>
     <string name="download_template">Template</string>
@@ -208,6 +210,7 @@
     <string name="exercise_library">Exercise library</string>
     <string name="exercise_library_subtitle">All exercises with instructions and video</string>
     <string name="exercises_count">Exercises: %d</string>
+    <string name="fastest_pace">Fastest pace</string>
     <string name="filter_by_client">Filter by client</string>
     <string name="first_name">First name</string>
     <string name="fms">FMS</string>
@@ -266,6 +269,7 @@
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="logout_question">Logout?</string>
+    <string name="longest_distance">Longest distance</string>
     <string name="longest_duration">Longest time</string>
     <string name="manage_appointment_details">Manage appointment details</string>
     <string name="manage_client_requests">Manage appointment requests</string>
@@ -372,6 +376,12 @@
     <string name="notify_coach_about_cancelation">Notify coach about cancelation.</string>
     <string name="other">Other</string>
     <string name="out_of_credits">Out of Credits</string>
+    <string name="pace_kmh">Speed (km/h) – bike, air-bike</string>
+    <string name="pace_none">No distance</string>
+    <string name="pace_per_500m">Pace per 500 m – row-erg, ski-erg</string>
+    <string name="pace_per_km">Pace per km (min/km) – walking, running</string>
+    <string name="pace_type">Distance and pace</string>
+    <string name="pace_type_hint">For workouts done over a distance (walking, rowing, cycling): sets record the distance and duration, and the pace is shown from them.</string>
     <string name="package_done_of_total">%1$d / %2$d done</string>
     <string name="package_remaining">%d left</string>
     <string name="package_trainings">%d trainings</string>

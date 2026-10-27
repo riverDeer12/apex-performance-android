@@ -1,3 +1,4 @@
 Novosti:
-- Vježbe su podijeljene u dvije kategorije: Mobilnost i fleksibilnost te Snaga i kondicija. Popis vježbi ima dvije tipke za filtriranje po kategoriji (ponovni dodir prikazuje sve vježbe).
-- U obrascu vježbe trener bira kategoriju. Nova vježba s tipom za mobilnost ili istezanje automatski dobiva kategoriju Mobilnost i fleksibilnost.
+- Udaljenost i pace za vježbe poput hodanja, bicikla, row-erga, ski-erga i air-bikea. U obrascu vježbe trener bira vrstu: pace po km (min/km), pace na 500 m ili brzina (km/h).
+- U treningu se uz trajanje seta upisuje udaljenost u metrima, a pace se prikazuje odmah dok se upisuje. Detalji treninga i setovi s prošlog treninga također prikazuju udaljenost i pace.
+- Osobni rekordi: novi rekordi najveće udaljenosti i najbržeg pacea.

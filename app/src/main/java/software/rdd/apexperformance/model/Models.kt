@@ -414,7 +414,10 @@ data class Workout(
     // Done for a time (e.g. plank): sets record a duration instead of repetitions.
     val isTimed: Boolean = false,
     // WorkoutCategory value; null from an API without categories.
-    val category: String? = null
+    val category: String? = null,
+    // PaceType value (e.g. rowing): sets record a distance and show a pace.
+    // Null when the workout records no distance.
+    val paceType: String? = null
 ) {
     // Category for filtering; before the API had them, taken from the types.
     val workoutCategory: WorkoutCategory
@@ -457,7 +460,9 @@ data class UpdateWorkoutRequest(
     val muscles: List<String>? = null,
     val secondaryMuscles: List<String>? = null,
     val isTimed: Boolean? = null,
-    val category: String? = null
+    val category: String? = null,
+    // Null keeps the current pace type, "" clears it.
+    val paceType: String? = null
 )
 
 // POST workouts/guess-muscles: muscles guessed from the name, with the
@@ -574,6 +579,14 @@ val WorkoutType.isMobilityOrStretching: Boolean
 enum class WorkoutCategory(val value: String, @StringRes val title: Int) {
     MOBILITY_FLEXIBILITY("MobilityFlexibility", R.string.category_mobility_flexibility),
     STRENGTH_CONDITIONING("StrengthConditioning", R.string.category_strength_conditioning)
+}
+
+// Options of a workout's pace type in the workout form.
+enum class PaceTypeOption(val value: String?, @StringRes val title: Int) {
+    NONE(null, R.string.pace_none),
+    PER_KM(PaceType.PER_KM, R.string.pace_per_km),
+    PER_500M(PaceType.PER_500M, R.string.pace_per_500m),
+    KMH(PaceType.KMH, R.string.pace_kmh)
 }
 
 // Deletes the workout (soft delete on the API, staff only).

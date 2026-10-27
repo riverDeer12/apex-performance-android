@@ -15,17 +15,23 @@ data class PersonalRecord(
     // Persisted JSON with the workout name translations.
     val workoutName: LocalizedText = LocalizedText(),
     val trainingId: String,
-    // "MaxWeight", "EstimatedOneRepMax" or "LongestDuration" (value in
-    // seconds, for workouts done for a time).
+    // "MaxWeight", "EstimatedOneRepMax", "LongestDuration" (value in
+    // seconds, for workouts done for a time), "LongestDistance" (value in
+    // metres) or "FastestPace" (value is the average speed in metres per
+    // minute, for workouts with a pace type).
     val type: String,
     val value: Double = 0.0,
     val weight: Double = 0.0,
     val reps: Double? = null,
-    val achievedAt: IsoInstant
+    val achievedAt: IsoInstant,
+    // Workout's PaceType value, for showing the fastest pace.
+    val paceType: String? = null
 ) {
     val isMaxWeight: Boolean get() = type == "MaxWeight"
     val isOneRepMax: Boolean get() = type == "EstimatedOneRepMax"
     val isLongestDuration: Boolean get() = type == "LongestDuration"
+    val isLongestDistance: Boolean get() = type == "LongestDistance"
+    val isFastestPace: Boolean get() = type == "FastestPace"
 
     companion object {
         // Record history of a client, newest first. Staff pass the client,
@@ -45,6 +51,9 @@ data class ExerciseRecords(
     val oneRepMax: PersonalRecord?,
     // Longest set of a workout done for a time (e.g. plank).
     val longestDuration: PersonalRecord?,
+    // Longest distance and fastest pace of a workout with a pace type (e.g. rowing).
+    val longestDistance: PersonalRecord?,
+    val fastestPace: PersonalRecord?,
     // Newest first.
     val history: List<PersonalRecord>
 ) {
@@ -69,6 +78,8 @@ data class ExerciseRecords(
                         maxWeight = history.firstOrNull { it.isMaxWeight },
                         oneRepMax = history.firstOrNull { it.isOneRepMax },
                         longestDuration = history.firstOrNull { it.isLongestDuration },
+                        longestDistance = history.firstOrNull { it.isLongestDistance },
+                        fastestPace = history.firstOrNull { it.isFastestPace },
                         history = history
                     )
                 }

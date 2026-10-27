@@ -42,6 +42,7 @@ import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.GuessMusclesRequest
 import software.rdd.apexperformance.model.GuessMusclesResponse
 import software.rdd.apexperformance.model.LocalizedText
+import software.rdd.apexperformance.model.PaceTypeOption
 import software.rdd.apexperformance.model.UpdateWorkoutRequest
 import software.rdd.apexperformance.model.Workout
 import software.rdd.apexperformance.model.WorkoutCategory
@@ -76,6 +77,8 @@ class WorkoutEditScreen(
     // Sets record a duration instead of repetitions (e.g. plank).
     private var isTimed by mutableStateOf(workout?.isTimed ?: false)
     private var category by mutableStateOf(workout?.workoutCategory ?: WorkoutCategory.STRENGTH_CONDITIONING)
+    // PaceType value (e.g. rowing): sets record a distance and show a pace.
+    private var paceType by mutableStateOf(workout?.paceType)
     // Picked by the coach, then picking a type no longer changes it.
     private var isCategoryPicked = workout != null
     // Muscle whose role menu is open.
@@ -91,6 +94,7 @@ class WorkoutEditScreen(
             selectedWorkoutTypeIds != workout?.workoutTypes.orEmpty().map { it.id }.toSet() ||
             muscles != rolesOf(workout) ||
             isTimed != (workout?.isTimed ?: false) ||
+            paceType != workout?.paceType ||
             category != (workout?.workoutCategory ?: WorkoutCategory.STRENGTH_CONDITIONING)
 
     // In the API's order, which the body map also uses.
@@ -236,6 +240,31 @@ class WorkoutEditScreen(
             }
 
             FormSection(
+                header = stringResource(R.string.pace_type),
+                footer = { Text(stringResource(R.string.pace_type_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
+            ) {
+                PaceTypeOption.entries.forEach { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                paceType = option.value
+                                // Distance sets also record their duration, like on the web.
+                                if (option.value != null) isTimed = true
+                            }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(option.title), style = ApexText.body, modifier = Modifier.weight(1f))
+                        if (option.value == paceType) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
+                        }
+                    }
+                    if (option != PaceTypeOption.entries.last()) Divider()
+                }
+            }
+
+            FormSection(
                 footer = { Text(stringResource(R.string.timed_workout_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
             ) {
                 ToggleRow(stringResource(R.string.timed_workout), isTimed) { isTimed = it }
@@ -377,8 +406,11 @@ class WorkoutEditScreen(
                 thumbnailUrl = thumbnailUrl.trim(),
                 videoUrl = videoUrl.trim(),
                 workoutTypes = selectedWorkoutTypeIds.toList(),
-                isTimed = isTimed,
+                // The API also makes a workout with a pace type timed.
+                isTimed = isTimed || paceType != null,
                 category = category.value,
+                // "" clears the pace type.
+                paceType = paceType.orEmpty(),
                 muscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.PRIMARY),
                 secondaryMuscles = if (workout == null && muscles.isEmpty()) null else selectedMuscles(MuscleRole.SECONDARY)
             )

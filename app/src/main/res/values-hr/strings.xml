@@ -160,6 +160,8 @@
     <string name="discard_changes">Odbaci promjene</string>
     <string name="discard_changes_info">Promjene nisu spremljene i bit će izgubljene.</string>
     <string name="discard_changes_question">Odbaciti promjene?</string>
+    <string name="distance">Udaljenost</string>
+    <string name="distance_meters">Udaljenost (m)</string>
     <string name="done">Gotovo</string>
     <string name="done_this_month">Odrađeno (mjesec)</string>
     <string name="download_template">Predložak</string>
@@ -207,6 +209,7 @@
     <string name="exercise_library">Biblioteka vježbi</string>
     <string name="exercise_library_subtitle">Sve vježbe s uputama i videom</string>
     <string name="exercises_count">Vježbe: %d</string>
+    <string name="fastest_pace">Najbrži pace</string>
     <string name="filter_by_client">Filtriraj po klijentu</string>
     <string name="first_name">Ime</string>
     <string name="fms">FMS</string>
@@ -265,6 +268,7 @@
     <string name="login">Prijava</string>
     <string name="logout">Odjava</string>
     <string name="logout_question">Želite li se odjaviti?</string>
+    <string name="longest_distance">Najveća udaljenost</string>
     <string name="longest_duration">Najduže trajanje</string>
     <string name="manage_appointment_details">Upravljaj detaljima termina</string>
     <string name="manage_client_requests">Upravljanje zahtjevima za termine</string>
@@ -371,6 +375,12 @@
     <string name="notify_coach_about_cancelation">Obavijesti trenera o otkazivanju termina.</string>
     <string name="other">Ostalo</string>
     <string name="out_of_credits">Nema sredstava</string>
+    <string name="pace_kmh">Brzina (km/h) – bicikl, air-bike</string>
+    <string name="pace_none">Bez udaljenosti</string>
+    <string name="pace_per_500m">Pace na 500 m – row-erg, ski-erg</string>
+    <string name="pace_per_km">Pace po km (min/km) – hodanje, trčanje</string>
+    <string name="pace_type">Udaljenost i pace</string>
+    <string name="pace_type_hint">Za vježbe na udaljenost (hodanje, veslanje, bicikl): serije bilježe udaljenost i trajanje, a iz njih se prikazuje pace.</string>
     <string name="package_done_of_total">%1$d / %2$d odrađeno</string>
     <string name="package_remaining">%d preostalo</string>
     <string name="package_trainings">%d treninga</string>

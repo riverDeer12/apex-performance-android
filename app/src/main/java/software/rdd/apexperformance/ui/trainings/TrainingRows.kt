@@ -29,6 +29,7 @@ import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.model.distanceSetParts
 import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.RowDivider
@@ -170,10 +171,14 @@ internal fun formatWeight(weight: Double): String =
         maximumFractionDigits = 2
     }.format(weight)
 
-// For example "10 × 40 kg", "10" or "40 kg".
-internal fun setDescription(set: Training.ExerciseSet): String {
+// For example "10 × 40 kg", "10" or "40 kg". The pace of a set over a
+// distance is shown for the exercise's pace type.
+internal fun setDescription(set: Training.ExerciseSet, paceType: String? = null): String {
     val reps = set.reps?.trim()?.takeIf { it.isNotEmpty() }
     val weight = set.weight?.let { "${formatWeight(it)} kg" }
+    // A set over a distance, e.g. "2 km · 7:30 · 1:52 /500 m".
+    val distanceParts = distanceSetParts(set, paceType)
+    if (distanceParts.isNotEmpty()) return (distanceParts + listOfNotNull(weight)).joinToString(" · ")
     // A timed set, e.g. "1:30 · 10 kg".
     set.durationSeconds?.let { return listOfNotNull(setDuration(it), weight).joinToString(" · ") }
     return when {

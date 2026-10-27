@@ -160,6 +160,8 @@
     <string name="discard_changes">Annulla modifiche</string>
     <string name="discard_changes_info">Le modifiche non sono state salvate e andranno perse.</string>
     <string name="discard_changes_question">Annullare le modifiche?</string>
+    <string name="distance">Distanza</string>
+    <string name="distance_meters">Distanza (m)</string>
     <string name="done">Fatto</string>
     <string name="done_this_month">Completati (mese)</string>
     <string name="download_template">Modello</string>
@@ -207,6 +209,7 @@
     <string name="exercise_library">Libreria esercizi</string>
     <string name="exercise_library_subtitle">Tutti gli esercizi con istruzioni e video</string>
     <string name="exercises_count">Esercizi: %d</string>
+    <string name="fastest_pace">Passo più veloce</string>
     <string name="filter_by_client">Filtra per cliente</string>
     <string name="first_name">Nome</string>
     <string name="fms">FMS</string>
@@ -265,6 +268,7 @@
     <string name="login">Accedi</string>
     <string name="logout">Esci</string>
     <string name="logout_question">Vuoi uscire?</string>
+    <string name="longest_distance">Distanza più lunga</string>
     <string name="longest_duration">Durata massima</string>
     <string name="manage_appointment_details">Gestisci i dettagli dell’appuntamento</string>
     <string name="manage_client_requests">Gestisci richieste client</string>
@@ -371,6 +375,12 @@
     <string name="notify_coach_about_cancelation">Avvisare l\'allenatore della cancellazione.</string>
     <string name="other">Altro</string>
     <string name="out_of_credits">Crediti esauriti</string>
+    <string name="pace_kmh">Velocità (km/h) – bici, air-bike</string>
+    <string name="pace_none">Senza distanza</string>
+    <string name="pace_per_500m">Passo per 500 m – vogatore, ski-erg</string>
+    <string name="pace_per_km">Passo per km (min/km) – camminata, corsa</string>
+    <string name="pace_type">Distanza e passo</string>
+    <string name="pace_type_hint">Per esercizi su distanza (camminata, vogatore, bici): le serie registrano distanza e durata e ne mostrano il passo.</string>
     <string name="package_done_of_total">%1$d / %2$d completati</string>
     <string name="package_remaining">%d rimanenti</string>
     <string name="package_trainings">%d allenamenti</string>

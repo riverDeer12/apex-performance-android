@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Functions
 import androidx.compose.material.icons.outlined.Scale
+import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,6 +44,8 @@ import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.model.ExerciseRecords
 import software.rdd.apexperformance.model.PersonalRecord
+import software.rdd.apexperformance.model.formatDistance
+import software.rdd.apexperformance.model.formatSpeed
 import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
@@ -167,7 +171,17 @@ class PersonalRecordsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val longestDuration = exercise.longestDuration
-                if (longestDuration != null) {
+                if (exercise.longestDistance != null || exercise.fastestPace != null) {
+                    // A workout done over a distance (e.g. rowing) has no weight records.
+                    RecordStat(stringResource(R.string.longest_distance), exercise.longestDistance, Modifier.weight(1f))
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .fillMaxHeight()
+                            .background(ApexColors.border)
+                    )
+                    RecordStat(stringResource(R.string.fastest_pace), exercise.fastestPace, Modifier.weight(1f))
+                } else if (longestDuration != null) {
                     // A workout done for a time has no weight records.
                     RecordStat(stringResource(R.string.longest_duration), longestDuration, Modifier.weight(1f))
                 } else {
@@ -267,6 +281,8 @@ class PersonalRecordHistoryScreen(private val exercise: ExerciseRecords) : Scree
             Box(modifier = Modifier.width(24.dp), contentAlignment = Alignment.Center) {
                 Icon(
                     when {
+                        record.isLongestDistance -> Icons.Outlined.Straighten
+                        record.isFastestPace -> Icons.Outlined.Speed
                         record.isLongestDuration -> Icons.Outlined.Timer
                         record.isMaxWeight -> Icons.Outlined.Scale
                         else -> Icons.Outlined.Functions
@@ -279,6 +295,8 @@ class PersonalRecordHistoryScreen(private val exercise: ExerciseRecords) : Scree
                 Text(
                     stringResource(
                         when {
+                            record.isLongestDistance -> R.string.longest_distance
+                            record.isFastestPace -> R.string.fastest_pace
                             record.isLongestDuration -> R.string.longest_duration
                             record.isMaxWeight -> R.string.max_weight
                             else -> R.string.estimated_one_rep_max
@@ -295,7 +313,9 @@ class PersonalRecordHistoryScreen(private val exercise: ExerciseRecords) : Scree
                 )
                 // The set the record comes from.
                 Text(
-                    if (record.isLongestDuration) {
+                    if (record.isLongestDistance || record.isFastestPace) {
+                        if (record.weight > 0) PersonalRecordFormat.kilograms(record.weight) else "—"
+                    } else if (record.isLongestDuration) {
                         if (record.weight > 0) PersonalRecordFormat.kilograms(record.weight) else "—"
                     } else {
                         PersonalRecordFormat.set(record.weight, record.reps)
@@ -318,9 +338,14 @@ internal object PersonalRecordFormat {
 
     fun kilograms(value: Double): String = "${number(value)} kg"
 
-    // Kilograms, or minutes and seconds for the longest duration.
-    fun value(record: PersonalRecord): String =
-        if (record.isLongestDuration) setDuration(record.value.toInt()) else kilograms(record.value)
+    // Kilograms, minutes and seconds for the longest duration, the distance
+    // for the longest distance or the pace for the fastest pace.
+    fun value(record: PersonalRecord): String = when {
+        record.isLongestDistance -> formatDistance(Math.round(record.value).toInt())
+        record.isFastestPace -> formatSpeed(record.paceType, record.value)
+        record.isLongestDuration -> setDuration(record.value.toInt())
+        else -> kilograms(record.value)
+    }
 
     // "10 × 40 kg" or "40 kg".
     fun set(weight: Double, reps: Double?): String =
