@@ -695,6 +695,8 @@ class TrainingFormScreen private constructor(
                         seconds = set.durationSeconds,
                         onSecondsChange = { value -> updateSet(exerciseId, set.id) { it.copy(durationSeconds = value) } },
                         title = stringResource(R.string.time),
+                        // Walks and rides over a distance can last over an hour.
+                        showsHours = paceType != null,
                         modifier = Modifier.weight(1f)
                     )
                 } else {

@@ -195,6 +195,7 @@ private fun NumberWheelSheet(
 
 // Duration shown like a field ("1:30"); tapping it opens minutes and
 // seconds wheels, e.g. how long a plank lasted. Like DurationWheelField on iOS.
+// With `showsHours` it also has an hours wheel, e.g. for a long walk or ride.
 @Composable
 fun DurationWheelField(
     seconds: Int?,
@@ -202,7 +203,8 @@ fun DurationWheelField(
     modifier: Modifier = Modifier,
     // Value the wheels start at when there is no value yet.
     defaultSeconds: Int = 60,
-    title: String? = null
+    title: String? = null,
+    showsHours: Boolean = false
 ) {
     var isPresented by remember { mutableStateOf(false) }
 
@@ -224,6 +226,7 @@ fun DurationWheelField(
         DurationWheelSheet(
             seconds = seconds ?: defaultSeconds,
             title = title,
+            showsHours = showsHours,
             onDone = {
                 onSecondsChange(it)
                 isPresented = false
@@ -233,17 +236,20 @@ fun DurationWheelField(
     }
 }
 
-// Bottom sheet with minutes (0–59) and seconds (in steps of 5) wheels.
+// Bottom sheet with minutes (0–59) and seconds (in steps of 5) wheels,
+// and an hours wheel (0–9) before them with `showsHours`.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DurationWheelSheet(
     seconds: Int,
     title: String?,
+    showsHours: Boolean,
     onDone: (Int?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val start = seconds.coerceIn(0, 59 * 60 + 55)
-    var minutes by remember { mutableIntStateOf(start / 60) }
+    val start = seconds.coerceIn(0, if (showsHours) MAX_HOURS * 3600 + 59 * 60 + 55 else 59 * 60 + 55)
+    var hours by remember { mutableIntStateOf(if (showsHours) start / 3600 else 0) }
+    var minutes by remember { mutableIntStateOf(start % 3600 / 60) }
     // Rounded down to the wheel's steps of 5 seconds.
     var secondsIndex by remember { mutableIntStateOf(start % 60 / 5) }
 
@@ -269,7 +275,7 @@ private fun DurationWheelSheet(
                     modifier = Modifier.weight(1f)
                 )
                 TextButton(onClick = {
-                    val total = minutes * 60 + secondsIndex * 5
+                    val total = hours * 3600 + minutes * 60 + secondsIndex * 5
                     // The API takes 1 second at least.
                     onDone(if (total > 0) total else null)
                 }) {
@@ -284,6 +290,15 @@ private fun DurationWheelSheet(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if (showsHours) {
+                    WheelPicker(
+                        items = (0..MAX_HOURS).map { it.toString() },
+                        selectedIndex = hours,
+                        onSelect = { hours = it },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text("h", style = ApexText.headline, color = ApexColors.secondaryLabel, modifier = Modifier.padding(horizontal = 12.dp))
+                }
                 WheelPicker(
                     items = (0 until 60).map { it.toString() },
                     selectedIndex = minutes,
@@ -302,6 +317,9 @@ private fun DurationWheelSheet(
         }
     }
 }
+
+// Most hours of the duration wheels with hours (9:59:55).
+private const val MAX_HOURS = 9
 
 // Scrolling wheel of values that snaps to the middle row, like a
 // UIPickerView wheel.
