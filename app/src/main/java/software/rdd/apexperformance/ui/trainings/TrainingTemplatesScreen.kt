@@ -93,7 +93,6 @@ class TrainingTemplatesScreen : Screen() {
     private var templates by mutableStateOf<List<TrainingTemplate>>(emptyList())
     private var searchText by mutableStateOf("")
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
     // Template picked for deletion from the long-press menu.
     private var templateToDelete by mutableStateOf<TrainingTemplate?>(null)
 
@@ -117,11 +116,9 @@ class TrainingTemplatesScreen : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                load()
-            }
+            load()
         }
 
         ScrollScreen(

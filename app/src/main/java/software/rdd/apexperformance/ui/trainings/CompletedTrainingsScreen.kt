@@ -65,7 +65,6 @@ class CompletedTrainingsScreen : Screen() {
     private var workouts by mutableStateOf<Map<String, Workout>>(emptyMap())
     private var searchText by mutableStateOf("")
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
 
     private val filteredTrainings: List<Training>
         get() {
@@ -83,11 +82,9 @@ class CompletedTrainingsScreen : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                load()
-            }
+            load()
         }
 
         // Training of a tapped push. Clients only see trainings their

@@ -15,6 +15,7 @@
     <string name="all_clients">Svi klijenti</string>
     <string name="all_plans">Svi planovi</string>
     <string name="all_trainings_subtitle">Treninzi svih klijenata</string>
+    <string name="all_workouts">Sve vježbe</string>
     <string name="already_in_appointment">Već ste u terminu</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">hr</string>
@@ -162,6 +163,7 @@
     <string name="discard_changes_question">Odbaciti promjene?</string>
     <string name="distance">Udaljenost</string>
     <string name="distance_meters">Udaljenost (m)</string>
+    <string name="distance_placeholder">metara</string>
     <string name="done">Gotovo</string>
     <string name="done_this_month">Odrađeno (mjesec)</string>
     <string name="download_template">Predložak</string>
@@ -495,6 +497,7 @@
     <string name="successfully_joined_appointment">Uspješno poslan zahtjev.</string>
     <string name="successfully_sent_cancelation_request">Uspješno poslan zahtjev za otkazivanje termina.</string>
     <string name="successfully_updated_user">Uspješno ažurirani korisnički podatci.</string>
+    <string name="suggested_for_training">Predloženo za ovaj trening</string>
     <string name="superset">Super serija</string>
     <string name="superset_with_previous">Super serija s prethodnom</string>
     <string name="tab_appointments">Termini</string>

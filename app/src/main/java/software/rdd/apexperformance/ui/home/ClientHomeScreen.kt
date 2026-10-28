@@ -95,7 +95,6 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
     private var approvedAppointments by mutableStateOf<List<Appointment>>(emptyList())
     private var pendingAppointments by mutableStateOf<List<Appointment>>(emptyList())
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
     private var goal by mutableStateOf<ClientGoal?>(null)
     private var showGoalSheet by mutableStateOf(false)
 
@@ -104,11 +103,9 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
 
     @Composable
     override fun Content() {
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                load()
-            }
+            load()
         }
 
         val planTitle = ClientPlan.from(client?.plan)?.let { stringResource(it.title) }

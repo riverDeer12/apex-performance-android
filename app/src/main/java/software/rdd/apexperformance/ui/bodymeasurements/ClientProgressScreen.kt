@@ -79,17 +79,14 @@ class ClientProgressScreen : Screen() {
     private var reviews by mutableStateOf<List<MonthlyReview>>(emptyList())
     private var trainings by mutableStateOf<List<Training>>(emptyList())
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                load()
-            }
+            load()
         }
 
         ScrollScreen(

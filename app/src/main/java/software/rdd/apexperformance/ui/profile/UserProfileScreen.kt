@@ -71,7 +71,6 @@ class UserProfileScreen : Screen() {
     // Account data from api/profile, same for all roles.
     private var accountProfile by mutableStateOf<Profile?>(null)
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
     private var showLogoutDialog by mutableStateOf(false)
 
     private val isClient: Boolean get() = AuthManager.hasRole(Roles.CLIENT)
@@ -80,11 +79,9 @@ class UserProfileScreen : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                loadUserProfile()
-            }
+            loadUserProfile()
         }
 
         ScrollScreen(showLoading = isLoading && accountProfile == null) {

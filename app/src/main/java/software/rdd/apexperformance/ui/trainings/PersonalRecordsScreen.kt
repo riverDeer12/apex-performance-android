@@ -71,7 +71,6 @@ class PersonalRecordsScreen(
     private var exercises by mutableStateOf<List<ExerciseRecords>>(emptyList())
     private var searchText by mutableStateOf("")
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
 
     private val filteredExercises: List<ExerciseRecords>
         get() {
@@ -84,11 +83,9 @@ class PersonalRecordsScreen(
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                load()
-            }
+            load()
         }
 
         ScrollScreen(

@@ -78,7 +78,6 @@ class StaffTrainingsScreen : Screen() {
     private var status by mutableStateOf(StatusFilter.ALL)
     private var clientId by mutableStateOf<String?>(null)
     private var isLoading by mutableStateOf(false)
-    private var hasLoaded = false
 
     // Clients that have trainings, by name.
     private val clients: List<Training.Person>
@@ -113,11 +112,9 @@ class StaffTrainingsScreen : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                load()
-            }
+            load()
         }
 
         ScrollScreen(

@@ -1,4 +1,3 @@
 Novosti:
-- Udaljenost i pace za vježbe poput hodanja, bicikla, row-erga, ski-erga i air-bikea. U obrascu vježbe trener bira vrstu: pace po km (min/km), pace na 500 m ili brzina (km/h).
-- U treningu se uz trajanje seta upisuje udaljenost u metrima, a pace se prikazuje odmah dok se upisuje. Detalji treninga i setovi s prošlog treninga također prikazuju udaljenost i pace.
-- Osobni rekordi: novi rekordi najveće udaljenosti i najbržeg pacea.
+- Ekrani se osvježavaju svaki put kad se otvore, nije potrebno povlačiti prema dolje.
+- Kod dodavanja vježbe u trening na vrhu su predložene vježbe koje odgovaraju nazivu treninga (npr. "Gornji dio tijela", "Noge", "Mobilnost") i vježbe iz ranijih treninga istog naziva.
