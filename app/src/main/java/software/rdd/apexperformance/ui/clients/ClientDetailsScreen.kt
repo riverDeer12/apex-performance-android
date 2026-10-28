@@ -118,20 +118,17 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
     private var goal by mutableStateOf(ClientGoal())
     private var monthlyReviews by mutableStateOf<List<MonthlyReview>>(emptyList())
     // Lists are loaded once, then kept up to date by the screens opened from here.
-    private var hasLoaded = false
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
         val context = LocalContext.current
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                launch { loadFunctionalMovementScreens() }
-                launch { loadTrainings() }
-                launch { loadGoalAndReviews() }
-            }
+            launch { loadFunctionalMovementScreens() }
+            launch { loadTrainings() }
+            launch { loadGoalAndReviews() }
         }
 
         ScrollScreen(

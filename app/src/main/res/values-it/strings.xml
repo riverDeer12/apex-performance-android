@@ -15,6 +15,7 @@
     <string name="all_clients">Tutti i clienti</string>
     <string name="all_plans">Tutti i piani</string>
     <string name="all_trainings_subtitle">Allenamenti di tutti i clienti</string>
+    <string name="all_workouts">Tutti gli esercizi</string>
     <string name="already_in_appointment">Sei già iscritto</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">it</string>
@@ -162,6 +163,7 @@
     <string name="discard_changes_question">Annullare le modifiche?</string>
     <string name="distance">Distanza</string>
     <string name="distance_meters">Distanza (m)</string>
+    <string name="distance_placeholder">metri</string>
     <string name="done">Fatto</string>
     <string name="done_this_month">Completati (mese)</string>
     <string name="download_template">Modello</string>
@@ -495,6 +497,7 @@
     <string name="successfully_joined_appointment">Richiesta inviata con successo.</string>
     <string name="successfully_sent_cancelation_request">Richiesta di annullamento inviata correttamente.</string>
     <string name="successfully_updated_user">Utente aggiornato con successo.</string>
+    <string name="suggested_for_training">Suggeriti per questo allenamento</string>
     <string name="superset">Superserie</string>
     <string name="superset_with_previous">Superserie con il precedente</string>
     <string name="tab_appointments">Appuntamenti</string>

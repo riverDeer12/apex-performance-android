@@ -106,7 +106,6 @@ class WorkoutsScreen(
     private var category by mutableStateOf<WorkoutCategory?>(null)
     private var isLoading by mutableStateOf(false)
     private var isImporting by mutableStateOf(false)
-    private var hasLoaded = false
     // Workout picked for deletion from the long-press menu.
     private var workoutToDelete by mutableStateOf<Workout?>(null)
 
@@ -147,11 +146,9 @@ class WorkoutsScreen(
             if (uri != null) launch { importWorkouts(context, uri) }
         }
 
+        // Fresh data every time the screen is shown, not only after pulling to refresh.
         LaunchedEffect(Unit) {
-            if (!hasLoaded) {
-                hasLoaded = true
-                loadWorkouts()
-            }
+            loadWorkouts()
         }
 
         ScrollScreen(

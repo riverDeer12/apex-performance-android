@@ -15,6 +15,7 @@
     <string name="all_clients">All clients</string>
     <string name="all_plans">All plans</string>
     <string name="all_trainings_subtitle">Trainings of all clients</string>
+    <string name="all_workouts">All workouts</string>
     <string name="already_in_appointment">You are already in it</string>
     <!-- Language the app is shown in, used to pick API translations. -->
     <string name="app_language_code">en</string>
@@ -163,6 +164,7 @@
     <string name="discard_changes_question">Discard changes?</string>
     <string name="distance">Distance</string>
     <string name="distance_meters">Distance (m)</string>
+    <string name="distance_placeholder">metres</string>
     <string name="done">Done</string>
     <string name="done_this_month">Done (month)</string>
     <string name="download_template">Template</string>
@@ -496,6 +498,7 @@
     <string name="successfully_joined_appointment">Join request successfully sent.</string>
     <string name="successfully_sent_cancelation_request">Successfully sent cancelation request.</string>
     <string name="successfully_updated_user">Successfully updated user.</string>
+    <string name="suggested_for_training">Suggested for this training</string>
     <string name="superset">Superset</string>
     <string name="superset_with_previous">Superset with previous</string>
     <string name="tab_appointments">Appointments</string>

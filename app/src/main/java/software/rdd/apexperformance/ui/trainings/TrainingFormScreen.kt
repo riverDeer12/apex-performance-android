@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -418,6 +419,7 @@ class TrainingFormScreen private constructor(
                         navigator.push(
                             WorkoutPickerScreen(
                                 workouts = { workouts },
+                                trainingName = name,
                                 selection = exercise.workoutId
                             ) { id -> updateExercise(exercise.id) { it.copy(workoutId = id, paceType = null) } }
                         )
@@ -1135,20 +1137,32 @@ private data class SetDraft(
 
 // MARK: - Workout picker
 
-// Searchable list of all workouts to choose a training exercise.
+// Searchable list of all workouts to choose a training exercise, with
+// the ones that fit the training's name on top (GET workouts/suggested).
 private class WorkoutPickerScreen(
     // Read when shown, as the form may still be loading them.
     private val workouts: () -> List<Workout>,
+    private val trainingName: String,
     private val selection: String?,
     private val onSelect: (String) -> Unit
 ) : Screen() {
 
     private var searchText by mutableStateOf("")
+    private var suggestedIds by mutableStateOf<List<String>>(emptyList())
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
         val all = workouts()
+
+        // Without suggestions (no name, or an API without them) the list is as before.
+        LaunchedEffect(trainingName) {
+            val name = trainingName.trim()
+            if (name.isNotEmpty()) {
+                runCatching { ApiClient.get<List<String>>("workouts/suggested?name=${Uri.encode(name)}") }
+                    .getOrNull()?.let { suggestedIds = it }
+            }
+        }
 
         ScrollScreen(
             topBar = { TopBar(title = stringResource(R.string.select_exercise)) },
@@ -1185,36 +1199,67 @@ private class WorkoutPickerScreen(
                 }
             }
 
+            // Suggestions while not searching, in the API's order (best first).
+            val suggested = if (searchText.isEmpty()) {
+                val byId = all.associateBy { it.id }
+                suggestedIds.mapNotNull { byId[it] }
+            } else {
+                emptyList()
+            }
+            if (suggested.isNotEmpty()) {
+                SectionTitle(stringResource(R.string.suggested_for_training))
+                WorkoutList(suggested) { workout ->
+                    onSelect(workout.id)
+                    navigator.pop()
+                }
+                SectionTitle(stringResource(R.string.all_workouts))
+            }
+
             val filtered = all.filter { it.matches(searchText) }
             if (filtered.isNotEmpty()) {
-                Column(
+                WorkoutList(filtered) { workout ->
+                    onSelect(workout.id)
+                    navigator.pop()
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun SectionTitle(text: String) {
+        Text(
+            text.uppercase(),
+            style = ApexText.footnote,
+            color = ApexColors.secondaryLabel,
+            modifier = Modifier.padding(start = 36.dp, end = 20.dp, top = 8.dp)
+        )
+    }
+
+    @Composable
+    private fun WorkoutList(workouts: List<Workout>, onClick: (Workout) -> Unit) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(ApexColors.secondaryGroupedBackground)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+        ) {
+            workouts.forEach { workout ->
+                Row(
                     modifier = Modifier
-                        .padding(horizontal = 20.dp)
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(ApexColors.secondaryGroupedBackground)
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable { onClick(workout) }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    filtered.forEach { workout ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onSelect(workout.id)
-                                    navigator.pop()
-                                }
-                                .padding(vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(workout.name.localized, style = ApexText.body, modifier = Modifier.weight(1f))
-                            if (workout.id == selection) {
-                                Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
-                            }
-                        }
-                        if (workout.id != filtered.last().id) {
-                            HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
-                        }
+                    Text(workout.name.localized, style = ApexText.body, modifier = Modifier.weight(1f))
+                    if (workout.id == selection) {
+                        Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
                     }
+                }
+                if (workout.id != workouts.last().id) {
+                    HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
                 }
             }
         }
