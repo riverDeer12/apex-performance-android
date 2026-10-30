@@ -470,6 +470,8 @@
     <string name="rules_open_document">Apri le regole (PDF)</string>
     <string name="rules_title">Regole di collaborazione</string>
     <string name="save">Salva</string>
+    <string name="save_and_start_training">Salva e inizia l\'allenamento</string>
+    <string name="save_and_start_training_hint">L\'allenamento viene salvato per oggi ed è subito in corso: il cliente lo vede e lo termini con “Termina allenamento” nei dettagli.</string>
     <string name="save_as_template">Salva come modello</string>
     <string name="save_as_template_hint">Il modello riceve gli esercizi e le serie di questo allenamento.</string>
     <string name="search">Cerca</string>
@@ -546,6 +548,7 @@
     <string name="training_progress_title">Progressi di allenamento</string>
     <string name="training_saved_successfully">Allenamento salvato.</string>
     <string name="training_started">Inizio</string>
+    <string name="training_started_toast">Allenamento iniziato.</string>
     <string name="training_templates">Modelli di allenamento</string>
     <string name="training_templates_subtitle">Prepara un allenamento una volta e assegnalo ai clienti</string>
     <string name="training_time">Orario dell\'allenamento</string>

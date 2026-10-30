@@ -282,18 +282,7 @@ class TrainingDetailScreen(
     private suspend fun saveTimes(startedAt: Instant?, endedAt: Instant?) {
         isSavingTimes = true
         try {
-            val response: Training.TimesResponse = ApiClient.request(
-                "trainings/${training.id}/times",
-                HttpMethod.PUT,
-                Training.TimesRequest(startedAt?.toString(), endedAt?.toString())
-            )
-            training = training.copy(
-                startedAt = response.startedAt,
-                endedAt = response.endedAt,
-                heartRate = response.heartRate,
-                isCompleted = response.isCompleted,
-                completedAt = response.completedAt
-            )
+            training = training.settingTimes(startedAt, endedAt)
             onSaved?.invoke(training)
         } catch (e: Exception) {
             showError(e)

@@ -1,4 +1,2 @@
 Novosti:
-- Trener u detaljima treninga označava početak i kraj treninga (Započni trening / Završi trening) i vidi trajanje.
-- Kad klijent na iPhoneu poveže Apple Health, uz trening se prikazuju njegov najniži, najviši i prosječni puls za vrijeme treninga.
-- Novi status treninga U tijeku: klijent vidi trening čim ga trener započne, a Završi trening ga ujedno označava završenim.
+- U obrascu novog treninga trener može odmah tapnuti "Spremi i započni trening": trening se sprema za danas i odmah je u tijeku, pa ga klijent vidi.

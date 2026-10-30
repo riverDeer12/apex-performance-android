@@ -85,6 +85,19 @@ data class Training(
 
     // Marks the training as completed or planned (staff only).
     // Returns the training with the new state.
+    // Marks when the training started and ended (PUT trainings/{id}/times, staff only).
+    suspend fun settingTimes(startedAt: java.time.Instant?, endedAt: java.time.Instant?): Training {
+        val response: TimesResponse =
+            ApiClient.request("trainings/$id/times", HttpMethod.PUT, TimesRequest(startedAt?.toString(), endedAt?.toString()))
+        return copy(
+            startedAt = response.startedAt,
+            endedAt = response.endedAt,
+            heartRate = response.heartRate,
+            isCompleted = response.isCompleted,
+            completedAt = response.completedAt
+        )
+    }
+
     suspend fun settingCompletion(isCompleted: Boolean): Training {
         val response: CompletionResponse =
             ApiClient.request("trainings/$id/completion", HttpMethod.PUT, CompletionRequest(isCompleted))

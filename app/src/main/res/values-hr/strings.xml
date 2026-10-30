@@ -470,6 +470,8 @@
     <string name="rules_open_document">Otvori pravila (PDF)</string>
     <string name="rules_title">Pravila suradnje</string>
     <string name="save">Spremi</string>
+    <string name="save_and_start_training">Spremi i započni trening</string>
+    <string name="save_and_start_training_hint">Trening se sprema za danas i odmah je u tijeku: klijent ga vidi, a u detaljima ga završavaš s „Završi trening”.</string>
     <string name="save_as_template">Spremi kao predložak</string>
     <string name="save_as_template_hint">Predložak dobiva vježbe i serije ovog treninga.</string>
     <string name="search">Pretraži</string>
@@ -546,6 +548,7 @@
     <string name="training_progress_title">Trenažni napredak</string>
     <string name="training_saved_successfully">Trening je spremljen.</string>
     <string name="training_started">Početak</string>
+    <string name="training_started_toast">Trening je započet.</string>
     <string name="training_templates">Predlošci treninga</string>
     <string name="training_templates_subtitle">Pripremi trening jednom i dodijeli ga klijentima</string>
     <string name="training_time">Vrijeme treninga</string>
