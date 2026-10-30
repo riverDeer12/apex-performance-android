@@ -36,6 +36,9 @@ import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.SettingsRow
 import software.rdd.apexperformance.ui.theme.ApexColors
 import java.text.NumberFormat
+import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 
 // Rows of trainings that open their details, used on client details for
 // coaches. With onSaved (staff) trainings can be edited, marked as
@@ -56,8 +59,8 @@ fun TrainingRows(
         trainings.forEach { training ->
             Box {
                 SettingsRow(
-                    icon = if (training.isCompleted) Icons.Outlined.CheckCircle else Icons.Outlined.CalendarMonth,
-                    iconTint = if (training.isCompleted) ApexColors.green else ApexColors.orange,
+                    icon = training.statusIcon,
+                    iconTint = training.statusTint,
                     title = training.name,
                     subtitle = "${DateFormats.date(training.date)} · " +
                         stringResource(R.string.exercises_count, training.exercises.size),
@@ -188,3 +191,18 @@ internal fun setDescription(set: Training.ExerciseSet, paceType: String? = null)
         else -> "—"
     }
 }
+
+// Icon of a training's status in lists: planned, in progress or completed.
+val Training.statusIcon: ImageVector
+    get() = when {
+        isCompleted -> Icons.Outlined.CheckCircle
+        isInProgress -> Icons.Outlined.Timer
+        else -> Icons.Outlined.CalendarMonth
+    }
+
+val Training.statusTint: Color
+    @Composable get() = when {
+        isCompleted -> ApexColors.green
+        isInProgress -> ApexColors.blue
+        else -> ApexColors.orange
+    }

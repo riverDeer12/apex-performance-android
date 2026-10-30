@@ -23,6 +23,7 @@
     <string name="appearance_dark">Scuro</string>
     <string name="appearance_light">Chiaro</string>
     <string name="appearance_system">Sistema</string>
+    <string name="apple_health_hint">La frequenza cardiaca è misurata da un Apple Watch o da una fascia toracica collegata ad Apple Salute. Al coach vengono inviate solo la frequenza minima, massima e media durante l\'allenamento.</string>
     <string name="appointment">Appuntamento</string>
     <string name="appointment_approved_successfully">Appuntamento approvato con successo.</string>
     <string name="appointment_declined_successfully">Appuntamento rifiutato con successo.</string>
@@ -49,6 +50,7 @@
     <string name="body_measurement_updated_successfully">Misurazione corporea aggiornata con successo.</string>
     <string name="body_measurements">Misure corporee</string>
     <string name="book_appointment">Prenota appuntamento</string>
+    <string name="bpm">bpm</string>
     <string name="calves">Polpacci</string>
     <string name="can_not_be_undone">Questa azione non può essere annullata.</string>
     <string name="cancel">Annulla</string>
@@ -114,6 +116,7 @@
     <string name="chest">Petto</string>
     <string name="clear">Cancella</string>
     <string name="clear_read_notifications">Elimina lette</string>
+    <string name="clear_training_times">Cancella gli orari</string>
     <string name="client">Cliente</string>
     <string name="client_created_successfully">Client creato con successo</string>
     <string name="clients">Clienti</string>
@@ -169,6 +172,7 @@
     <string name="download_template">Modello</string>
     <string name="drop_set">Drop set</string>
     <string name="drop_set_short">Drop</string>
+    <string name="duration_minutes">%d min</string>
     <string name="edit">Modifica</string>
     <string name="edit_goal_and_plan">Modifica obiettivo e piano</string>
     <string name="edit_profile">Modifica profilo</string>
@@ -177,6 +181,7 @@
     <string name="edit_workout">Modifica esercizio</string>
     <string name="email">Email</string>
     <string name="email_copied">L\'e-mail è stata copiata.</string>
+    <string name="end_training">Termina allenamento</string>
     <string name="english">Inglese</string>
     <string name="enter_confirm_password">Reinserisci password</string>
     <string name="enter_new_password">Inserisci la nuova password</string>
@@ -237,12 +242,18 @@
     <string name="goal_placeholder">Cosa vuole raggiungere il cliente</string>
     <string name="goal_saved_successfully">Obiettivo e piano salvati.</string>
     <string name="got_it">Ok</string>
+    <string name="heart_rate">Frequenza cardiaca</string>
+    <string name="heart_rate_average">Media</string>
+    <string name="heart_rate_from_client_hint">La frequenza cardiaca arriva dall\'iPhone del cliente (Apple Salute) quando il cliente apre i suoi allenamenti.</string>
+    <string name="heart_rate_max">Massima</string>
+    <string name="heart_rate_min">Minima</string>
     <string name="height">Altezza</string>
     <string name="hello_name">Ciao, %s.</string>
     <string name="hide_password">Nascondi password</string>
     <string name="hurdle_step">Passo sull’ostacolo</string>
     <string name="import_workouts">Importa</string>
     <string name="in_line_lunge">Affondo in linea</string>
+    <string name="in_progress">In corso</string>
     <string name="info">Info</string>
     <string name="invalid_profile_picture">L\'immagine selezionata non è valida.</string>
     <string name="invalid_youtube_url">Inserisci un link YouTube valido.</string>
@@ -351,6 +362,7 @@
     <string name="no_exercises_yet">Nessun esercizio aggiunto.</string>
     <string name="no_fms">Nessuna valutazione FMS.</string>
     <string name="no_goal_and_plan">Obiettivo e piano non ancora scritti.</string>
+    <string name="no_heart_rate_measurements">Apple Salute non ha misurazioni della frequenza cardiaca durante questo allenamento.</string>
     <string name="no_measurements">Nessuna misurazione</string>
     <string name="no_monthly_reviews">Ancora nessuna revisione mensile.</string>
     <string name="no_notifications">Nessuna notifica.</string>
@@ -419,6 +431,7 @@
     <string name="profile_updated_successfully">Profilo aggiornato con successo.</string>
     <string name="progress">Progressi</string>
     <string name="progress_summary">Riepilogo progressi</string>
+    <string name="read_heart_rate_apple_health">Leggi la frequenza da Apple Salute</string>
     <string name="ready_for_next_training">Pronto per il prossimo allenamento?</string>
     <string name="record_history">Storico dei record</string>
     <string name="recurring_appointments_generated_successfully">Le date sono state generate correttamente.</string>
@@ -489,6 +502,7 @@
     <string name="show_all_measurements">Mostra tutte le misure</string>
     <string name="show_password">Mostra password</string>
     <string name="since_first_measurement">dalla prima misurazione</string>
+    <string name="start_training">Inizia allenamento</string>
     <string name="status">Stato</string>
     <string name="strength_and_conditioning">Forza e condizionamento</string>
     <string name="success">Successo</string>
@@ -523,15 +537,22 @@
     <string name="total_reps_per_training">Ripetizioni totali per allenamento</string>
     <string name="training_actions">Azioni allenamento</string>
     <string name="training_deleted_successfully">Allenamento eliminato.</string>
+    <string name="training_duration">Durata</string>
+    <string name="training_ended">Fine</string>
+    <string name="training_in_progress">Allenamento in corso</string>
     <string name="training_marked_completed">Allenamento segnato come completato.</string>
     <string name="training_marked_planned">Allenamento segnato come pianificato.</string>
     <string name="training_not_completed_yet">L\'allenamento sarà visibile quando il tuo coach lo segnerà come completato.</string>
     <string name="training_progress_title">Progressi di allenamento</string>
     <string name="training_saved_successfully">Allenamento salvato.</string>
+    <string name="training_started">Inizio</string>
     <string name="training_templates">Modelli di allenamento</string>
     <string name="training_templates_subtitle">Prepara un allenamento una volta e assegnalo ai clienti</string>
+    <string name="training_time">Orario dell\'allenamento</string>
+    <string name="training_time_hint">Segna l\'inizio e la fine dell\'allenamento. L\'iPhone del cliente aggiunge poi la frequenza cardiaca minima, massima e media da Apple Salute.</string>
     <string name="trainings">Allenamenti</string>
     <string name="trainings_created">Allenamenti creati: %d</string>
+    <string name="trainings_in_progress">Allenamenti in corso</string>
     <string name="trainings_per_week">Allenamenti per settimana</string>
     <string name="trunk_stability_push_up">Piegamento per la stabilità del tronco</string>
     <string name="unknown_coach">Allenatore sconosciuto</string>

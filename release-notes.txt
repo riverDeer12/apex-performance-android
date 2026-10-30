@@ -1,3 +1,4 @@
 Novosti:
-- Ekrani se osvježavaju svaki put kad se otvore, nije potrebno povlačiti prema dolje.
-- Kod dodavanja vježbe u trening na vrhu su predložene vježbe koje odgovaraju nazivu treninga (npr. "Gornji dio tijela", "Noge", "Mobilnost") i vježbe iz ranijih treninga istog naziva.
+- Trener u detaljima treninga označava početak i kraj treninga (Započni trening / Završi trening) i vidi trajanje.
+- Kad klijent na iPhoneu poveže Apple Health, uz trening se prikazuju njegov najniži, najviši i prosječni puls za vrijeme treninga.
+- Novi status treninga U tijeku: klijent vidi trening čim ga trener započne, a Završi trening ga ujedno označava završenim.

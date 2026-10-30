@@ -56,6 +56,7 @@ import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.core.navigation.Navigator
 
 // Client's tab with the trainings their coach marked as completed.
 class CompletedTrainingsScreen : Screen() {
@@ -116,23 +117,27 @@ class CompletedTrainingsScreen : Screen() {
                     EmptyText(stringResource(if (searchText.isEmpty()) R.string.no_client_trainings else R.string.no_trainings_found))
                 }
             } else {
-                // Planned trainings are for the coach, the API only returns completed ones.
-                val completed = filtered.filter { it.isCompleted }
-                if (completed.isNotEmpty()) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        ApexLabel(stringResource(R.string.completed_trainings))
+                // Planned trainings are for the coach; started ones are in progress.
+                TrainingsSection(stringResource(R.string.trainings_in_progress), filtered.filter { it.isInProgress }, navigator)
+                TrainingsSection(stringResource(R.string.completed_trainings), filtered.filter { it.isCompleted }, navigator)
+            }
+        }
+    }
 
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            completed.forEach { training ->
-                                val imageUrl = imageUrl(training)
-                                TrainingCard(training, imageUrl) {
-                                    navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl))
-                                }
-                            }
-                        }
+    @Composable
+    private fun TrainingsSection(title: String, trainings: List<Training>, navigator: Navigator) {
+        if (trainings.isEmpty()) return
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ApexLabel(title)
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                trainings.forEach { training ->
+                    val imageUrl = imageUrl(training)
+                    TrainingCard(training, imageUrl) {
+                        navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl))
                     }
                 }
             }
@@ -182,7 +187,7 @@ class CompletedTrainingsScreen : Screen() {
     private suspend fun load() {
         isLoading = true
         try {
-            trainings = Training.loadCompleted()
+            trainings = Training.loadStartedOrCompleted()
         } catch (e: Exception) {
             showError(e)
         } finally {
@@ -231,12 +236,13 @@ internal fun TrainingCard(training: Training, imageUrl: String? = null, onClick:
                 )
 
                 if (!training.isCompleted) {
+                    val tint = if (training.isInProgress) ApexColors.blue else ApexColors.orange
                     Text(
-                        stringResource(R.string.planned).uppercase(),
+                        stringResource(if (training.isInProgress) R.string.in_progress else R.string.planned).uppercase(),
                         style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
-                        color = ApexColors.orange,
+                        color = tint,
                         modifier = Modifier
-                            .background(ApexColors.orange.copy(alpha = 0.15f), CircleShape)
+                            .background(tint.copy(alpha = 0.15f), CircleShape)
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }

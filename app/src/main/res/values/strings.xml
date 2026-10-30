@@ -24,6 +24,7 @@
     <string name="appearance_dark">Dark</string>
     <string name="appearance_light">Light</string>
     <string name="appearance_system">System</string>
+    <string name="apple_health_hint">Your heart rate is measured by an Apple Watch or a chest strap connected to Apple Health. Only the lowest, highest and average heart rate during the training are sent to your coach.</string>
     <string name="appointment">Appointment</string>
     <string name="appointment_approved_successfully">Appointment approved successfully.</string>
     <string name="appointment_declined_successfully">Appointment declined succ</string>
@@ -50,6 +51,7 @@
     <string name="body_measurement_updated_successfully">Body Measurement updated successfully.</string>
     <string name="body_measurements">Body Measurements</string>
     <string name="book_appointment">Book appointment</string>
+    <string name="bpm">bpm</string>
     <string name="calves">Calves</string>
     <string name="can_not_be_undone">This action can not be undone.</string>
     <string name="cancel">Cancel</string>
@@ -115,6 +117,7 @@
     <string name="chest">Chest</string>
     <string name="clear">Clear</string>
     <string name="clear_read_notifications">Clear read</string>
+    <string name="clear_training_times">Clear training times</string>
     <string name="client">Client</string>
     <string name="client_created_successfully">Client created successfully</string>
     <string name="clients">Clients</string>
@@ -170,6 +173,7 @@
     <string name="download_template">Template</string>
     <string name="drop_set">Drop set</string>
     <string name="drop_set_short">Drop</string>
+    <string name="duration_minutes">%d min</string>
     <string name="edit">Edit</string>
     <string name="edit_goal_and_plan">Edit goal and plan</string>
     <string name="edit_profile">Edit profile</string>
@@ -178,6 +182,7 @@
     <string name="edit_workout">Edit workout</string>
     <string name="email">Email</string>
     <string name="email_copied">Email copied.</string>
+    <string name="end_training">End training</string>
     <string name="english">English</string>
     <string name="enter_confirm_password">Re-enter password</string>
     <string name="enter_new_password">Enter new password</string>
@@ -238,12 +243,18 @@
     <string name="goal_placeholder">What the client wants to achieve</string>
     <string name="goal_saved_successfully">Goal and plan saved.</string>
     <string name="got_it">Got it</string>
+    <string name="heart_rate">Heart rate</string>
+    <string name="heart_rate_average">Average</string>
+    <string name="heart_rate_from_client_hint">The heart rate comes from the client\'s iPhone (Apple Health) when the client opens their trainings.</string>
+    <string name="heart_rate_max">Highest</string>
+    <string name="heart_rate_min">Lowest</string>
     <string name="height">Height</string>
     <string name="hello_name">Hi, %s.</string>
     <string name="hide_password">Hide password</string>
     <string name="hurdle_step">Hurdle Step</string>
     <string name="import_workouts">Import</string>
     <string name="in_line_lunge">Inline Lunge</string>
+    <string name="in_progress">In progress</string>
     <string name="info">Info</string>
     <string name="invalid_profile_picture">The selected image is not valid.</string>
     <string name="invalid_youtube_url">Enter a valid YouTube link.</string>
@@ -352,6 +363,7 @@
     <string name="no_exercises_yet">No exercises added yet.</string>
     <string name="no_fms">No FMS assessments.</string>
     <string name="no_goal_and_plan">Goal and plan aren\'t written yet.</string>
+    <string name="no_heart_rate_measurements">Apple Health has no heart rate measurements during this training.</string>
     <string name="no_measurements">No Measurements.</string>
     <string name="no_monthly_reviews">No monthly reviews yet.</string>
     <string name="no_notifications">No notifications.</string>
@@ -420,6 +432,7 @@
     <string name="profile_updated_successfully">Profile updated successfully.</string>
     <string name="progress">Progress</string>
     <string name="progress_summary">Progress summary</string>
+    <string name="read_heart_rate_apple_health">Read heart rate from Apple Health</string>
     <string name="ready_for_next_training">Ready for your next training?</string>
     <string name="record_history">Record history</string>
     <string name="recurring_appointments_generated_successfully">Appointments are successfully generated.</string>
@@ -490,6 +503,7 @@
     <string name="show_all_measurements">Show all measurements</string>
     <string name="show_password">Show password</string>
     <string name="since_first_measurement">since first measurement</string>
+    <string name="start_training">Start training</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Strength and Conditioning</string>
     <string name="success">Success</string>
@@ -524,15 +538,22 @@
     <string name="total_reps_per_training">Total reps per training</string>
     <string name="training_actions">Training actions</string>
     <string name="training_deleted_successfully">Training deleted.</string>
+    <string name="training_duration">Duration</string>
+    <string name="training_ended">End</string>
+    <string name="training_in_progress">Training in progress</string>
     <string name="training_marked_completed">Training marked as completed.</string>
     <string name="training_marked_planned">Training marked as planned.</string>
     <string name="training_not_completed_yet">The training will be visible once your coach marks it as completed.</string>
     <string name="training_progress_title">Training progress</string>
     <string name="training_saved_successfully">Training saved.</string>
+    <string name="training_started">Start</string>
     <string name="training_templates">Training templates</string>
     <string name="training_templates_subtitle">Prepare a training once and assign it to clients</string>
+    <string name="training_time">Training time</string>
+    <string name="training_time_hint">Mark when the training starts and ends. The client\'s iPhone then adds the lowest, highest and average heart rate from Apple Health.</string>
     <string name="trainings">Trainings</string>
     <string name="trainings_created">Trainings created: %d</string>
+    <string name="trainings_in_progress">Trainings in progress</string>
     <string name="trainings_per_week">Trainings per week</string>
     <string name="trunk_stability_push_up">Trunk Stability Push-Up</string>
     <string name="unknown_coach">Unknown Coach</string>
