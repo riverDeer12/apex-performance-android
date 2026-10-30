@@ -267,7 +267,12 @@ class WorkoutEditScreen(
             FormSection(
                 footer = { Text(stringResource(R.string.timed_workout_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
             ) {
-                ToggleRow(stringResource(R.string.timed_workout), isTimed) { isTimed = it }
+                ToggleRow(stringResource(R.string.timed_workout), isTimed) {
+                    isTimed = it
+                    // A pace needs a duration: without one the workout has no pace type,
+                    // otherwise the API keeps it timed and switching off had no effect.
+                    if (!it) paceType = null
+                }
             }
 
             FormSection(header = stringResource(R.string.category)) {
