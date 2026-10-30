@@ -103,6 +103,8 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
+import androidx.compose.material.icons.filled.PlayArrow
+import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 
 // Creates or edits a client's training (staff only). Next to every
 // exercise it shows the sets the client did in the same exercise on
@@ -261,6 +263,25 @@ class TrainingFormScreen private constructor(
             ) {
                 ButtonRow(Icons.Filled.Add, stringResource(R.string.add_exercise)) {
                     exercises = exercises + ExerciseDraft()
+                }
+            }
+
+            if (canStart) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ApexPrimaryButton(
+                        stringResource(R.string.save_and_start_training),
+                        icon = Icons.Filled.PlayArrow,
+                        enabled = isValid,
+                        isLoading = isSaving
+                    ) { launch { save(navigator, starting = true) } }
+                    Text(
+                        stringResource(R.string.save_and_start_training_hint),
+                        style = ApexText.footnote,
+                        color = ApexColors.secondaryLabel
+                    )
                 }
             }
         }
@@ -924,7 +945,12 @@ class TrainingFormScreen private constructor(
         }
     }
 
-    private suspend fun save(navigator: Navigator) {
+    // A training not started or completed yet can be started right away.
+    private val canStart: Boolean
+        get() = !isTemplate && !isCompleted && training?.startedAt == null
+
+    // Saves the training; starting also marks it as started now (in progress).
+    private suspend fun save(navigator: Navigator, starting: Boolean = false) {
         if (isTemplate) {
             saveTemplate(navigator)
             return
@@ -938,16 +964,18 @@ class TrainingFormScreen private constructor(
                 client = clientId,
                 name = name.trim(),
                 // ISO 8601 without fractions, like ISO8601DateFormatter on iOS.
-                date = date.truncatedTo(ChronoUnit.SECONDS).toString(),
+                // A started training happens today.
+                date = (if (starting) Instant.now() else date).truncatedTo(ChronoUnit.SECONDS).toString(),
                 note = trimmedNote.ifEmpty { null },
                 isCompleted = isCompleted,
                 exercises = exercises.mapNotNull { it.request },
                 notifyClient = notifyClient
             )
 
-            val saved = Training.save(request, training?.id)
+            var saved = Training.save(request, training?.id)
+            if (starting) saved = saved.settingTimes(Instant.now(), null)
             onSaved?.invoke(saved)
-            ToastManager.show(R.string.training_saved_successfully, ToastType.SUCCESS)
+            ToastManager.show(if (starting) R.string.training_started_toast else R.string.training_saved_successfully, ToastType.SUCCESS)
             navigator.pop()
         } catch (e: Exception) {
             showError(e)
