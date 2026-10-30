@@ -75,6 +75,7 @@ import software.rdd.apexperformance.ui.home.NotificationBell
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.LocalDate
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 class AppointmentsScreen : Screen() {
 
@@ -159,7 +160,7 @@ class AppointmentsScreen : Screen() {
                     SectionLabel(stringResource(R.string.pending_approvals))
                     CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                         Column {
-                            pendingAppointments.forEach { appointment ->
+                            ShowMoreItems(pendingAppointments) { appointment ->
                                 PendingAppointmentRow(appointment)
                                 if (appointment.id != pendingAppointments.last().id) RowDivider()
                             }
@@ -192,7 +193,7 @@ class AppointmentsScreen : Screen() {
                         EmptyText(stringResource(R.string.no_appointments_for_selected_day))
                     } else {
                         Column {
-                            dayAppointments.forEach { appointment ->
+                            ShowMoreItems(dayAppointments) { appointment ->
                                 AppointmentRow(appointment) {
                                     navigator.push(AppointmentDetailsScreen(appointment))
                                 }
@@ -218,7 +219,7 @@ class AppointmentsScreen : Screen() {
             SectionLabel(title)
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Column {
-                    requests.forEach { request ->
+                    ShowMoreItems(requests) { request ->
                         AppointmentRequestRow(request)
                         if (request.id != requests.last().id) RowDivider()
                     }

@@ -39,6 +39,7 @@ import java.text.NumberFormat
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Rows of trainings that open their details, used on client details for
 // coaches. With onSaved (staff) trainings can be edited, marked as
@@ -56,7 +57,7 @@ fun TrainingRows(
     var trainingToDelete by remember { mutableStateOf<Training?>(null) }
 
     Column {
-        trainings.forEach { training ->
+        ShowMoreItems(trainings) { training ->
             Box {
                 SettingsRow(
                     icon = training.statusIcon,

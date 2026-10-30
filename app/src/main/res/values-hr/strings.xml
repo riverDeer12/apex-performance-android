@@ -502,6 +502,7 @@
     <string name="shoulder_mobility">Pokretljivost ramena</string>
     <string name="shoulders">Ramena</string>
     <string name="show_all_measurements">Prikaži sve mjere</string>
+    <string name="show_more">Prikaži više (%d)</string>
     <string name="show_password">Prikaži lozinku</string>
     <string name="since_first_measurement">od prvog mjerenja</string>
     <string name="start_training">Započni trening</string>

@@ -63,6 +63,7 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.Instant
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Push notification kept for the user (docs/NOTIFICATIONS_API.md in the backend).
 @Serializable
@@ -231,7 +232,7 @@ class NotificationsScreen : Screen() {
                     EmptyText(stringResource(R.string.no_notifications))
                 } else {
                     Column {
-                        notifications.forEach { notification ->
+                        ShowMoreItems(notifications) { notification ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

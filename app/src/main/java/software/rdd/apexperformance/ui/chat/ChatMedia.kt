@@ -74,6 +74,7 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.workouts.WorkoutDetailScreen
 import java.io.ByteArrayOutputStream
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 object ChatImages {
     // Same limit as the API.
@@ -300,7 +301,7 @@ class ChatWorkoutPickerScreen(private val onPick: (Workout) -> Unit) : Screen() 
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = workouts.filter { it.matches(searchText) }
                 Column {
-                    list.forEach { workout ->
+                    ShowMoreItems(list) { workout ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

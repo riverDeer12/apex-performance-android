@@ -50,6 +50,7 @@ import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.SettingsRow
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 class AppointmentRequestsScreen : Screen() {
 
@@ -83,7 +84,7 @@ class AppointmentRequestsScreen : Screen() {
                         EmptyText(stringResource(R.string.no_requests))
                     } else {
                         Column {
-                            sentRequests.forEach { request ->
+                            ShowMoreItems(sentRequests) { request ->
                                 SentRequestRow(request)
                                 if (request.id != sentRequests.last().id) RowDivider()
                             }
@@ -94,7 +95,7 @@ class AppointmentRequestsScreen : Screen() {
                         EmptyText(stringResource(R.string.no_requests))
                     } else {
                         Column {
-                            requests.forEach { request ->
+                            ShowMoreItems(requests) { request ->
                                 RequestRow(request) { navigator.push(AppointmentRequestDetailsScreen(request)) }
                                 if (request.id != requests.last().id) RowDivider()
                             }

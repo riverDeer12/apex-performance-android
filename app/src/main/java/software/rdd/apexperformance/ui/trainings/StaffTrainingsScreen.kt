@@ -60,6 +60,7 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Trainings tab of coaches and administrators, like the web's trainings
 // menu: trainings of all their clients (administrators see all) with
@@ -170,7 +171,7 @@ class StaffTrainingsScreen : Screen() {
                     EmptyText(stringResource(if (trainings.isEmpty()) R.string.no_trainings else R.string.no_trainings_found))
                 } else {
                     Column {
-                        list.forEach { training ->
+                        ShowMoreItems(list) { training ->
                             SettingsRow(
                                 icon = training.statusIcon,
                                 iconTint = training.statusTint,
@@ -384,7 +385,7 @@ class ClientListScreen(
                     EmptyText(stringResource(R.string.no_clients))
                 } else {
                     Column {
-                        list.forEach { client ->
+                        ShowMoreItems(list) { client ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

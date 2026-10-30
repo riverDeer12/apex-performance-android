@@ -100,6 +100,7 @@ import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.auth.AuthManager
 import androidx.compose.material.icons.automirrored.outlined.Chat
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 class ClientDetailsScreen(private val client: Client) : Screen() {
 
@@ -224,7 +225,7 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                 } else {
                     val measurements = bodyMeasurements.sortedByDescending { it.measuredAt }
                     Column {
-                        measurements.forEach { measurement ->
+                        ShowMoreItems(measurements) { measurement ->
                             SettingsRow(
                                 icon = Icons.Outlined.Straighten,
                                 iconTint = ApexColors.blue,
@@ -276,7 +277,7 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                     )
                 functionalMovementScreens.isEmpty() -> EmptyText(stringResource(R.string.no_fms))
                 else -> Column {
-                    functionalMovementScreens.forEach { screen ->
+                    ShowMoreItems(functionalMovementScreens) { screen ->
                         SettingsRow(
                             icon = Icons.Outlined.AccessibilityNew,
                             iconTint = ApexColors.blue,
@@ -380,7 +381,7 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                 EmptyText(stringResource(R.string.no_monthly_reviews))
             } else {
                 Column {
-                    monthlyReviews.forEach { review ->
+                    ShowMoreItems(monthlyReviews) { review ->
                         ReviewRow(review) { openReview(review) }
                         if (review.id != monthlyReviews.last().id) RowDivider()
                     }

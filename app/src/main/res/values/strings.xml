@@ -503,6 +503,7 @@
     <string name="shoulder_mobility">Shoulder Mobility</string>
     <string name="shoulders">Shoulders</string>
     <string name="show_all_measurements">Show all measurements</string>
+    <string name="show_more">Show more (%d)</string>
     <string name="show_password">Show password</string>
     <string name="since_first_measurement">since first measurement</string>
     <string name="start_training">Start training</string>

@@ -53,6 +53,7 @@ import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 class ClientsScreen : Screen() {
 
@@ -144,7 +145,7 @@ class ClientsScreen : Screen() {
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredClients
                 Column {
-                    list.forEach { client ->
+                    ShowMoreItems(list) { client ->
                         ClientRow(client) {
                             focusManager.clearFocus()
                             navigator.push(ClientDetailsScreen(client))
