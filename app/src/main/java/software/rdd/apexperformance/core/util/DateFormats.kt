@@ -14,6 +14,7 @@ object DateFormats {
     private val dateWithDots = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     private val dateAndTimeWithDots = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
     private val apiDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.US)
+    private val time = DateTimeFormatter.ofPattern("HH:mm")
 
     val zone: ZoneId get() = ZoneId.systemDefault()
 
@@ -22,6 +23,9 @@ object DateFormats {
     fun date(date: LocalDate): String = dateWithDots.format(date)
 
     fun dateAndTime(instant: Instant): String = dateAndTimeWithDots.format(instant.atZone(zone))
+
+    // For example "18:05".
+    fun time(instant: Instant): String = time.format(instant.atZone(zone))
 
     // Full weekday name in the app language, e.g. "Monday".
     fun dayName(instant: Instant, locale: Locale = Locale.getDefault()): String =

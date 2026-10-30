@@ -18,8 +18,27 @@ data class Training(
     val isCompleted: Boolean = false,
     val completedAt: IsoInstant? = null,
     val client: Person,
-    val exercises: List<Exercise> = emptyList()
+    val exercises: List<Exercise> = emptyList(),
+    // When the training really started and ended, marked by the coach.
+    val startedAt: IsoInstant? = null,
+    val endedAt: IsoInstant? = null,
+    // Client's heart rate in between, from Apple Health on the client's iPhone.
+    val heartRate: HeartRate? = null
 ) {
+    // Beats per minute.
+    @Serializable
+    data class HeartRate(val min: Int, val max: Int, val average: Int)
+
+    @Serializable
+    data class TimesRequest(val startedAt: String?, val endedAt: String?)
+
+    @Serializable
+    data class TimesResponse(
+        val startedAt: IsoInstant? = null,
+        val endedAt: IsoInstant? = null,
+        val heartRate: HeartRate? = null
+    )
+
     @Serializable
     data class Person(
         val id: String,

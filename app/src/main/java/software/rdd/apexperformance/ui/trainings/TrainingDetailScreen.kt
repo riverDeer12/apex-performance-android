@@ -76,6 +76,16 @@ import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import software.rdd.apexperformance.core.auth.AuthManager
+import software.rdd.apexperformance.core.util.Roles
+import software.rdd.apexperformance.core.network.ApiClient
+import software.rdd.apexperformance.core.network.HttpMethod
+import software.rdd.apexperformance.ui.components.ApexPrimaryButton
+import java.time.Instant
 
 // Exercises and sets of one training. Staff can edit it.
 class TrainingDetailScreen(
@@ -94,6 +104,7 @@ class TrainingDetailScreen(
     // "Save as template" asks for the template's name.
     private var showSaveAsTemplate by mutableStateOf(false)
     private var templateName by mutableStateOf("")
+    private var isSavingTimes by mutableStateOf(false)
 
     @Composable
     override fun Content() {
@@ -117,6 +128,9 @@ class TrainingDetailScreen(
             )
 
             Header()
+
+            // Start and end marked by the coach, heart rate from the client's Apple Health.
+            TimesCard()
 
             if (training.exercises.isEmpty()) {
                 CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
@@ -178,6 +192,104 @@ class TrainingDetailScreen(
             } else {
                 StatusLabel(Icons.Outlined.CalendarMonth, stringResource(R.string.planned), ApexColors.orange)
             }
+        }
+    }
+
+    @Composable
+    private fun TimesCard() {
+        val isStaff = !AuthManager.hasRole(Roles.CLIENT)
+        val startedAt = training.startedAt
+        val endedAt = training.endedAt
+        val heartRate = training.heartRate
+        // Clients see the card once the coach marked the training.
+        if (!isStaff && startedAt == null && heartRate == null) return
+
+        CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.training_time)) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                if (startedAt != null) {
+                    Row {
+                        TimesValue(stringResource(R.string.training_started), DateFormats.time(startedAt))
+                        if (endedAt != null) {
+                            TimesValue(stringResource(R.string.training_ended), DateFormats.time(endedAt))
+                            val minutes = Math.round(java.time.Duration.between(startedAt, endedAt).seconds / 60.0).toInt()
+                            TimesValue(stringResource(R.string.training_duration), stringResource(R.string.duration_minutes, minutes))
+                        } else {
+                            Text(
+                                stringResource(R.string.training_in_progress),
+                                style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                                color = ApexColors.orange,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                } else if (isStaff) {
+                    Text(stringResource(R.string.training_time_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                }
+
+                if (isStaff) {
+                    when {
+                        startedAt == null -> ApexPrimaryButton(
+                            stringResource(R.string.start_training),
+                            icon = Icons.Filled.PlayArrow,
+                            isLoading = isSavingTimes
+                        ) { launch { saveTimes(Instant.now(), null) } }
+                        endedAt == null -> ApexPrimaryButton(
+                            stringResource(R.string.end_training),
+                            icon = Icons.Filled.Stop,
+                            isLoading = isSavingTimes
+                        ) { launch { saveTimes(startedAt, Instant.now()) } }
+                    }
+                    if (startedAt != null) {
+                        Text(
+                            stringResource(R.string.clear_training_times),
+                            style = ApexText.footnote.copy(fontWeight = FontWeight.SemiBold),
+                            color = ApexColors.red,
+                            modifier = Modifier.clickable(enabled = !isSavingTimes) { launch { saveTimes(null, null) } }
+                        )
+                    }
+                }
+
+                if (heartRate != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Icon(Icons.Filled.Favorite, contentDescription = null, tint = ApexColors.red, modifier = Modifier.size(16.dp))
+                        Text(stringResource(R.string.heart_rate), style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold), color = ApexColors.red)
+                    }
+                    Row {
+                        val bpm = stringResource(R.string.bpm)
+                        TimesValue(stringResource(R.string.heart_rate_min), "${heartRate.min} $bpm")
+                        TimesValue(stringResource(R.string.heart_rate_average), "${heartRate.average} $bpm")
+                        TimesValue(stringResource(R.string.heart_rate_max), "${heartRate.max} $bpm")
+                    }
+                } else if (endedAt != null && isStaff) {
+                    Text(stringResource(R.string.heart_rate_from_client_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun RowScope.TimesValue(title: String, value: String) {
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(title, style = ApexText.caption, color = ApexColors.secondaryLabel)
+            Text(value, style = ApexText.headline)
+        }
+    }
+
+    private suspend fun saveTimes(startedAt: Instant?, endedAt: Instant?) {
+        isSavingTimes = true
+        try {
+            val response: Training.TimesResponse = ApiClient.request(
+                "trainings/${training.id}/times",
+                HttpMethod.PUT,
+                Training.TimesRequest(startedAt?.toString(), endedAt?.toString())
+            )
+            training = training.copy(startedAt = response.startedAt, endedAt = response.endedAt, heartRate = response.heartRate)
+            onSaved?.invoke(training)
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isSavingTimes = false
         }
     }
 

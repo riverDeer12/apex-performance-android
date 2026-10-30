@@ -23,6 +23,7 @@
     <string name="appearance_dark">Tamni</string>
     <string name="appearance_light">Svijetli</string>
     <string name="appearance_system">Sustav</string>
+    <string name="apple_health_hint">Puls mjeri Apple Watch ili prsni pojas povezan s Apple Healthom. Treneru se šalju samo najniži, najviši i prosječni puls za vrijeme treninga.</string>
     <string name="appointment">Termin</string>
     <string name="appointment_approved_successfully">Termin je uspješno odobren.</string>
     <string name="appointment_declined_successfully">Termin je uspješno odbijen.</string>
@@ -49,6 +50,7 @@
     <string name="body_measurement_updated_successfully">Mjera je uspješno ažurirana.</string>
     <string name="body_measurements">Tjelesne mjere</string>
     <string name="book_appointment">Rezerviraj termin</string>
+    <string name="bpm">otk/min</string>
     <string name="calves">Listovi</string>
     <string name="can_not_be_undone">Ovu radnju nije moguće poništiti.</string>
     <string name="cancel">Otkaži</string>
@@ -114,6 +116,7 @@
     <string name="chest">Prsa</string>
     <string name="clear">Očisti</string>
     <string name="clear_read_notifications">Obriši pročitane</string>
+    <string name="clear_training_times">Poništi vrijeme treninga</string>
     <string name="client">Klijent</string>
     <string name="client_created_successfully">Klijent je uspješno kreiran</string>
     <string name="clients">Klijenti</string>
@@ -169,6 +172,7 @@
     <string name="download_template">Predložak</string>
     <string name="drop_set">Drop set</string>
     <string name="drop_set_short">Drop</string>
+    <string name="duration_minutes">%d min</string>
     <string name="edit">Uredi</string>
     <string name="edit_goal_and_plan">Uredi cilj i plan</string>
     <string name="edit_profile">Uredi profil</string>
@@ -177,6 +181,7 @@
     <string name="edit_workout">Uredi vježbu</string>
     <string name="email">E-mail</string>
     <string name="email_copied">Email je kopiran.</string>
+    <string name="end_training">Završi trening</string>
     <string name="english">Engleski</string>
     <string name="enter_confirm_password">Ponovi unos lozinke</string>
     <string name="enter_new_password">Unesi novu lozinku</string>
@@ -237,6 +242,11 @@
     <string name="goal_placeholder">Što klijent želi postići</string>
     <string name="goal_saved_successfully">Cilj i plan su spremljeni.</string>
     <string name="got_it">U redu</string>
+    <string name="heart_rate">Puls</string>
+    <string name="heart_rate_average">Prosjek</string>
+    <string name="heart_rate_from_client_hint">Puls dolazi s klijentovog iPhonea (Apple Health) kad klijent otvori svoje treninge.</string>
+    <string name="heart_rate_max">Najviši</string>
+    <string name="heart_rate_min">Najniži</string>
     <string name="height">Visina</string>
     <string name="hello_name">Bok, %s.</string>
     <string name="hide_password">Sakrij lozinku</string>
@@ -351,6 +361,7 @@
     <string name="no_exercises_yet">Još nema dodanih vježbi.</string>
     <string name="no_fms">Nema FMS procjena.</string>
     <string name="no_goal_and_plan">Cilj i plan još nisu upisani.</string>
+    <string name="no_heart_rate_measurements">Apple Health nema mjerenja pulsa za vrijeme ovog treninga.</string>
     <string name="no_measurements">Nema mjerenja</string>
     <string name="no_monthly_reviews">Još nema mjesečnih reviewa.</string>
     <string name="no_notifications">Nema obavijesti.</string>
@@ -419,6 +430,7 @@
     <string name="profile_updated_successfully">Profil je uspješno ažuriran.</string>
     <string name="progress">Napredak</string>
     <string name="progress_summary">Sažetak napretka</string>
+    <string name="read_heart_rate_apple_health">Učitaj puls iz Apple Healtha</string>
     <string name="ready_for_next_training">Sve spremno za sljedeći trening?</string>
     <string name="record_history">Povijest rekorda</string>
     <string name="recurring_appointments_generated_successfully">Termini su uspješno generirani.</string>
@@ -489,6 +501,7 @@
     <string name="show_all_measurements">Prikaži sve mjere</string>
     <string name="show_password">Prikaži lozinku</string>
     <string name="since_first_measurement">od prvog mjerenja</string>
+    <string name="start_training">Započni trening</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Snaga i kondicija</string>
     <string name="success">Uspjeh</string>
@@ -523,13 +536,19 @@
     <string name="total_reps_per_training">Ukupno ponavljanja po treningu</string>
     <string name="training_actions">Radnje treninga</string>
     <string name="training_deleted_successfully">Trening je obrisan.</string>
+    <string name="training_duration">Trajanje</string>
+    <string name="training_ended">Kraj</string>
+    <string name="training_in_progress">Trening je u tijeku</string>
     <string name="training_marked_completed">Trening je označen kao odrađen.</string>
     <string name="training_marked_planned">Trening je označen kao planiran.</string>
     <string name="training_not_completed_yet">Trening će biti vidljiv kad ga trener označi kao završen.</string>
     <string name="training_progress_title">Trenažni napredak</string>
     <string name="training_saved_successfully">Trening je spremljen.</string>
+    <string name="training_started">Početak</string>
     <string name="training_templates">Predlošci treninga</string>
     <string name="training_templates_subtitle">Pripremi trening jednom i dodijeli ga klijentima</string>
+    <string name="training_time">Vrijeme treninga</string>
+    <string name="training_time_hint">Označi početak i kraj treninga. Klijentov iPhone tada iz Apple Healtha dodaje najniži, najviši i prosječni puls.</string>
     <string name="trainings">Treninzi</string>
     <string name="trainings_created">Kreirano treninga: %d</string>
     <string name="trainings_per_week">Treninzi po tjednu</string>
