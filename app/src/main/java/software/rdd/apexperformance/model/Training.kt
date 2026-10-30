@@ -25,6 +25,9 @@ data class Training(
     // Client's heart rate in between, from Apple Health on the client's iPhone.
     val heartRate: HeartRate? = null
 ) {
+    // Started by the coach, not completed yet; clients see it then.
+    val isInProgress: Boolean get() = !isCompleted && startedAt != null
+
     // Beats per minute.
     @Serializable
     data class HeartRate(val min: Int, val max: Int, val average: Int)
@@ -36,7 +39,10 @@ data class Training(
     data class TimesResponse(
         val startedAt: IsoInstant? = null,
         val endedAt: IsoInstant? = null,
-        val heartRate: HeartRate? = null
+        val heartRate: HeartRate? = null,
+        // Ending a training also completes it.
+        val isCompleted: Boolean = false,
+        val completedAt: IsoInstant? = null
     )
 
     @Serializable
@@ -98,6 +104,9 @@ data class Training(
 
         // Completed trainings the logged user can see, newest first.
         suspend fun loadCompleted(): List<Training> = loadAll().filter { it.isCompleted }
+
+        // Client's trainings: in progress (started by the coach) and completed.
+        suspend fun loadStartedOrCompleted(): List<Training> = loadAll().filter { it.isCompleted || it.isInProgress }
 
         // Creates a training, or updates it when an id is given (staff only).
         suspend fun save(request: SaveTrainingRequest, id: String? = null): Training =

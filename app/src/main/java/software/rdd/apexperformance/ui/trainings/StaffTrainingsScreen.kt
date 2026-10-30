@@ -172,8 +172,8 @@ class StaffTrainingsScreen : Screen() {
                     Column {
                         list.forEach { training ->
                             SettingsRow(
-                                icon = if (training.isCompleted) Icons.Outlined.CheckCircle else Icons.Outlined.CalendarMonth,
-                                iconTint = if (training.isCompleted) ApexColors.green else ApexColors.orange,
+                                icon = training.statusIcon,
+                                iconTint = training.statusTint,
                                 title = training.name,
                                 subtitle = "${training.client.fullName} · ${DateFormats.date(training.date)}",
                                 showChevron = true,

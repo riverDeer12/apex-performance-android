@@ -253,6 +253,7 @@
     <string name="hurdle_step">Passo sull’ostacolo</string>
     <string name="import_workouts">Importa</string>
     <string name="in_line_lunge">Affondo in linea</string>
+    <string name="in_progress">In corso</string>
     <string name="info">Info</string>
     <string name="invalid_profile_picture">L\'immagine selezionata non è valida.</string>
     <string name="invalid_youtube_url">Inserisci un link YouTube valido.</string>
@@ -551,6 +552,7 @@
     <string name="training_time_hint">Segna l\'inizio e la fine dell\'allenamento. L\'iPhone del cliente aggiunge poi la frequenza cardiaca minima, massima e media da Apple Salute.</string>
     <string name="trainings">Allenamenti</string>
     <string name="trainings_created">Allenamenti creati: %d</string>
+    <string name="trainings_in_progress">Allenamenti in corso</string>
     <string name="trainings_per_week">Allenamenti per settimana</string>
     <string name="trunk_stability_push_up">Piegamento per la stabilità del tronco</string>
     <string name="unknown_coach">Allenatore sconosciuto</string>

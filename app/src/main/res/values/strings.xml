@@ -254,6 +254,7 @@
     <string name="hurdle_step">Hurdle Step</string>
     <string name="import_workouts">Import</string>
     <string name="in_line_lunge">Inline Lunge</string>
+    <string name="in_progress">In progress</string>
     <string name="info">Info</string>
     <string name="invalid_profile_picture">The selected image is not valid.</string>
     <string name="invalid_youtube_url">Enter a valid YouTube link.</string>
@@ -552,6 +553,7 @@
     <string name="training_time_hint">Mark when the training starts and ends. The client\'s iPhone then adds the lowest, highest and average heart rate from Apple Health.</string>
     <string name="trainings">Trainings</string>
     <string name="trainings_created">Trainings created: %d</string>
+    <string name="trainings_in_progress">Trainings in progress</string>
     <string name="trainings_per_week">Trainings per week</string>
     <string name="trunk_stability_push_up">Trunk Stability Push-Up</string>
     <string name="unknown_coach">Unknown Coach</string>

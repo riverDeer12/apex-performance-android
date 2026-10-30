@@ -86,6 +86,7 @@ import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.HttpMethod
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import java.time.Instant
+import androidx.compose.material.icons.outlined.Timer
 
 // Exercises and sets of one training. Staff can edit it.
 class TrainingDetailScreen(
@@ -189,6 +190,8 @@ class TrainingDetailScreen(
                     stringResource(R.string.completed_at, DateFormats.dateAndTime(completedAt)),
                     ApexColors.green
                 )
+            } else if (training.isInProgress) {
+                StatusLabel(Icons.Outlined.Timer, stringResource(R.string.in_progress), ApexColors.blue)
             } else {
                 StatusLabel(Icons.Outlined.CalendarMonth, stringResource(R.string.planned), ApexColors.orange)
             }
@@ -284,7 +287,13 @@ class TrainingDetailScreen(
                 HttpMethod.PUT,
                 Training.TimesRequest(startedAt?.toString(), endedAt?.toString())
             )
-            training = training.copy(startedAt = response.startedAt, endedAt = response.endedAt, heartRate = response.heartRate)
+            training = training.copy(
+                startedAt = response.startedAt,
+                endedAt = response.endedAt,
+                heartRate = response.heartRate,
+                isCompleted = response.isCompleted,
+                completedAt = response.completedAt
+            )
             onSaved?.invoke(training)
         } catch (e: Exception) {
             showError(e)

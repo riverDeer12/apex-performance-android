@@ -253,6 +253,7 @@
     <string name="hurdle_step">Korak preko prepreke</string>
     <string name="import_workouts">Uvezi</string>
     <string name="in_line_lunge">Iskorak u liniji</string>
+    <string name="in_progress">U tijeku</string>
     <string name="info">Info</string>
     <string name="invalid_profile_picture">Odabrana slika nije valjana.</string>
     <string name="invalid_youtube_url">Unesite ispravnu YouTube poveznicu.</string>
@@ -551,6 +552,7 @@
     <string name="training_time_hint">Označi početak i kraj treninga. Klijentov iPhone tada iz Apple Healtha dodaje najniži, najviši i prosječni puls.</string>
     <string name="trainings">Treninzi</string>
     <string name="trainings_created">Kreirano treninga: %d</string>
+    <string name="trainings_in_progress">Treninzi u tijeku</string>
     <string name="trainings_per_week">Treninzi po tjednu</string>
     <string name="trunk_stability_push_up">Stabilnost trupa - sklek</string>
     <string name="unknown_coach">Nepoznati trener</string>
