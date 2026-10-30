@@ -84,6 +84,7 @@ import software.rdd.apexperformance.ui.theme.ApexText
 import java.text.Collator
 import java.time.Instant
 import java.time.ZoneOffset
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Training templates of the coach (administrators see all), opened
 // from the workouts tab. Templates are assigned to clients as planned
@@ -150,7 +151,7 @@ class TrainingTemplatesScreen : Screen() {
                     EmptyText(stringResource(if (searchText.isEmpty()) R.string.no_templates else R.string.no_templates_found))
                 } else {
                     Column {
-                        list.forEach { template ->
+                        ShowMoreItems(list) { template ->
                             TemplateRow(template) {
                                 navigator.push(
                                     TrainingTemplateDetailScreen(
@@ -498,7 +499,7 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
                         )
                     }
                     val list = filteredClients
-                    list.forEach { client ->
+                    ShowMoreItems(list) { client ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

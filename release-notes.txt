@@ -1,2 +1,2 @@
 Novosti:
-- U obrascu novog treninga trener može odmah tapnuti "Spremi i započni trening": trening se sprema za danas i odmah je u tijeku, pa ga klijent vidi.
+- Dugi popisi (vježbe, klijenti, treninzi, predlošci, rekordi, termini, zahtjevi, obavijesti, chat, mjerenja, osvrti) prikazuju prvih 10 stavki i gumb "Prikaži više" koji dodaje sljedećih 10.

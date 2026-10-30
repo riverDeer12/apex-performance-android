@@ -78,6 +78,7 @@ import java.time.Month
 import java.time.ZoneOffset
 import java.time.format.TextStyle as DateTextStyle
 import java.util.Locale
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // MARK: - Goal and plan
 
@@ -381,7 +382,7 @@ class MonthlyReviewsScreen(private val reviews: List<MonthlyReview>) : Screen() 
                 }
             }
 
-            reviews.forEach { review ->
+            ShowMoreItems(reviews) { review ->
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 20.dp)

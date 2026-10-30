@@ -53,6 +53,7 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.Instant
 import java.time.YearMonth
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Client's package worked out from credits and appointments: credits are
 // taken when an appointment is approved, so the credits left are still
@@ -257,7 +258,7 @@ class MyPackageScreen(
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            upcoming.forEach { appointment ->
+            ShowMoreItems(upcoming) { appointment ->
                 HorizontalDivider(color = ApexColors.border, thickness = 1.dp)
                 Row(
                     modifier = Modifier

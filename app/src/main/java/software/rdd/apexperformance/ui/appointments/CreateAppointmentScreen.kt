@@ -79,6 +79,7 @@ import software.rdd.apexperformance.ui.components.ToggleRow
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 class CreateAppointmentScreen : Screen() {
 
@@ -213,7 +214,7 @@ class CreateAppointmentScreen : Screen() {
             if (!isClient) {
                 FormSection(header = stringResource(R.string.select_clients)) {
                     if (isLoadingClients) LoadingRow(stringResource(R.string.loading_clients))
-                    clients.forEach { client ->
+                    ShowMoreItems(clients) { client ->
                         ToggleRow(
                             title = client.fullName,
                             checked = client.id in selectedClients,

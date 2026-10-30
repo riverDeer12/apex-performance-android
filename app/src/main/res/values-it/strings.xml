@@ -502,6 +502,7 @@
     <string name="shoulder_mobility">Mobilità della spalla</string>
     <string name="shoulders">Spalle</string>
     <string name="show_all_measurements">Mostra tutte le misure</string>
+    <string name="show_more">Mostra altri (%d)</string>
     <string name="show_password">Mostra password</string>
     <string name="since_first_measurement">dalla prima misurazione</string>
     <string name="start_training">Inizia allenamento</string>

@@ -63,6 +63,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Chat, opened from the floating button: conversations between a coach and
 // their clients, newest activity first. Either side can start a chat; only
@@ -114,7 +115,7 @@ class ChatListScreen(private val onClose: (() -> Unit)? = null) : Screen() {
                     conversations.isEmpty() ->
                         EmptyText(stringResource(if (isCoach) R.string.chat_empty_coach else R.string.chat_empty_client))
                     else -> Column {
-                        conversations.forEach { conversation ->
+                        ShowMoreItems(conversations) { conversation ->
                             ConversationRow(conversation) { navigator.push(ChatConversationScreen(conversation.id)) }
                             if (conversation.id != conversations.last().id) RowDivider(startIndent = 60.dp)
                         }
@@ -298,7 +299,7 @@ class ChatContactListScreen(
                     EmptyText(stringResource(R.string.chat_no_contacts))
                 } else {
                     Column {
-                        list.forEach { contact ->
+                        ShowMoreItems(list) { contact ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

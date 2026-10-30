@@ -59,6 +59,7 @@ import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.text.NumberFormat
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Client's personal records per exercise, calculated by the API from
 // completed trainings, same as the web page. Staff open a client's
@@ -119,7 +120,7 @@ class PersonalRecordsScreen(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                list.forEach { exercise ->
+                ShowMoreItems(list) { exercise ->
                     RecordsCard(exercise) {
                         navigator.push(PersonalRecordHistoryScreen(exercise))
                     }
@@ -252,7 +253,7 @@ class PersonalRecordHistoryScreen(private val exercise: ExerciseRecords) : Scree
     override fun Content() {
         ScrollScreen(topBar = { TopBar(title = exercise.name) }) {
             FormSection(header = stringResource(R.string.record_history)) {
-                exercise.history.forEach { record ->
+                ShowMoreItems(exercise.history) { record ->
                     RecordRow(record)
                     if (record.id != exercise.history.last().id) {
                         HorizontalDivider(

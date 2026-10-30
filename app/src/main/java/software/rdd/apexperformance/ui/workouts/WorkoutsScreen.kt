@@ -91,6 +91,7 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.WorkoutThumbnail
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Workout library. Clients open it from home, limited by their plan
 // through `workoutFilter`, with their own title and subtitle.
@@ -200,7 +201,7 @@ class WorkoutsScreen(
                     EmptyText(stringResource(if (searchText.isEmpty() && category == null) R.string.no_workouts else R.string.no_workouts_found))
                 } else {
                     Column {
-                        list.forEach { workout ->
+                        ShowMoreItems(list) { workout ->
                             WorkoutRow(workout) {
                                 navigator.push(
                                     WorkoutDetailScreen(

@@ -105,6 +105,8 @@ import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 import androidx.compose.material.icons.filled.PlayArrow
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
+import software.rdd.apexperformance.ui.components.SHOW_MORE_PAGE_SIZE
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Creates or edits a client's training (staff only). Next to every
 // exercise it shows the sets the client did in the same exercise on
@@ -1236,7 +1238,7 @@ private class WorkoutPickerScreen(
             }
             if (suggested.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.suggested_for_training))
-                WorkoutList(suggested) { workout ->
+                WorkoutList(suggested, limited = false) { workout ->
                     onSelect(workout.id)
                     navigator.pop()
                 }
@@ -1264,7 +1266,7 @@ private class WorkoutPickerScreen(
     }
 
     @Composable
-    private fun WorkoutList(workouts: List<Workout>, onClick: (Workout) -> Unit) {
+    private fun WorkoutList(workouts: List<Workout>, limited: Boolean = true, onClick: (Workout) -> Unit) {
         Column(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
@@ -1273,7 +1275,7 @@ private class WorkoutPickerScreen(
                 .background(ApexColors.secondaryGroupedBackground)
                 .padding(horizontal = 16.dp, vertical = 4.dp)
         ) {
-            workouts.forEach { workout ->
+            ShowMoreItems(workouts, pageSize = if (limited) SHOW_MORE_PAGE_SIZE else workouts.size.coerceAtLeast(1)) { workout ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

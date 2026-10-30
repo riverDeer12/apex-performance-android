@@ -57,6 +57,7 @@ import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.core.navigation.Navigator
+import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 // Client's tab with the trainings their coach marked as completed.
 class CompletedTrainingsScreen : Screen() {
@@ -134,7 +135,7 @@ class CompletedTrainingsScreen : Screen() {
             ApexLabel(title)
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                trainings.forEach { training ->
+                ShowMoreItems(trainings) { training ->
                     val imageUrl = imageUrl(training)
                     TrainingCard(training, imageUrl) {
                         navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl))
