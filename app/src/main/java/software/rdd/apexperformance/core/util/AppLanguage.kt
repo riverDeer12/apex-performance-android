@@ -13,7 +13,8 @@ enum class AppLanguage(val value: String, val nativeName: String) {
     SYSTEM("system", ""),
     HR("hr", "Hrvatski"),
     EN("en", "English"),
-    IT("it", "Italiano");
+    IT("it", "Italiano"),
+    DE("de", "Deutsch");
 
     companion object {
         private const val PREFERENCES = "settings"

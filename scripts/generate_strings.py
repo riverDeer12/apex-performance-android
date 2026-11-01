@@ -32,7 +32,7 @@ def convert(value, has_args):
 
 existing_re = re.compile(r'^(\s*(?:<!--.*-->\s*)?)<string name="([^"]+)"([^>]*)>(.*)</string>\s*$')
 
-for lang, folder in [('en', 'values'), ('hr', 'values-hr'), ('it', 'values-it')]:
+for lang, folder in [('en', 'values'), ('hr', 'values-hr'), ('it', 'values-it'), ('de', 'values-de')]:
     path = f'{res}/{folder}/strings.xml'
     lines = open(path, encoding='utf-8').read().splitlines()
     header = [l for l in lines[:4] if not l.strip().startswith('<string')]
