@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.home
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -75,15 +76,21 @@ data class CooperationRules(
     val document: String = "",
     // Version to accept, sent back when accepting.
     val version: String,
-    // PDF of the rules.
+    // PDF of the rules in Croatian, the binding version.
     val documentUrl: String = "",
     val isRequired: Boolean = false,
     // The current version is accepted.
     val isAccepted: Boolean = false,
     val acceptedVersion: String? = null,
-    val acceptedAt: IsoInstant? = null
+    val acceptedAt: IsoInstant? = null,
+    // PDF by language ("hr", "en", "it", "de"); missing on an older API.
+    val documentUrls: Map<String, String> = emptyMap()
 ) {
     val needsAcceptance: Boolean get() = isRequired && !isAccepted
+
+    // PDF in the app's language, the Croatian one when there's no translation.
+    fun localizedDocumentUrl(context: Context): String =
+        documentUrls[context.getString(R.string.app_language_code)] ?: documentUrl
 
     @Serializable
     data class AcceptRequest(
@@ -192,7 +199,7 @@ fun CooperationRulesPopup(rules: CooperationRules, onAccepted: () -> Unit, onLog
                     .clip(RoundedCornerShape(10.dp))
                     .background(ApexColors.main.copy(alpha = 0.1f))
                     .clickable {
-                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(current.documentUrl))) }
+                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(current.localizedDocumentUrl(context)))) }
                     }
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.Center,
@@ -320,7 +327,7 @@ fun CooperationRulesRow() {
         subtitle = stringResource(R.string.rules_accepted_version, acceptedVersion) +
             (loaded.acceptedAt?.let { " · " + DateFormats.date(it) } ?: ""),
         showChevron = true,
-        onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loaded.documentUrl))) } }
+        onClick = { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(loaded.localizedDocumentUrl(context)))) } }
     )
     RowDivider()
 }

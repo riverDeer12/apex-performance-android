@@ -1,2 +1,3 @@
 Novosti:
 - Aplikacija je dostupna i na njemačkom jeziku (Profil → Jezik ili na ekranu za prijavu). Obavijesti stižu na odabranom jeziku.
+- Pravila suradnje otvaraju se na jeziku aplikacije (hrvatski, engleski, talijanski ili njemački).
