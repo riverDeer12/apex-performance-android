@@ -1,2 +1,2 @@
 Novosti:
-- Dugi popisi (vježbe, klijenti, treninzi, predlošci, rekordi, termini, zahtjevi, obavijesti, chat, mjerenja, osvrti) prikazuju prvih 10 stavki i gumb "Prikaži više" koji dodaje sljedećih 10.
+- Aplikacija je dostupna i na njemačkom jeziku (Profil → Jezik ili na ekranu za prijavu). Obavijesti stižu na odabranom jeziku.

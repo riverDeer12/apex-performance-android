@@ -491,10 +491,16 @@ data class LocalizedText(val translations: Map<String, String> = emptyMap()) {
 
     // Uses the same language the app's own strings are shown in.
     val localized: String
-        get() = value(ApexApp.appContext.getString(R.string.app_language_code))
-            ?: value("HR")
-            ?: translations.values.firstOrNull { it.isNotEmpty() }
-            ?: ""
+        get() {
+            val language = ApexApp.appContext.getString(R.string.app_language_code)
+            // Names are written in Croatian and English (e.g. not in German): English
+            // for other languages, Croatian for Croatian.
+            return value(language)
+                ?: value(if (language == "hr") "HR" else "EN")
+                ?: value("HR")
+                ?: translations.values.firstOrNull { it.isNotEmpty() }
+                ?: ""
+        }
 
     val allValues: List<String> get() = translations.values.toList()
 }
