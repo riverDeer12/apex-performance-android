@@ -175,22 +175,22 @@ internal fun formatWeight(weight: Double): String =
         maximumFractionDigits = 2
     }.format(weight)
 
-// For example "10 × 40 kg", "10" or "40 kg". The pace of a set over a
-// distance is shown for the exercise's pace type.
+// For example "10 × 40 kg", "10", "40 kg" or "10 × 40 kg · 0:45" with a duration.
+// The pace of a set over a distance is shown for the exercise's pace type.
 internal fun setDescription(set: Training.ExerciseSet, paceType: String? = null): String {
     val reps = set.reps?.trim()?.takeIf { it.isNotEmpty() }
     val weight = set.weight?.let { "${formatWeight(it)} kg" }
     // A set over a distance, e.g. "2 km · 7:30 · 1:52 /500 m".
     val distanceParts = distanceSetParts(set, paceType)
     if (distanceParts.isNotEmpty()) return (distanceParts + listOfNotNull(weight)).joinToString(" · ")
-    // A timed set, e.g. "1:30 · 10 kg".
-    set.durationSeconds?.let { return listOfNotNull(setDuration(it), weight).joinToString(" · ") }
-    return when {
+    // A set held for a time, e.g. "1:30 · 10 kg".
+    if (reps == null) set.durationSeconds?.let { return listOfNotNull(setDuration(it), weight).joinToString(" · ") }
+    val lift = when {
         reps != null && weight != null -> "$reps × $weight"
         reps != null -> reps
-        weight != null -> weight
-        else -> "—"
+        else -> weight
     }
+    return listOfNotNull(lift, set.durationSeconds?.let { setDuration(it) }).joinToString(" · ").ifEmpty { "—" }
 }
 
 // Icon of a training's status in lists: planned, in progress or completed.

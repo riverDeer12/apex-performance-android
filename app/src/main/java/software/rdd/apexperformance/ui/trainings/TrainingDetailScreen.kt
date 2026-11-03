@@ -470,19 +470,16 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
             }
 
             val sets = exercise.sets.sortedBy { it.order }
+            // Sets over a distance (e.g. rowing) show the distance, duration and pace.
+            val hasDistance = sets.any { it.distanceMeters != null }
+            // Any set can have a duration: a time column then, next to repetitions and weight.
+            val hasDuration = !hasDistance && sets.any { it.durationSeconds != null }
             if (sets.isNotEmpty()) {
                 TrainingSetRow(
                     stringResource(R.string.set),
-                    // Sets of a timed workout (e.g. plank) have a duration instead of reps,
-                    // sets over a distance (e.g. rowing) the distance, duration and pace.
-                    stringResource(
-                        when {
-                            sets.any { it.distanceMeters != null } -> R.string.distance
-                            sets.any { it.durationSeconds != null } -> R.string.time
-                            else -> R.string.reps
-                        }
-                    ),
+                    stringResource(if (hasDistance) R.string.distance else R.string.reps),
                     stringResource(R.string.kg),
+                    time = if (hasDuration) stringResource(R.string.time) else null,
                     isHeader = true
                 )
             }
@@ -494,10 +491,10 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                     // Drop set of the set above, done right after it.
                     number?.toString() ?: "↳ ${stringResource(R.string.drop_set_short)}",
                     distanceSetParts(set, exercise.paceType).takeIf { it.isNotEmpty() }?.joinToString(" · ")
-                        ?: set.durationSeconds?.let { setDuration(it) }
                         ?: set.reps?.trim()?.takeIf { it.isNotEmpty() }
                         ?: "—",
                     set.weight?.let(::formatWeight) ?: "—",
+                    time = if (hasDuration) set.durationSeconds?.let { setDuration(it) } ?: "—" else null,
                     isDropSet = number == null
                 )
             }
@@ -515,9 +512,16 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
     }
 }
 
-// Row of the sets table: set number, repetitions and weight.
+// Row of the sets table: set number, repetitions, weight and the duration when sets have one.
 @Composable
-private fun TrainingSetRow(set: String, reps: String, weight: String, isHeader: Boolean = false, isDropSet: Boolean = false) {
+private fun TrainingSetRow(
+    set: String,
+    reps: String,
+    weight: String,
+    time: String? = null,
+    isHeader: Boolean = false,
+    isDropSet: Boolean = false
+) {
     val style = if (isHeader) {
         TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, color = ApexColors.secondaryLabel)
     } else {
@@ -542,6 +546,9 @@ private fun TrainingSetRow(set: String, reps: String, weight: String, isHeader: 
         )
         Text(text(reps), style = style, modifier = Modifier.weight(1f))
         Text(text(weight), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
+        if (time != null) {
+            Text(text(time), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
+        }
     }
 }
 
