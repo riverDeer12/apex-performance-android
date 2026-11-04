@@ -52,7 +52,6 @@ import software.rdd.apexperformance.ui.components.FormSection
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.ScrollScreen
-import software.rdd.apexperformance.ui.components.ToggleRow
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
@@ -75,7 +74,8 @@ class WorkoutEditScreen(
     private var selectedWorkoutTypeIds by mutableStateOf(workout?.workoutTypes.orEmpty().map { it.id }.toSet())
     private var muscles by mutableStateOf(rolesOf(workout))
     // Sets record a duration instead of repetitions (e.g. plank).
-    private var isTimed by mutableStateOf(workout?.isTimed ?: false)
+    // No longer set in the form (every set can have a duration), kept as the workout has it.
+    private val isTimed = workout?.isTimed ?: false
     private var category by mutableStateOf(workout?.workoutCategory ?: WorkoutCategory.STRENGTH_CONDITIONING)
     // PaceType value (e.g. rowing): sets record a distance and show a pace.
     private var paceType by mutableStateOf(workout?.paceType)
@@ -249,8 +249,6 @@ class WorkoutEditScreen(
                             .fillMaxWidth()
                             .clickable {
                                 paceType = option.value
-                                // Distance sets also record their duration, like on the web.
-                                if (option.value != null) isTimed = true
                             }
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -261,17 +259,6 @@ class WorkoutEditScreen(
                         }
                     }
                     if (option != PaceTypeOption.entries.last()) Divider()
-                }
-            }
-
-            FormSection(
-                footer = { Text(stringResource(R.string.timed_workout_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
-            ) {
-                ToggleRow(stringResource(R.string.timed_workout), isTimed) {
-                    isTimed = it
-                    // A pace needs a duration: without one the workout has no pace type,
-                    // otherwise the API keeps it timed and switching off had no effect.
-                    if (!it) paceType = null
                 }
             }
 

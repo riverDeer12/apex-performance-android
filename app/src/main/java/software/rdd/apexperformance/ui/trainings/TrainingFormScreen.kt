@@ -428,10 +428,9 @@ class TrainingFormScreen private constructor(
     @Composable
     private fun ExerciseSection(index: Int, exercise: ExerciseDraft, label: String, navigator: Navigator) {
         val previous = previousSets(exercise.workoutId)
-        // Done over a distance (e.g. rowing): a distance instead of the weight, with the pace.
+        // Done over a distance (e.g. rowing): a duration and a distance, with the pace.
+        // Other sets have repetitions, weight and a duration, none of them required.
         val paceType = paceTypeOf(exercise)
-        // Done for a time (e.g. plank): a duration instead of repetitions.
-        val isTimed = workouts.firstOrNull { it.id == exercise.workoutId }?.isTimed == true || paceType != null
 
         Section(header = { ExerciseHeader(index, exercise, label) }) {
             // Exercise picker.
@@ -466,13 +465,13 @@ class TrainingFormScreen private constructor(
 
             if (exercise.sets.isNotEmpty()) {
                 Divider()
-                SetsHeader(previous, isTimed, paceType)
+                SetsHeader(previous, paceType)
             }
 
             val setNumbers = setNumbers(exercise.sets.map { it.isDropSet })
             exercise.sets.forEachIndexed { setIndex, set ->
                 key(set.id) {
-                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous, isTimed, paceType)
+                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous, paceType)
                 }
             }
 
@@ -599,9 +598,12 @@ class TrainingFormScreen private constructor(
         }
     }
 
+    // Width of the previous training's sets on the side, narrower next to three fields.
+    private fun previousWidth(paceType: String?) = if (paceType == null) 64.dp else 92.dp
+
     // Column titles of the sets, with the previous training's date.
     @Composable
-    private fun SetsHeader(previous: PreviousSets?, isTimed: Boolean, paceType: String?) {
+    private fun SetsHeader(previous: PreviousSets?, paceType: String?) {
         val style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
         Row(
             modifier = Modifier
@@ -612,7 +614,7 @@ class TrainingFormScreen private constructor(
         ) {
             Text("#", style = style, modifier = Modifier.width(22.dp))
             Text(
-                stringResource(if (isTimed) R.string.time else R.string.reps).uppercase(),
+                stringResource(if (paceType != null) R.string.time else R.string.reps).uppercase(),
                 style = style,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
@@ -626,6 +628,15 @@ class TrainingFormScreen private constructor(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
+            if (paceType == null) {
+                Text(
+                    stringResource(R.string.time).uppercase(),
+                    style = style,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            }
             if (previous != null) {
                 Text(
                     stringResource(R.string.last_time).uppercase(),
@@ -633,7 +644,7 @@ class TrainingFormScreen private constructor(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.width(92.dp)
+                    modifier = Modifier.width(previousWidth(paceType))
                 )
             }
         }
@@ -649,7 +660,6 @@ class TrainingFormScreen private constructor(
         number: Int?,
         set: SetDraft,
         previous: PreviousSets?,
-        isTimed: Boolean,
         paceType: String?
     ) {
         val dismissState = rememberSwipeToDismissBoxState(
@@ -715,13 +725,13 @@ class TrainingFormScreen private constructor(
                             .size(18.dp)
                     )
                 }
-                if (isTimed) {
+                if (paceType != null) {
                     DurationWheelField(
                         seconds = set.durationSeconds,
                         onSecondsChange = { value -> updateSet(exerciseId, set.id) { it.copy(durationSeconds = value) } },
                         title = stringResource(R.string.time),
                         // Walks and rides over a distance can last over an hour.
-                        showsHours = paceType != null,
+                        showsHours = true,
                         modifier = Modifier.weight(1f)
                     )
                 } else {
@@ -783,6 +793,14 @@ class TrainingFormScreen private constructor(
                         title = stringResource(R.string.weight),
                         modifier = Modifier.weight(1f)
                     )
+                    // How long the set lasted, optional for every exercise.
+                    DurationWheelField(
+                        seconds = set.durationSeconds,
+                        onSecondsChange = { value -> updateSet(exerciseId, set.id) { it.copy(durationSeconds = value) } },
+                        title = stringResource(R.string.time),
+                        showsHours = false,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
                 if (previous != null) {
                     // Same set on the previous training, shown on the side.
@@ -793,7 +811,7 @@ class TrainingFormScreen private constructor(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.width(92.dp)
+                        modifier = Modifier.width(previousWidth(paceType))
                     )
                 }
             }
