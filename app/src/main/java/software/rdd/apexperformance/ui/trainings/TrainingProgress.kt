@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -59,6 +60,7 @@ import software.rdd.apexperformance.ui.components.EmptyText
 import software.rdd.apexperformance.ui.components.ProgressPeriod
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.workouts.WorkoutMuscle
 import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.Instant
@@ -305,28 +307,36 @@ private fun trainingsPerWeek(sessions: List<Session>): List<ChartPoint> {
 
 private class MuscleGroup(val id: String, val name: String, val sets: Int)
 
-// Logged sets per workout type. Exercises without a type count as other.
-private fun muscleGroups(sessions: List<Session>, workouts: List<Workout>, other: String): List<MuscleGroup> {
+// Logged sets per primary muscle of the exercise's workout. Exercises whose
+// workout has no muscles count as other.
+private fun muscleGroups(
+    sessions: List<Session>,
+    workouts: List<Workout>,
+    other: String,
+    muscleName: (String) -> String
+): List<MuscleGroup> {
     val workoutsById = workouts.distinctBy { it.id }.associateBy { it.id }
+    val otherId = "__other"
 
     val sets = linkedMapOf<String, Int>()
     sessions.flatMap { it.training.exercises }
         .filter { it.sets.isNotEmpty() }
         .forEach { exercise ->
-            val types = workoutsById[exercise.workoutId]?.workoutTypes?.map { it.name.localized }.orEmpty()
-            for (type in types.ifEmpty { listOf(other) }) {
-                sets[type] = (sets[type] ?: 0) + exercise.sets.sortedBy { it.order }.mainSetCount
+            val muscles = workoutsById[exercise.workoutId]?.muscles.orEmpty().distinct()
+            for (muscle in muscles.ifEmpty { listOf(otherId) }) {
+                sets[muscle] = (sets[muscle] ?: 0) + exercise.sets.sortedBy { it.order }.mainSetCount
             }
         }
 
     val sorted = sets
-        .map { (name, count) -> MuscleGroup(name, name, count) }
-        .sortedByDescending { it.sets }
+        .map { (code, count) -> MuscleGroup(code, if (code == otherId) other else muscleName(code), count) }
+        .sortedWith(compareByDescending<MuscleGroup> { it.sets }.thenBy { it.name })
 
-    // At most six slices, the rest is grouped as other.
+    // At most six slices: five muscles, the rest is grouped as other.
     if (sorted.size <= 6) return sorted
-    val rest = sorted.drop(5).sumOf { it.sets }
-    return sorted.take(5) + MuscleGroup("__other", other, rest)
+    val muscles = sorted.filter { it.id != otherId }
+    val rest = muscles.drop(5).sumOf { it.sets } + (sorted.firstOrNull { it.id == otherId }?.sets ?: 0)
+    return muscles.take(5) + MuscleGroup(otherId, other, rest)
 }
 
 // Accent, teal, indigo, orange, pink and gray, as on iOS.
@@ -341,7 +351,10 @@ private fun sliceColors(): List<Color> = listOf(
 
 @Composable
 private fun MuscleGroupsCard(sessions: List<Session>, workouts: List<Workout>) {
-    val groups = muscleGroups(sessions, workouts, stringResource(R.string.other))
+    val context = LocalContext.current
+    val groups = muscleGroups(sessions, workouts, stringResource(R.string.other)) {
+        WorkoutMuscle.name(context, it)
+    }
     val total = max(groups.sumOf { it.sets }, 1)
     val colors = sliceColors()
     val percent = NumberFormat.getPercentInstance().apply { maximumFractionDigits = 0 }
