@@ -1,3 +1,2 @@
 Novosti:
-- Svaka serija sada ima i polje za vrijeme, uz ponavljanja i kilograme. Nijedno polje nije obavezno, a vrijeme se prikazuje u treningu kao zaseban stupac.
-- U obrascu vježbe više nema prekidača "Vježba na vrijeme".
+- Grafikon mišićnih skupina u napretku treninga sada prikazuje mišiće koje vježba radi (prsa, triceps...) umjesto naziva vježbe.
