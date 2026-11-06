@@ -417,6 +417,7 @@
     <string name="plan_online_coaching">Online coaching</string>
     <string name="plan_private_coaching">Private coaching</string>
     <string name="planned">Planiran</string>
+    <string name="planned_training_hint">Planirani trening ne pokreće se spremanjem. Pokreni ga kasnije u treningu.</string>
     <string name="play_video">Pokreni video</string>
     <string name="previous_reviews">Prethodni osvrti</string>
     <string name="primary_muscle">Primarni</string>
@@ -504,6 +505,7 @@
     <string name="show_password">Prikaži lozinku</string>
     <string name="since_first_measurement">od prvog mjerenja</string>
     <string name="start_training">Započni trening</string>
+    <string name="starts_on_save_hint">Trening se pokreće spremanjem i mjeri mu se vrijeme. Označi ga kao planiran da ga pokreneš kasnije.</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Snaga i kondicija</string>
     <string name="success">Uspjeh</string>

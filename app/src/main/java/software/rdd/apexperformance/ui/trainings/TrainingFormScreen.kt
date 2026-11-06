@@ -99,8 +99,6 @@ import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -152,6 +150,8 @@ class TrainingFormScreen private constructor(
     private var date by mutableStateOf(training?.date ?: Instant.now())
     private var note by mutableStateOf(training?.note ?: copying?.note ?: template?.note.orEmpty())
     private var isCompleted by mutableStateOf(training?.isCompleted ?: false)
+    // Planned trainings are saved without starting; others start on save.
+    private var isPlanned by mutableStateOf(training?.let { !it.isCompleted && it.startedAt == null } ?: false)
     // The client gets a push about a new training, about an edit only when asked.
     private var notifyClient by mutableStateOf(training == null)
     private var exercises by mutableStateOf(
@@ -163,7 +163,7 @@ class TrainingFormScreen private constructor(
     // What the form saves, as it was when it opened.
     private val initialState = formState()
 
-    private fun formState(): List<Any?> = listOf(name, date, note, isCompleted, exercises)
+    private fun formState(): List<Any?> = listOf(name, date, note, isCompleted, isPlanned, exercises)
 
     override val hasUnsavedChanges: Boolean get() = formState() != initialState
 
@@ -222,7 +222,17 @@ class TrainingFormScreen private constructor(
                 }
             }
 
-            Section {
+            Section(
+                footer = if (!isTemplate && canBePlanned) {
+                    {
+                        Text(
+                            stringResource(if (isPlanned) R.string.planned_training_hint else R.string.starts_on_save_hint),
+                            style = ApexText.footnote,
+                            color = ApexColors.secondaryLabel
+                        )
+                    }
+                } else null
+            ) {
                 PlainTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -237,6 +247,10 @@ class TrainingFormScreen private constructor(
                     Divider()
                     SwitchRow(stringResource(R.string.completed), isCompleted) { isCompleted = it }
                     Divider()
+                    if (canBePlanned) {
+                        SwitchRow(stringResource(R.string.planned), isPlanned) { isPlanned = it }
+                        Divider()
+                    }
                     NotifyClientRow(notifyClient) { notifyClient = it }
                     Divider()
                 }
@@ -946,14 +960,17 @@ class TrainingFormScreen private constructor(
         }
     }
 
-    // A new training for today that is not completed starts when it is
-    // saved, so its time is measured without another tap.
-    private val startsOnSave: Boolean
-        get() = !isTemplate && training == null && !isCompleted &&
-            date.atZone(ZoneId.systemDefault()).toLocalDate() == LocalDate.now()
+    // A training not started or completed yet can be marked as planned.
+    private val canBePlanned: Boolean
+        get() = !isCompleted && training?.startedAt == null
 
-    // Saves the training; a new one for today is also marked as started now
-    // (in progress).
+    // A training not marked as planned starts when it is saved, so its
+    // time is measured without another tap.
+    private val startsOnSave: Boolean
+        get() = !isTemplate && canBePlanned && !isPlanned
+
+    // Saves the training; one not marked as planned is also marked as
+    // started now (in progress).
     private suspend fun save(navigator: Navigator) {
         val starting = startsOnSave
         if (isTemplate) {

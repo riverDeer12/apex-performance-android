@@ -29,8 +29,8 @@ android {
         applicationId = "software.rdd.apexperformance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 33
-        versionName = "1.34"
+        versionCode = 34
+        versionName = "1.35"
     }
 
     signingConfigs {

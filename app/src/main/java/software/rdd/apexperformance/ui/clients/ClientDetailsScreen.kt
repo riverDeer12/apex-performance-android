@@ -156,6 +156,9 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                 }
             }
 
+            // Trainings first, the coach opens them most often.
+            TrainingsCard()
+
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.personal_info)) {
                 Column {
                     EditableRow(stringResource(R.string.first_name)) {
@@ -254,8 +257,6 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
             GoalCard()
 
             MonthlyReviewsCard()
-
-            TrainingsCard()
         }
     }
 

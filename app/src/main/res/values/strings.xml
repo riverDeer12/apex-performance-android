@@ -418,6 +418,7 @@
     <string name="plan_online_coaching">Online coaching</string>
     <string name="plan_private_coaching">Private coaching</string>
     <string name="planned">Planned</string>
+    <string name="planned_training_hint">A planned training doesn\'t start when saved. Start it later from the training.</string>
     <string name="play_video">Play video</string>
     <string name="previous_reviews">Previous reviews</string>
     <string name="primary_muscle">Primary</string>
@@ -505,6 +506,7 @@
     <string name="show_password">Show password</string>
     <string name="since_first_measurement">since first measurement</string>
     <string name="start_training">Start training</string>
+    <string name="starts_on_save_hint">The training starts when saved and its time is measured. Mark it as planned to start it later.</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Strength and Conditioning</string>
     <string name="success">Success</string>

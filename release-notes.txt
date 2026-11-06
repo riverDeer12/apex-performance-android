@@ -1,2 +1,3 @@
 Novosti:
-- Novi trening za današnji dan odmah se pokreće kad ga trener spremi, pa se vrijeme treninga mjeri bez dodatnog klika. Tipka "Spremi i započni trening" je uklonjena.
+- Trening se pokreće čim ga trener spremi i vrijeme se mjeri automatski. Trening koji treba pokrenuti kasnije označi se kao "Planiran" prije spremanja. Tipka "Spremi i započni trening" je uklonjena.
+- U detaljima klijenta treninzi su sada prvi, odmah ispod podataka o klijentu.
