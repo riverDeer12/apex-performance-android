@@ -99,12 +99,12 @@ import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
-import androidx.compose.material.icons.filled.PlayArrow
-import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import software.rdd.apexperformance.ui.components.SHOW_MORE_PAGE_SIZE
 import software.rdd.apexperformance.ui.components.ShowMoreItems
 
@@ -265,25 +265,6 @@ class TrainingFormScreen private constructor(
             ) {
                 ButtonRow(Icons.Filled.Add, stringResource(R.string.add_exercise)) {
                     exercises = exercises + ExerciseDraft()
-                }
-            }
-
-            if (canStart) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ApexPrimaryButton(
-                        stringResource(R.string.save_and_start_training),
-                        icon = Icons.Filled.PlayArrow,
-                        enabled = isValid,
-                        isLoading = isSaving
-                    ) { launch { save(navigator, starting = true) } }
-                    Text(
-                        stringResource(R.string.save_and_start_training_hint),
-                        style = ApexText.footnote,
-                        color = ApexColors.secondaryLabel
-                    )
                 }
             }
         }
@@ -965,12 +946,16 @@ class TrainingFormScreen private constructor(
         }
     }
 
-    // A training not started or completed yet can be started right away.
-    private val canStart: Boolean
-        get() = !isTemplate && !isCompleted && training?.startedAt == null
+    // A new training for today that is not completed starts when it is
+    // saved, so its time is measured without another tap.
+    private val startsOnSave: Boolean
+        get() = !isTemplate && training == null && !isCompleted &&
+            date.atZone(ZoneId.systemDefault()).toLocalDate() == LocalDate.now()
 
-    // Saves the training; starting also marks it as started now (in progress).
-    private suspend fun save(navigator: Navigator, starting: Boolean = false) {
+    // Saves the training; a new one for today is also marked as started now
+    // (in progress).
+    private suspend fun save(navigator: Navigator) {
+        val starting = startsOnSave
         if (isTemplate) {
             saveTemplate(navigator)
             return

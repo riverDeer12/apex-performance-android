@@ -471,8 +471,6 @@
     <string name="rules_open_document">Open the rules (PDF)</string>
     <string name="rules_title">Cooperation rules</string>
     <string name="save">Save</string>
-    <string name="save_and_start_training">Save and start training</string>
-    <string name="save_and_start_training_hint">The training is saved for today and is in progress right away: the client sees it, and you end it with “End training” in its details.</string>
     <string name="save_as_template">Save as template</string>
     <string name="save_as_template_hint">The template gets the exercises and sets of this training.</string>
     <string name="search">Search</string>

@@ -1,2 +1,2 @@
 Novosti:
-- Grafikon mišićnih skupina u napretku treninga sada prikazuje mišiće koje vježba radi (prsa, triceps...) umjesto naziva vježbe.
+- Novi trening za današnji dan odmah se pokreće kad ga trener spremi, pa se vrijeme treninga mjeri bez dodatnog klika. Tipka "Spremi i započni trening" je uklonjena.

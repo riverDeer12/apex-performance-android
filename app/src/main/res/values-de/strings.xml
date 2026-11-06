@@ -470,8 +470,6 @@
     <string name="rules_open_document">Regeln öffnen (PDF)</string>
     <string name="rules_title">Regeln der Zusammenarbeit</string>
     <string name="save">Speichern</string>
-    <string name="save_and_start_training">Speichern und Training starten</string>
-    <string name="save_and_start_training_hint">Das Training wird für heute gespeichert und läuft sofort: Der Kunde sieht es, und du beendest es in den Details mit „Training beenden“.</string>
     <string name="save_as_template">Als Vorlage speichern</string>
     <string name="save_as_template_hint">Die Vorlage erhält die Übungen und Sätze dieses Trainings.</string>
     <string name="search">Suchen</string>
