@@ -417,6 +417,7 @@
     <string name="plan_online_coaching">Online-Coaching</string>
     <string name="plan_private_coaching">Personal Coaching</string>
     <string name="planned">Geplant</string>
+    <string name="planned_training_hint">Ein geplantes Training startet beim Speichern nicht. Starte es später im Training.</string>
     <string name="play_video">Video abspielen</string>
     <string name="previous_reviews">Frühere Rückblicke</string>
     <string name="primary_muscle">Primär</string>
@@ -470,8 +471,6 @@
     <string name="rules_open_document">Regeln öffnen (PDF)</string>
     <string name="rules_title">Regeln der Zusammenarbeit</string>
     <string name="save">Speichern</string>
-    <string name="save_and_start_training">Speichern und Training starten</string>
-    <string name="save_and_start_training_hint">Das Training wird für heute gespeichert und läuft sofort: Der Kunde sieht es, und du beendest es in den Details mit „Training beenden“.</string>
     <string name="save_as_template">Als Vorlage speichern</string>
     <string name="save_as_template_hint">Die Vorlage erhält die Übungen und Sätze dieses Trainings.</string>
     <string name="search">Suchen</string>
@@ -506,6 +505,7 @@
     <string name="show_password">Passwort anzeigen</string>
     <string name="since_first_measurement">seit der ersten Messung</string>
     <string name="start_training">Training starten</string>
+    <string name="starts_on_save_hint">Das Training startet beim Speichern und seine Zeit wird gemessen. Markiere es als geplant, um es später zu starten.</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Kraft und Kondition</string>
     <string name="success">Erfolg</string>

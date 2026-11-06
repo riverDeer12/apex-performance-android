@@ -417,6 +417,7 @@
     <string name="plan_online_coaching">Online coaching</string>
     <string name="plan_private_coaching">Private coaching</string>
     <string name="planned">Pianificato</string>
+    <string name="planned_training_hint">Un allenamento pianificato non inizia al salvataggio. Avvialo più tardi dall\'allenamento.</string>
     <string name="play_video">Riproduci video</string>
     <string name="previous_reviews">Revisioni precedenti</string>
     <string name="primary_muscle">Primario</string>
@@ -470,8 +471,6 @@
     <string name="rules_open_document">Apri le regole (PDF)</string>
     <string name="rules_title">Regole di collaborazione</string>
     <string name="save">Salva</string>
-    <string name="save_and_start_training">Salva e inizia l\'allenamento</string>
-    <string name="save_and_start_training_hint">L\'allenamento viene salvato per oggi ed è subito in corso: il cliente lo vede e lo termini con “Termina allenamento” nei dettagli.</string>
     <string name="save_as_template">Salva come modello</string>
     <string name="save_as_template_hint">Il modello riceve gli esercizi e le serie di questo allenamento.</string>
     <string name="search">Cerca</string>
@@ -506,6 +505,7 @@
     <string name="show_password">Mostra password</string>
     <string name="since_first_measurement">dalla prima misurazione</string>
     <string name="start_training">Inizia allenamento</string>
+    <string name="starts_on_save_hint">L’allenamento inizia al salvataggio e ne viene misurato il tempo. Segnalo come pianificato per avviarlo più tardi.</string>
     <string name="status">Stato</string>
     <string name="strength_and_conditioning">Forza e condizionamento</string>
     <string name="success">Successo</string>
