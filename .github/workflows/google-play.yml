@@ -68,7 +68,8 @@ jobs:
       - name: Release notes
         run: |
           mkdir -p whatsnew
-          head -c 500 release-notes.txt > whatsnew/whatsnew-hr-HR
+          # By characters, so a letter like č is never cut in half.
+          python3 -c "import sys; sys.stdout.write(open('release-notes.txt', encoding='utf-8').read()[:500])" > whatsnew/whatsnew-hr-HR
 
       - name: Sign in to Google Cloud
         id: google
