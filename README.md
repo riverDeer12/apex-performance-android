@@ -121,11 +121,33 @@ One-time setup:
    through the API only after the first one.
 4. **Internal testing → Testers**: create an email list with the testers and share the opt-in
    link with them.
-5. Google Cloud console (project of the Play account) → enable the **Google Play Android
-   Developer API** → create a service account and a JSON key for it.
+5. Google Cloud: service account `github-play-upload` and a Workload Identity Federation
+   pool that lets only this repository's workflows act as it (no key is stored anywhere; the
+   organization policy blocks service account keys anyway). In Cloud Shell:
+
+   ```bash
+   PROJECT_ID=apex-performance-514123
+   SA=github-play-upload@$PROJECT_ID.iam.gserviceaccount.com
+   PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+   gcloud services enable androidpublisher.googleapis.com iamcredentials.googleapis.com sts.googleapis.com --project=$PROJECT_ID
+   gcloud iam workload-identity-pools create github --project=$PROJECT_ID --location=global --display-name=GitHub
+   gcloud iam workload-identity-pools providers create-oidc apex-android --project=$PROJECT_ID \
+     --location=global --workload-identity-pool=github --display-name="apex-performance-android" \
+     --issuer-uri=https://token.actions.githubusercontent.com \
+     --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+     --attribute-condition="assertion.repository=='riverDeer12/apex-performance-android'"
+   gcloud iam service-accounts add-iam-policy-binding $SA --project=$PROJECT_ID \
+     --role=roles/iam.workloadIdentityUser \
+     --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/riverDeer12/apex-performance-android"
+   echo "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/providers/apex-android"
+   ```
+
 6. Play Console → **Users and permissions** → invite the service account's email with the
    app's *Release to testing tracks* permission.
-7. Add the JSON key as the repository secret `PLAY_SERVICE_ACCOUNT_JSON`.
+7. Repository **variables** (Settings → Secrets and variables → Actions → Variables):
+   `GCP_WORKLOAD_IDENTITY_PROVIDER` = the line the last command printed,
+   `GCP_PLAY_SERVICE_ACCOUNT` = `github-play-upload@apex-performance-514123.iam.gserviceaccount.com`.
+   Neither is secret.
 
 Before production: store listing (512×512 icon, 1024×500 feature graphic, phone screenshots,
 descriptions in `play-store/listing`), **App content** (privacy policy URL, **Data safety**:
