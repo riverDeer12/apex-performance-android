@@ -107,13 +107,34 @@ installed app, and users would have to uninstall it first.
 
 ## Publishing on Google Play
 
+Releases go to a Google Play testing track with the **Publish to Google Play** workflow
+(Actions → Publish to Google Play → Run workflow): it builds the signed release bundle (AAB)
+and uploads it with the release notes from `release-notes.txt`. Testers of the track get every
+update from the Play Store.
+
+One-time setup:
+
 1. [Google Play Console](https://play.google.com/console) developer account (one-time fee).
-2. Create the app, enable **Play App Signing** and upload `app-release.aab` to an internal testing track first.
-3. Store listing: 512×512 icon, 1024×500 feature graphic, phone screenshots, descriptions (hr/en/it).
-4. App content: privacy policy URL, **Data safety** (same data as the iOS privacy manifest: name,
-   email, phone, user ID – for app functionality, not shared), content rating, target audience.
-5. New personal developer accounts must run a closed test with testers before production access.
-6. Bump `versionCode` in `app/build.gradle.kts` for every upload.
+2. Create the app (`software.rdd.apexperformance`), keep **Play App Signing** on.
+3. Run the workflow with **upload** off, download the `app-release-aab` artifact (kept for a
+   day) and upload it by hand to **Testing → Internal testing** – Google Play takes uploads
+   through the API only after the first one.
+4. **Internal testing → Testers**: create an email list with the testers and share the opt-in
+   link with them.
+5. Google Cloud console (project of the Play account) → enable the **Google Play Android
+   Developer API** → create a service account and a JSON key for it.
+6. Play Console → **Users and permissions** → invite the service account's email with the
+   app's *Release to testing tracks* permission.
+7. Add the JSON key as the repository secret `PLAY_SERVICE_ACCOUNT_JSON`.
+
+Before production: store listing (512×512 icon, 1024×500 feature graphic, phone screenshots,
+descriptions in `play-store/listing`), **App content** (privacy policy URL, **Data safety**:
+name, email, phone, user ID, health and fitness, crash logs – for app functionality, not
+shared), content rating and target audience. New personal developer accounts must run a
+closed test with at least 12 testers for 14 days before production access.
+
+Bump `versionCode` in `app/build.gradle.kts` for every upload: Google Play refuses a bundle
+with a `versionCode` it already has.
 
 ## Structure
 
