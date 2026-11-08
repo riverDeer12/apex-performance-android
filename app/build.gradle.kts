@@ -10,9 +10,12 @@ plugins {
 }
 
 // Firebase config is downloaded from the Firebase console (Android app in the
-// apex-performance project). Without it the app builds and runs without push.
+// apex-performance project). Without it the app builds and runs without push
+// and crash reports. Crashlytics uploads the release mapping file, so crash
+// reports of the minified app are readable.
 if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
+    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
 }
 
 // Upload key for Google Play, kept out of git (see README).
@@ -29,8 +32,8 @@ android {
         applicationId = "software.rdd.apexperformance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.35"
+        versionCode = 35
+        versionName = "1.36"
     }
 
     signingConfigs {
@@ -46,12 +49,15 @@ android {
 
     buildTypes {
         debug {
+            // Crashes while developing don't go to Crashlytics.
+            manifestPlaceholders["crashlyticsEnabled"] = false
             // A local API can be used with -PapiUrl=http://10.0.2.2:5000/api (emulator → this Mac).
             val apiUrl = providers.gradleProperty("apiUrl").orElse("https://test.apex-performance.fit/api").get()
             buildConfigField("String", "API_URL", "\"$apiUrl\"")
         }
         release {
             buildConfigField("String", "API_URL", "\"https://apex-performance.fit/api\"")
+            manifestPlaceholders["crashlyticsEnabled"] = true
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -110,6 +116,7 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
 }
