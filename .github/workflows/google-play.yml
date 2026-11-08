@@ -25,6 +25,13 @@ on:
         type: boolean
         default: true
 
+# Google Play access without a stored key (Workload Identity Federation):
+# GitHub's token for this run is exchanged for a short-lived token of the
+# github-play-upload service account. Only this repository may do that.
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -63,11 +70,19 @@ jobs:
           mkdir -p whatsnew
           head -c 500 release-notes.txt > whatsnew/whatsnew-hr-HR
 
+      - name: Sign in to Google Cloud
+        id: google
+        if: ${{ inputs.upload }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_PLAY_SERVICE_ACCOUNT }}
+
       - name: Upload to Google Play
         if: ${{ inputs.upload }}
         uses: r0adkll/upload-google-play@v1.1.3
         with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          serviceAccountJson: ${{ steps.google.outputs.credentials_file_path }}
           packageName: software.rdd.apexperformance
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           mappingFile: app/build/outputs/mapping/release/mapping.txt
