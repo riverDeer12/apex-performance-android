@@ -231,10 +231,10 @@ class PlayStoreScreenshots {
             "enter",
             "clock -e hhmm 0941",
             "battery -e level 100 -e plugged false",
-            // The emulator's own Wi-Fi icon stays: a demo one next to it showed
-            // two Wi-Fi icons, so demo mode shows no network icons.
+            // Full mobile signal only: the emulator's system UI draws the demo
+            // Wi-Fi icon twice.
             "network -e wifi hide",
-            "network -e mobile hide",
+            "network -e mobile show -e datatype none -e level 4 -e fully true",
             "notifications -e visible false"
         )
         for (command in commands) {
