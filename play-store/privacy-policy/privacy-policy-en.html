@@ -78,7 +78,7 @@ footer a{color:var(--muted)}
   <div class="hero-inner">
     <p class="eyebrow">Apex Performance · mobile app</p>
     <h1>Privacy Policy</h1>
-    <p class="meta">Apex Performance mobile app (Android and iOS)<br>Effective from: 30 October 2026</p>
+    <p class="meta">Apex Performance mobile app (Android and iOS)<br>Effective from: 9 November 2026</p>
   </div>
 </section>
 <main>
@@ -105,7 +105,7 @@ footer a{color:var(--muted)}
     <tr><td data-label="Category">Body measurements and assessments</td><td data-label="Data">height, weight and circumferences (shoulders, chest, upper arm, waist, thigh, calves, glutes) with the measurement date; FMS (Functional Movement Screen) results and coach notes</td><td data-label="Source">coach</td></tr>
     <tr><td data-label="Category">Heart rate during trainings (iOS only, with your permission)</td><td data-label="Data">lowest, highest and average heart rate during a training with your coach, calculated from Apple Health (Apple Watch or a chest strap); the time the training started and ended</td><td data-label="Source">your device (Apple Health), coach</td></tr>
     <tr><td data-label="Category">Device and notifications</td><td data-label="Data">push notification token, platform (Android/iOS), app version, operating system version, device model</td><td data-label="Source">your device</td></tr>
-    <tr><td data-label="Category">Technical logs</td><td data-label="Data">IP address, time and type of requests to the server, error logs</td><td data-label="Source">server</td></tr>
+    <tr><td data-label="Category">Technical logs</td><td data-label="Data">IP address, time and type of requests to the server, error logs</td><td data-label="Source">server</td></tr><tr><td data-label="Category">Crash reports</td><td data-label="Data">when the App crashes: where in the code it happened, app version, operating system version, device model, time of the crash and a random identifier of the installation (not linked to your name or account)</td><td data-label="Source">your device</td></tr>
   </table></div>
   <p><strong>Apple Health:</strong> if you allow it, the App reads heart rate measurements from Apple Health on your iPhone, only for the time between the start and end of a training marked by your coach. It calculates the lowest, highest and average heart rate on your device and sends only these three values; individual measurements never leave your device. The App does not write anything to Apple Health, does not read other health data, and does not use data from Apple Health for advertising or share it with third parties.</p>
   <p>Body measurements, FMS assessments and heart rate may reveal information about your health and fitness. We process them only so that you and your coach can track your progress and plan your training.</p>
@@ -118,13 +118,14 @@ footer a{color:var(--muted)}
     <li><strong>Heart rate from Apple Health</strong> – showing the lowest, highest and average heart rate with a training, so that you and your coach can follow the training load and your cardiovascular fitness. Basis: your explicit consent (Art. 9(2)(a) GDPR), given by allowing the App to read your heart rate. You can withdraw it at any time in the iPhone settings (Settings → Privacy &amp; Security → Health → Apex); we delete the stored values on request at <a href="mailto:info@rdd.software">info@rdd.software</a>.</li>
     <li><strong>Push notifications</strong> – about new requests, appointment changes and new measurements. Basis: your consent, given by allowing notifications on your device, which you can withdraw at any time in the device settings.</li>
     <li><strong>System emails</strong> – e.g. login details, password changes, the result of a workout import. Basis: performance of the contract.</li>
-    <li><strong>Security and reliability</strong> – preventing misuse and fixing errors using technical logs. Basis: legitimate interest (Art. 6(1)(f)).</li>
+    <li><strong>Security and reliability</strong> – preventing misuse and fixing errors using technical logs and crash reports. Basis: legitimate interest (Art. 6(1)(f)).</li>
   </ul>
 
   <h2>4. Who has access to the data</h2>
   <ul>
     <li><strong>Coaches and administrators of the centre</strong> – see the data of their clients they need for their work (appointments, credits, measurements, FMS, heart rate during trainings).</li>
     <li><strong>Google (Firebase Cloud Messaging)</strong> – processes the device token and notification content to deliver push notifications. <a href="https://firebase.google.com/support/privacy">Firebase privacy</a>.</li>
+<li><strong>Google (Firebase Crashlytics)</strong> – receives crash reports from the App, so we can find and fix errors. <a href="https://firebase.google.com/support/privacy">Firebase privacy</a>.</li>
     <li><strong>YouTube (Google)</strong> – workout videos are shown with the embedded YouTube player only when you start a video. YouTube then receives your IP address and device information under its <a href="https://policies.google.com/privacy">privacy policy</a>.</li>
     <li><strong>Server</strong> – the App and all data are hosted on our own server (Windows Server) operated by R.D.D., in Rijeka, Croatia. We do not store data with external hosting providers.</li>
     <li><strong>Google (Gmail)</strong> – system emails are sent through Google's email service, so Google processes the recipient's email address and the message content.</li>
@@ -136,7 +137,7 @@ footer a{color:var(--muted)}
   <p>After you sign in, the App keeps only an access token on your device, encrypted with a key from the device's secure storage (Android Keystore or iOS Keychain). Your password is not stored on the device. The token is deleted when you log out; on Android it is also deleted when you uninstall the App and is excluded from device backups.</p>
 
   <h2>6. How long we keep data</h2>
-  <p>We keep data while your account is active. After the account is closed or you ask for deletion, we delete or anonymise the data within 30 days, except data we are legally required to keep longer (e.g. accounting records). Technical logs are kept for at most 90 days. Logging out invalidates the notification token, so the device no longer receives notifications; the device record is deleted together with your account.</p>
+  <p>We keep data while your account is active. After the account is closed or you ask for deletion, we delete or anonymise the data within 30 days, except data we are legally required to keep longer (e.g. accounting records). Technical logs and crash reports are kept for at most 90 days. Logging out invalidates the notification token, so the device no longer receives notifications; the device record is deleted together with your account.</p>
 
   <h2>7. Deleting your account and data</h2>
   <p>You can request deletion of your account and related data by emailing <a href="mailto:info@rdd.software">info@rdd.software</a> with the subject “Account deletion” from the email address linked to your account, or in person at the Apex Performance centre. Deletion removes your user account, profile, profile picture, body measurements, FMS assessments, requests and device tokens. We handle requests within 30 days. You can also ask us to delete only some data (e.g. your profile picture or measurements) without closing your account.</p>
