@@ -1,30 +1,33 @@
-# Titolo (max 30)
+# Nome (max 30)
 Apex Performance
 
 # Descrizione breve (max 80)
-Appuntamenti, progressi e allenamenti con il tuo coach, tutto in un'unica app.
+Allenamenti, appuntamenti e progressi con il tuo coach, tutto in un'unica app.
 
 # Descrizione completa (max 4000)
-Apex Performance è l'app per i clienti e gli allenatori del centro Apex Performance. Prenota le sessioni, segui i tuoi progressi e consulta gli esercizi in qualsiasi momento, direttamente dal telefono.
+Apex Performance è l'app per i clienti e gli allenatori del centro Apex Performance. Allenamenti, appuntamenti, progressi e chat con il tuo allenatore sono sempre a portata di mano, direttamente dal telefono.
 
 PER I CLIENTI
-• Prenota una sessione: scegli il giorno, l'allenatore e la fascia oraria libera, oppure partecipa a una sessione esistente.
-• Invia una richiesta di cancellazione con un messaggio per il tuo allenatore.
-• Segui lo stato delle tue richieste: approvata, in attesa o rifiutata.
-• Consulta le tue misure corporee e il grafico dell'andamento del peso.
-• Nel profilo vedi sempre i crediti rimasti e il tuo piano di allenamento.
+• Allenamenti – ogni allenamento con esercizi e serie (ripetizioni × kg, tempo, distanza) e le note dell'allenatore.
+• Progressi – grafici di carico massimo, volume e ripetizioni, allenamenti a settimana e la quota di serie per gruppo muscolare.
+• Record personali – registrati automaticamente dagli allenamenti completati.
+• Misure corporee – peso e circonferenze con il grafico dell'andamento, oltre alle valutazioni del movimento FMS.
+• Appuntamenti – prenota un appuntamento, unisciti a uno esistente o richiedi una cancellazione con un commento.
+• Il mio pacchetto – quanti allenamenti hai svolto e quanti ne restano.
+• Obiettivo e piano, e la revisione mensile dei tuoi progressi da parte dell'allenatore.
+• Chat con l'allenatore – messaggi, immagini ed esercizi condivisi.
 
 PER GLI ALLENATORI
-• Calendario di tutti gli appuntamenti con panoramica giorno per giorno.
-• Approva nuovi appuntamenti, richieste di cancellazione e di partecipazione con un solo tocco.
-• Genera il programma della settimana successiva dagli appuntamenti ricorrenti.
-• Elenco clienti con ricerca, filtro per piano ed evidenza dei clienti senza crediti.
-• Profilo del cliente: contatti, piano, crediti, misure corporee con grafico dei progressi e valutazioni FMS (Functional Movement Screen).
-• Libreria di esercizi con video, tipi di esercizio e importazione da modello Excel.
+• Calendario degli appuntamenti e approvazione delle richieste con un tocco.
+• Un nuovo allenamento inizia appena lo salvi e il tempo viene misurato automaticamente; segna come pianificato un allenamento per dopo.
+• Modelli di allenamento, copia degli allenamenti e le serie precedenti del cliente accanto all'inserimento.
+• Libreria di esercizi con video, categorie (mobilità e flessibilità / forza e condizionamento) e la mappa dei muscoli che ogni esercizio allena.
+• Profilo del cliente: allenamenti al primo posto, progressi, misure corporee, FMS, obiettivo e piano, revisioni mensili e crediti.
+• Elenco dei clienti con ricerca e filtro per piano.
 
 NOTIFICHE
-Le notifiche push ti avvisano di nuove richieste, modifiche agli appuntamenti e nuove misurazioni.
+Notifiche push su nuove richieste, modifiche agli appuntamenti, nuovi allenamenti, misurazioni e messaggi.
 
-L'app è disponibile in italiano, inglese e croato.
+L'app è disponibile in croato, inglese, italiano e tedesco.
 
-Per utilizzare l'app è necessario un account creato dal centro Apex Performance.
+Per usare l'app serve un account aperto dal centro Apex Performance.
