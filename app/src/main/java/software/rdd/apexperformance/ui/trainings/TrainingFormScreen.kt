@@ -1,6 +1,7 @@
 package software.rdd.apexperformance.ui.trainings
 
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,6 +50,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -68,6 +70,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Navigator
@@ -158,6 +163,12 @@ class TrainingFormScreen private constructor(
     // When the coach wrote the new training's name: its start, so the time
     // is right even when the form stays open during the training.
     private var startedAt by mutableStateOf<Instant?>(null)
+    // The running new training saved when the app went to the background,
+    // so it isn't lost; the form then goes on editing it.
+    private var autosaved by mutableStateOf<Training?>(null)
+
+    // The training being edited: the given one or the autosaved new one.
+    private val currentTraining: Training? get() = autosaved ?: training
     // The client gets a push about a new training, about an edit only when asked.
     private var notifyClient by mutableStateOf(training == null)
     private var exercises by mutableStateOf(
@@ -167,7 +178,7 @@ class TrainingFormScreen private constructor(
     )
 
     // What the form saves, as it was when it opened.
-    private val initialState = formState()
+    private var initialState = formState()
 
     private fun formState(): List<Any?> = listOf(name, date, note, isCompleted, isPlanned, exercises)
 
@@ -203,6 +214,15 @@ class TrainingFormScreen private constructor(
         LaunchedEffect(Unit) { loadWorkouts() }
         // A copied training comes with its name.
         LaunchedEffect(Unit) { startTimerIfNeeded() }
+        // Locking the phone or leaving the app saves the running training.
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) launch { autosave() }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
         LaunchedEffect(Unit) { loadTemplates() }
 
         ScrollScreen(
@@ -253,7 +273,7 @@ class TrainingFormScreen private constructor(
                         .padding(vertical = 12.dp)
                 )
                 Divider()
-                startedAt?.takeIf { startsOnSave }?.let { start ->
+                startedAt?.takeIf { startsOnSave || autosaved != null }?.let { start ->
                     TrainingTimerRow(start)
                     Divider()
                 }
@@ -971,7 +991,7 @@ class TrainingFormScreen private constructor(
         val clientId = clientId ?: return null
 
         val earlier = history
-            .filter { it.client.id == clientId && it.id != training?.id && !it.date.isAfter(date) }
+            .filter { it.client.id == clientId && it.id != currentTraining?.id && !it.date.isAfter(date) }
             .sortedByDescending { it.date }
 
         for (previous in earlier) {
@@ -1007,12 +1027,44 @@ class TrainingFormScreen private constructor(
 
     // A training not started or completed yet can be marked as planned.
     private val canBePlanned: Boolean
-        get() = !isCompleted && training?.startedAt == null
+        get() = !isCompleted && currentTraining?.startedAt == null
 
     // A training not marked as planned starts when it is saved, so its
     // time is measured without another tap.
     private val startsOnSave: Boolean
         get() = !isTemplate && canBePlanned && !isPlanned
+
+    // Saves the running new training as in progress when the app goes to the
+    // background (locked phone, another app), so nothing is lost if the app is
+    // closed. The form stays open and goes on editing it; a failed try is
+    // repeated the next time. An unfinished exercise waits for the next save.
+    private suspend fun autosave() {
+        val start = startedAt ?: return
+        val clientId = clientId ?: return
+        if (isTemplate || isSaving || name.isBlank() || (autosaved == null && !startsOnSave)) return
+        try {
+            val request = SaveTrainingRequest(
+                client = clientId,
+                name = name.trim(),
+                date = (autosaved?.date ?: start).truncatedTo(ChronoUnit.SECONDS).toString(),
+                note = note.trim().ifEmpty { null },
+                isCompleted = false,
+                exercises = exercises.filter { it.isValid }.mapNotNull { it.request },
+                // The client hears about the new training once.
+                notifyClient = autosaved == null && notifyClient
+            )
+            var saved = Training.save(request, autosaved?.id)
+            if (autosaved == null) saved = saved.settingTimes(start, null)
+            autosaved = saved
+            notifyClient = false
+            // Nothing to discard any more: it is saved.
+            initialState = formState()
+            onSaved?.invoke(saved)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.w("TrainingForm", "Training not autosaved", e)
+        }
+    }
 
     // A new training starts when its name is written, not when it is saved.
     private fun startTimerIfNeeded() {
@@ -1045,7 +1097,7 @@ class TrainingFormScreen private constructor(
                 notifyClient = notifyClient
             )
 
-            var saved = Training.save(request, training?.id)
+            var saved = Training.save(request, currentTraining?.id)
             if (starting) saved = saved.settingTimes(start, null)
             onSaved?.invoke(saved)
             ToastManager.show(if (starting) R.string.training_started_toast else R.string.training_saved_successfully, ToastType.SUCCESS)

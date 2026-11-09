@@ -1,2 +1,3 @@
 Novosti:
-- Novi trening počinje čim trener upiše naziv, a ne tek kad ga spremi. U obrascu se vidi vrijeme koje teče, pa je početak treninga točan i kad obrazac ostane otvoren tijekom treninga.
+- Novi trening počinje čim trener upiše naziv, a ne tek kad ga spremi. U obrascu se vidi vrijeme koje teče.
+- Ako trener zaključa mobitel ili izađe iz aplikacije dok trening traje, trening se automatski spremi kao "u tijeku", pa se ništa ne izgubi.
