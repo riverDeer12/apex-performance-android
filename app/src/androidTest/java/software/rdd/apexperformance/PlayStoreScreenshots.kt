@@ -210,12 +210,29 @@ class PlayStoreScreenshots {
         // The settled frame is drawn on the next vsync.
         Thread.sleep(SETTLE_MILLIS)
 
-        val bitmap = instrumentation.uiAutomation.takeScreenshot()
-            ?: throw AssertionError("$language: no screenshot for $name")
+        // Right after the app opens the screen can still be blank: taken again then.
+        var bitmap = instrumentation.uiAutomation.takeScreenshot()
+        var attempt = 0
+        while ((bitmap == null || bitmap.isBlank()) && attempt < 20) {
+            Thread.sleep(SETTLE_MILLIS)
+            compose.waitForIdle()
+            bitmap = instrumentation.uiAutomation.takeScreenshot()
+            attempt++
+        }
+        if (bitmap == null || (bitmap.isBlank() && number > 0)) throw AssertionError("$language: blank screenshot for $name")
         val directory = File(context.getExternalFilesDir(null), "play-screenshots/$language").apply { mkdirs() }
         val file = File(directory, String.format(Locale.ROOT, "%02d_%s.png", number, name))
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         Log.i(TAG, "Saved ${file.absolutePath} (${bitmap.width}×${bitmap.height})")
+    }
+
+    // One colour all over (a black or empty window), from a grid of pixels.
+    private fun Bitmap.isBlank(): Boolean {
+        val first = getPixel(width / 2, height / 2)
+        for (x in 1..9) for (y in 1..9) {
+            if (getPixel(width * x / 10, height * y / 10) != first) return false
+        }
+        return true
     }
 
     private companion object {
