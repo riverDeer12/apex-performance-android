@@ -505,7 +505,7 @@
     <string name="show_password">Prikaži lozinku</string>
     <string name="since_first_measurement">od prvog mjerenja</string>
     <string name="start_training">Započni trening</string>
-    <string name="starts_on_save_hint">Trening se pokreće spremanjem i mjeri mu se vrijeme. Označi ga kao planiran da ga pokreneš kasnije.</string>
+    <string name="starts_on_save_hint">Trening počinje upisom naziva i od tada mu se mjeri vrijeme. Označi ga kao planiran da ga pokreneš kasnije.</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Snaga i kondicija</string>
     <string name="success">Uspjeh</string>

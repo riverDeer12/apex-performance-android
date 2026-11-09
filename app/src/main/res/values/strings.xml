@@ -506,7 +506,7 @@
     <string name="show_password">Show password</string>
     <string name="since_first_measurement">since first measurement</string>
     <string name="start_training">Start training</string>
-    <string name="starts_on_save_hint">The training starts when saved and its time is measured. Mark it as planned to start it later.</string>
+    <string name="starts_on_save_hint">The training starts when its name is written, and its time is measured from then. Mark it as planned to start it later.</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Strength and Conditioning</string>
     <string name="success">Success</string>

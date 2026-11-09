@@ -505,7 +505,7 @@
     <string name="show_password">Passwort anzeigen</string>
     <string name="since_first_measurement">seit der ersten Messung</string>
     <string name="start_training">Training starten</string>
-    <string name="starts_on_save_hint">Das Training startet beim Speichern und seine Zeit wird gemessen. Markiere es als geplant, um es später zu starten.</string>
+    <string name="starts_on_save_hint">Das Training beginnt mit der Eingabe des Namens, ab dann wird die Zeit gemessen. Markiere es als geplant, um es später zu starten.</string>
     <string name="status">Status</string>
     <string name="strength_and_conditioning">Kraft und Kondition</string>
     <string name="success">Erfolg</string>

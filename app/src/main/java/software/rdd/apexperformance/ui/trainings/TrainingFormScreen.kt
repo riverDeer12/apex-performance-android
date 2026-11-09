@@ -1,6 +1,7 @@
 package software.rdd.apexperformance.ui.trainings
 
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.LibraryAdd
 import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -48,6 +50,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -67,6 +70,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Navigator
@@ -98,9 +104,11 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 import software.rdd.apexperformance.ui.components.SHOW_MORE_PAGE_SIZE
@@ -152,6 +160,15 @@ class TrainingFormScreen private constructor(
     private var isCompleted by mutableStateOf(training?.isCompleted ?: false)
     // Planned trainings are saved without starting; others start on save.
     private var isPlanned by mutableStateOf(training?.let { !it.isCompleted && it.startedAt == null } ?: false)
+    // When the coach wrote the new training's name: its start, so the time
+    // is right even when the form stays open during the training.
+    private var startedAt by mutableStateOf<Instant?>(null)
+    // The running new training saved when the app went to the background,
+    // so it isn't lost; the form then goes on editing it.
+    private var autosaved by mutableStateOf<Training?>(null)
+
+    // The training being edited: the given one or the autosaved new one.
+    private val currentTraining: Training? get() = autosaved ?: training
     // The client gets a push about a new training, about an edit only when asked.
     private var notifyClient by mutableStateOf(training == null)
     private var exercises by mutableStateOf(
@@ -161,7 +178,7 @@ class TrainingFormScreen private constructor(
     )
 
     // What the form saves, as it was when it opened.
-    private val initialState = formState()
+    private var initialState = formState()
 
     private fun formState(): List<Any?> = listOf(name, date, note, isCompleted, isPlanned, exercises)
 
@@ -195,6 +212,17 @@ class TrainingFormScreen private constructor(
         val navigator = LocalNavigator.current
 
         LaunchedEffect(Unit) { loadWorkouts() }
+        // A copied training comes with its name.
+        LaunchedEffect(Unit) { startTimerIfNeeded() }
+        // Locking the phone or leaving the app saves the running training.
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) launch { autosave() }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
         LaunchedEffect(Unit) { loadTemplates() }
 
         ScrollScreen(
@@ -235,13 +263,20 @@ class TrainingFormScreen private constructor(
             ) {
                 PlainTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        startTimerIfNeeded()
+                    },
                     placeholder = stringResource(R.string.name),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 12.dp)
                 )
                 Divider()
+                startedAt?.takeIf { startsOnSave || autosaved != null }?.let { start ->
+                    TrainingTimerRow(start)
+                    Divider()
+                }
                 if (!isTemplate) {
                     DateRow()
                     Divider()
@@ -344,6 +379,35 @@ class TrainingFormScreen private constructor(
                     todayContentColor = ApexColors.main
                 )
             )
+        }
+    }
+
+    @Composable
+    private fun TrainingTimerRow(start: Instant) {
+        // Ticks every second while the form is open.
+        var now by remember { mutableStateOf(Instant.now()) }
+        LaunchedEffect(start) {
+            while (true) {
+                now = Instant.now()
+                delay(1_000)
+            }
+        }
+        val seconds = maxOf(0L, now.epochSecond - start.epochSecond)
+        val elapsed = if (seconds >= 3600) {
+            String.format(Locale.ROOT, "%d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60)
+        } else {
+            String.format(Locale.ROOT, "%d:%02d", seconds / 60, seconds % 60)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(Icons.Outlined.Timer, contentDescription = null, tint = ApexColors.orange)
+            Text(stringResource(R.string.training_in_progress), style = ApexText.body, color = ApexColors.orange, modifier = Modifier.weight(1f))
+            Text(elapsed, style = ApexText.body, color = ApexColors.orange)
         }
     }
 
@@ -849,6 +913,7 @@ class TrainingFormScreen private constructor(
     // Fills the name, note and exercises from the chosen template, like the web.
     private fun applyTemplate(template: TrainingTemplate) {
         name = template.name
+        startTimerIfNeeded()
         note = template.note.orEmpty()
         exercises = template.exercises.sortedBy { it.order }.map { ExerciseDraft.from(it) }
     }
@@ -926,7 +991,7 @@ class TrainingFormScreen private constructor(
         val clientId = clientId ?: return null
 
         val earlier = history
-            .filter { it.client.id == clientId && it.id != training?.id && !it.date.isAfter(date) }
+            .filter { it.client.id == clientId && it.id != currentTraining?.id && !it.date.isAfter(date) }
             .sortedByDescending { it.date }
 
         for (previous in earlier) {
@@ -962,17 +1027,55 @@ class TrainingFormScreen private constructor(
 
     // A training not started or completed yet can be marked as planned.
     private val canBePlanned: Boolean
-        get() = !isCompleted && training?.startedAt == null
+        get() = !isCompleted && currentTraining?.startedAt == null
 
     // A training not marked as planned starts when it is saved, so its
     // time is measured without another tap.
     private val startsOnSave: Boolean
         get() = !isTemplate && canBePlanned && !isPlanned
 
+    // Saves the running new training as in progress when the app goes to the
+    // background (locked phone, another app), so nothing is lost if the app is
+    // closed. The form stays open and goes on editing it; a failed try is
+    // repeated the next time. An unfinished exercise waits for the next save.
+    private suspend fun autosave() {
+        val start = startedAt ?: return
+        val clientId = clientId ?: return
+        if (isTemplate || isSaving || name.isBlank() || (autosaved == null && !startsOnSave)) return
+        try {
+            val request = SaveTrainingRequest(
+                client = clientId,
+                name = name.trim(),
+                date = (autosaved?.date ?: start).truncatedTo(ChronoUnit.SECONDS).toString(),
+                note = note.trim().ifEmpty { null },
+                isCompleted = false,
+                exercises = exercises.filter { it.isValid }.mapNotNull { it.request },
+                // The client hears about the new training once.
+                notifyClient = autosaved == null && notifyClient
+            )
+            var saved = Training.save(request, autosaved?.id)
+            if (autosaved == null) saved = saved.settingTimes(start, null)
+            autosaved = saved
+            notifyClient = false
+            // Nothing to discard any more: it is saved.
+            initialState = formState()
+            onSaved?.invoke(saved)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Log.w("TrainingForm", "Training not autosaved", e)
+        }
+    }
+
+    // A new training starts when its name is written, not when it is saved.
+    private fun startTimerIfNeeded() {
+        if (startedAt == null && training == null && !isTemplate && name.isNotBlank()) startedAt = Instant.now()
+    }
+
     // Saves the training; one not marked as planned is also marked as
     // started now (in progress).
     private suspend fun save(navigator: Navigator) {
         val starting = startsOnSave
+        val start = startedAt ?: Instant.now()
         if (isTemplate) {
             saveTemplate(navigator)
             return
@@ -987,15 +1090,15 @@ class TrainingFormScreen private constructor(
                 name = name.trim(),
                 // ISO 8601 without fractions, like ISO8601DateFormatter on iOS.
                 // A started training happens today.
-                date = (if (starting) Instant.now() else date).truncatedTo(ChronoUnit.SECONDS).toString(),
+                date = (if (starting) start else date).truncatedTo(ChronoUnit.SECONDS).toString(),
                 note = trimmedNote.ifEmpty { null },
                 isCompleted = isCompleted,
                 exercises = exercises.mapNotNull { it.request },
                 notifyClient = notifyClient
             )
 
-            var saved = Training.save(request, training?.id)
-            if (starting) saved = saved.settingTimes(Instant.now(), null)
+            var saved = Training.save(request, currentTraining?.id)
+            if (starting) saved = saved.settingTimes(start, null)
             onSaved?.invoke(saved)
             ToastManager.show(if (starting) R.string.training_started_toast else R.string.training_saved_successfully, ToastType.SUCCESS)
             navigator.pop()
