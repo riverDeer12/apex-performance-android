@@ -208,7 +208,7 @@ class TrainingDetailScreen(
         // Clients see the card once the coach marked the training.
         if (!isStaff && startedAt == null && heartRate == null) return
 
-        CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.training_time)) {
+        CardView(modifier = Modifier.testTag("training-times").padding(horizontal = 20.dp), title = stringResource(R.string.training_time)) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 if (startedAt != null) {
                     Row {

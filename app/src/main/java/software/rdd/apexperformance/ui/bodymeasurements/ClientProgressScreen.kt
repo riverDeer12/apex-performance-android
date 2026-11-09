@@ -240,7 +240,7 @@ class ClientProgressScreen : Screen() {
                     letterSpacing = 0.8.sp,
                     color = ApexColors.secondaryLabel
                 )
-                Text(review.content, style = ApexText.subheadline)
+                Text(review.content, style = ApexText.subheadline, modifier = Modifier.testTag("monthly-review"))
             } else if (!isLoading) {
                 Text(stringResource(R.string.no_monthly_reviews), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
             }

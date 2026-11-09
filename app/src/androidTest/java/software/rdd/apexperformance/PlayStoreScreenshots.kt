@@ -6,7 +6,10 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
@@ -83,6 +86,7 @@ class PlayStoreScreenshots {
         // Progress: monthly review, body mass and circumferences.
         click("progress-row")
         waitForTag("body-mass-value")
+        waitForTag("monthly-review")
         screenshot(8, "body_progress")
 
         // Training progress, scrolled to the muscle groups.
@@ -95,7 +99,7 @@ class PlayStoreScreenshots {
         click("tab-trainings")
         click("training-row")
         waitForTag("exercise-card")
-        node("exercise-card").performScrollTo()
+        scrollToTop("training-times")
         screenshot(2, "training_details")
 
         // Chat with the coach: a picture and a shared workout.
@@ -182,6 +186,21 @@ class PlayStoreScreenshots {
         val node = node(tag)
         runCatching { node.performScrollTo() }
         node.performClick()
+        compose.waitForIdle()
+    }
+
+    // Scrolls the screen so the node is at its top, a little below the top bar.
+    private fun scrollToTop(tag: String, marginDp: Float = 12f) {
+        val target = node(tag).fetchSemanticsNode().boundsInRoot
+        val containers = compose.onAllNodes(
+            hasScrollAction() and hasAnyDescendant(hasTestTag(tag)),
+            useUnmergedTree = true
+        )
+        // The innermost scrolling container.
+        val index = containers.fetchSemanticsNodes().withIndex().minBy { it.value.boundsInRoot.height }.index
+        val top = containers[index].fetchSemanticsNode().boundsInRoot.top
+        val margin = marginDp * context.resources.displayMetrics.density
+        containers[index].performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, target.top - top - margin) }
         compose.waitForIdle()
     }
 
