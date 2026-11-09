@@ -176,8 +176,12 @@ class PlayStoreScreenshots {
         return compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true)[0]
     }
 
+    // Scrolled into view first (when in a scrolling screen): a row below the
+    // fold would be under the tab bar.
     private fun click(tag: String) {
-        node(tag).performClick()
+        val node = node(tag)
+        runCatching { node.performScrollTo() }
+        node.performClick()
         compose.waitForIdle()
     }
 
