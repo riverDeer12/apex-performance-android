@@ -60,37 +60,16 @@ keyPassword=...
 
 `./gradlew bundleRelease` then produces a signed `app-release.aab`.
 
-## Distribution outside Google Play (Firebase App Distribution)
+## Publishing on Google Play
 
-For the few Android users, the signed release APK (production API) goes out through
-[Firebase App Distribution](https://console.firebase.google.com/project/apex-performance-e9a76/appdistribution)
-instead of the Play Store. Testers get an email invite, install the app from their phone and
-are emailed again for every new version.
+Releases go to a Google Play testing track with the **Publish to Google Play** workflow
+(Actions → Publish to Google Play → Run workflow): it builds the signed release bundle (AAB)
+and uploads it with the release notes from `release-notes.txt`. Testers of the track get every
+update from the Play Store.
 
-One-time setup:
-
-1. Firebase console → **App Distribution** → Get started (Android app `software.rdd.apexperformance`).
-2. **Testers & Groups** → create a group with the alias `android-testers` and add the users' emails.
-3. Install the Firebase CLI (`brew install firebase-cli` or `npm install -g firebase-tools`) and run
-   `firebase login` – the Gradle plugin uploads with those credentials.
-4. `google-services.json` and `keystore.properties` must be in place (see above).
-
-Every release:
-
-1. Bump `versionCode` (and `versionName`) in `app/build.gradle.kts` – Android won't install an
-   update with the same or a lower `versionCode`.
-2. Write what changed in `release-notes.txt`.
-3. Build and upload:
-
-   ```bash
-   ./gradlew assembleRelease appDistributionUploadRelease
-   ```
-
-### From GitHub Actions
-
-The **Distribute to Firebase** workflow (`.github/workflows/distribute.yml`, started by hand
-from the Actions tab) builds the signed release APK and uploads it the same way. It needs
-these repository secrets (Settings → Secrets and variables → Actions):
+Every release: bump `versionCode` (and `versionName`) in `app/build.gradle.kts` and write what
+changed in `release-notes.txt` on `production`, then run the workflow. It needs these repository
+secrets (Settings → Secrets and variables → Actions) for the upload key:
 
 | Secret | Value |
 | --- | --- |
@@ -98,19 +77,8 @@ these repository secrets (Settings → Secrets and variables → Actions):
 | `KEYSTORE_PASSWORD` | `storePassword` from `keystore.properties` |
 | `KEY_ALIAS` | `keyAlias` from `keystore.properties` |
 | `KEY_PASSWORD` | `keyPassword` from `keystore.properties` |
-| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the *Firebase App Distribution Admin* role |
 
-Bump `versionCode` and update `release-notes.txt` on `production` before running it.
-
-Always sign with the same upload key: an APK signed with a different key can't update the
-installed app, and users would have to uninstall it first.
-
-## Publishing on Google Play
-
-Releases go to a Google Play testing track with the **Publish to Google Play** workflow
-(Actions → Publish to Google Play → Run workflow): it builds the signed release bundle (AAB)
-and uploads it with the release notes from `release-notes.txt`. Testers of the track get every
-update from the Play Store.
+Always sign with the same upload key: Google Play refuses a bundle signed with another one.
 
 One-time setup:
 
