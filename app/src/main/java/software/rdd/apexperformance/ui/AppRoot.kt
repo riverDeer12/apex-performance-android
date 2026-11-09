@@ -54,6 +54,7 @@ import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.NavigatorHost
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.util.AppTab
+import software.rdd.apexperformance.core.util.AppUpdateChecker
 import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.core.util.Permissions
 import software.rdd.apexperformance.core.util.Roles
@@ -68,6 +69,7 @@ import software.rdd.apexperformance.ui.home.CooperationRulesPopup
 import software.rdd.apexperformance.ui.home.NotificationInbox
 import software.rdd.apexperformance.ui.chat.ChatListScreen
 import software.rdd.apexperformance.ui.clients.ClientsScreen
+import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.ProfilePictureStore
 import software.rdd.apexperformance.ui.components.SplashOverlay
 import software.rdd.apexperformance.ui.components.ToastView
@@ -120,6 +122,21 @@ fun AppRoot() {
 
             if (showSplash) {
                 SplashOverlay { showSplash = false }
+            }
+
+            // Newer version on Google Play, once per launch, like on iOS.
+            if (!showSplash) {
+                AppUpdateChecker.available?.let { info ->
+                    ConfirmDialog(
+                        title = stringResource(R.string.update_available_title),
+                        message = stringResource(R.string.update_available_message_play),
+                        confirmText = stringResource(R.string.update),
+                        dismissText = stringResource(R.string.later),
+                        destructive = false,
+                        onConfirm = { activity?.let { AppUpdateChecker.start(it, info, it.updateLauncher) } },
+                        onDismiss = { AppUpdateChecker.dismiss() }
+                    )
+                }
             }
         }
     }
