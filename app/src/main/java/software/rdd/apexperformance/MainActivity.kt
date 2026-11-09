@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.util.AppLanguage
+import software.rdd.apexperformance.core.util.AppUpdateChecker
 import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.ui.home.CooperationRulesGate
 import software.rdd.apexperformance.ui.home.NotificationInbox
@@ -21,6 +22,10 @@ class MainActivity : ComponentActivity() {
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
+    // Google Play's update screen (AppUpdateChecker).
+    val updateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // System bars follow the appearance picked in the app, see setDarkSystemBars.
@@ -57,6 +62,8 @@ class MainActivity : ComponentActivity() {
         NotificationInbox.refreshCountLater()
         // A new version of the cooperation rules can come any time.
         CooperationRulesGate.checkLater()
+        // Newer version on Google Play.
+        AppUpdateChecker.check(this, updateLauncher)
     }
 
     override fun onNewIntent(intent: Intent) {

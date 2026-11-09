@@ -566,6 +566,7 @@
     <string name="upcoming_past_sessions">Pregled svih termina</string>
     <string name="update">Ažuriraj</string>
     <string name="update_available_message">Verzija %s aplikacije Apex Performance dostupna je u App Storeu. Ažurirajte aplikaciju za najnovije mogućnosti i ispravke.</string>
+    <string name="update_available_message_play">Nova verzija aplikacije Apex Performance dostupna je na Google Playu. Ažurirajte aplikaciju za najnovije mogućnosti i ispravke.</string>
     <string name="update_available_title">Dostupna je nova verzija</string>
     <string name="updated_on">Ažurirano %s</string>
     <string name="upload_profile_picture">Dodaj profilnu sliku</string>

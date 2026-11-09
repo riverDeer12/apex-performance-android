@@ -566,6 +566,7 @@
     <string name="upcoming_past_sessions">Liste aller Termine</string>
     <string name="update">Aktualisieren</string>
     <string name="update_available_message">Version %s von Apex Performance ist im App Store verfügbar. Aktualisiere, um die neuesten Funktionen und Fehlerbehebungen zu erhalten.</string>
+    <string name="update_available_message_play">Eine neue Version von Apex Performance ist bei Google Play verfügbar. Aktualisiere, um die neuesten Funktionen und Fehlerbehebungen zu erhalten.</string>
     <string name="update_available_title">Neue Version verfügbar</string>
     <string name="updated_on">Aktualisiert %s</string>
     <string name="upload_profile_picture">Profilbild hochladen</string>
