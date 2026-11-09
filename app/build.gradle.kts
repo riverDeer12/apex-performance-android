@@ -1,4 +1,3 @@
-import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 import java.util.Properties
 
 plugins {
@@ -6,7 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.firebase.appdistribution)
 }
 
 // Firebase config is downloaded from the Firebase console (Android app in the
@@ -62,13 +60,6 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release")
-
-            // Sideloaded APK for Android users outside Google Play (see README).
-            firebaseAppDistribution {
-                artifactType = "APK"
-                groups = "android-testers"
-                releaseNotesFile = rootProject.file("release-notes.txt").path
-            }
         }
     }
 
