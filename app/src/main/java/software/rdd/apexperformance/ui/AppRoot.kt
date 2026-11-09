@@ -329,11 +329,11 @@ private fun HomeView() {
             ChatFloatingButton(
                 unreadCount = ChatStore.unreadCount,
                 modifier = Modifier
-                    .testTag("chat-button")
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
                     // Above the tab bar.
-                    .padding(end = 16.dp, bottom = 92.dp),
+                    .padding(end = 16.dp, bottom = 92.dp)
+                    .testTag("chat-button"),
                 onClick = { state.showsChat = true }
             )
         }
