@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.appointments
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -234,7 +235,7 @@ class AppointmentsScreen : Screen() {
         val tint = if (isCancelation) ApexColors.red else ApexColors.blue
         val isProcessing = processingRequestId == request.id
 
-        Column {
+        Column(modifier = Modifier.testTag("appointment-request-row")) {
             Row(
                 modifier = Modifier.padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

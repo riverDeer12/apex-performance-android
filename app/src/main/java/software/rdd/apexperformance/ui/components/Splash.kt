@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.components
 
+import androidx.compose.ui.platform.testTag
 import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.provider.Settings
@@ -61,7 +62,7 @@ fun SplashOverlay(onFinished: () -> Unit) {
         onFinished()
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxSize().testTag("splash"), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
                 .fillMaxSize()

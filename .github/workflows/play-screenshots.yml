@@ -1,0 +1,116 @@
+name: Google Play screenshots
+
+# Runs PlayStoreScreenshots (app/src/androidTest) on an emulator and pushes
+# the PNGs to the play-screenshots branch: <language>/NN_name.png, eight
+# portrait phone screenshots (1080 × 1920) in Croatian, English, Italian and
+# German, numbered in the order they go to Google Play. Also kept as the
+# play-screenshots artifact, downloadable as a ZIP from the run's page.
+# The app runs with invented demo data (DemoAPI, debug builds only), so no
+# server or accounts are needed and no real people are shown.
+# Started by hand (Actions -> Google Play screenshots -> Run workflow).
+on:
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: "Languages, e.g. hr,en (empty: hr, en, it, de)"
+        required: false
+        default: ""
+  push:
+    branches: [feature/play-screenshots]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: play-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Every demo response must decode into the app's models,
+      # otherwise screens would show errors instead of data.
+      - name: Check the demo data
+        run: ./gradlew testDebugUnitTest --tests '*DemoAPITest'
+
+      - name: Build the app and the screenshot test
+        run: ./gradlew assembleDebug assembleDebugAndroidTest
+
+      # Hardware acceleration for the emulator (android-emulator-runner README).
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Pixel 2 screen: 1080 × 1920 (9:16) at 420 dpi, as Google Play wants
+      # phone screenshots.
+      - name: Take screenshots
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          LANGUAGES: ${{ inputs.languages }}
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: ./scripts/play-screenshots.sh
+
+      - name: Check the screenshots
+        run: |
+          count=$(find play-screenshots -name '[0-9][1-9]_*.png' | wc -l)
+          find play-screenshots -name '*.png' | sort
+          if [ "$count" = "0" ]; then
+            echo "::error::No screenshots were taken."
+            exit 1
+          fi
+          # Google Play: PNG, 9:16 portrait, 1080 px wide.
+          python3 - <<'EOF'
+          import glob, struct, sys
+          bad = []
+          for path in sorted(glob.glob("play-screenshots/*/*.png")):
+              with open(path, "rb") as f:
+                  header = f.read(24)
+              width, height = struct.unpack(">II", header[16:24])
+              if (width, height) != (1080, 1920):
+                  bad.append(f"{path}: {width}x{height}")
+          if bad:
+              print("::error::Not 1080x1920: " + ", ".join(bad))
+              sys.exit(1)
+          EOF
+
+      - name: Push the screenshots
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          rm -f play-screenshots/*/00_*.png
+          cd play-screenshots
+          git init -q -b play-screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -qm "Google Play screenshots of ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" play-screenshots
+
+      # Also the failed screens' pictures (00_failed_...), to see why.
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: play-screenshots
+          path: |
+            play-screenshots
+            logcat.txt
+          if-no-files-found: ignore

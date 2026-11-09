@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.chat
 
+import androidx.compose.ui.platform.testTag
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -130,6 +131,7 @@ class ChatListScreen(private val onClose: (() -> Unit)? = null) : Screen() {
         val other = conversation.otherParticipant(ChatStore.userId)
         Row(
             modifier = Modifier
+                .testTag("chat-row")
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(vertical = 10.dp),

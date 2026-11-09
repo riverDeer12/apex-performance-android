@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -211,6 +212,7 @@ internal fun TrainingCard(training: Training, imageUrl: String? = null, onClick:
 
     Row(
         modifier = Modifier
+            .testTag("training-row")
             .fillMaxWidth()
             .apexCard()
             .clickable(onClick = onClick)

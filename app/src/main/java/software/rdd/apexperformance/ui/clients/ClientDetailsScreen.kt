@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.clients
 
+import androidx.compose.ui.platform.testTag
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -442,6 +443,7 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                     SettingsRow(
                         icon = Icons.AutoMirrored.Filled.TrendingUp,
                         iconTint = ApexColors.accent,
+                        modifier = Modifier.testTag("client-training-progress"),
                         title = stringResource(R.string.training_progress_title),
                         showChevron = true,
                         onClick = { navigator.push(ClientTrainingProgressScreen(client.fullName, trainings)) }
