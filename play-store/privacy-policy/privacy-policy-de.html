@@ -78,7 +78,7 @@ footer a{color:var(--muted)}
   <div class="hero-inner">
     <p class="eyebrow">Apex Performance · mobile App</p>
     <h1>Datenschutzerklärung</h1>
-    <p class="meta">Mobile App Apex Performance (Android und iOS)<br>Gültig ab: 30. Oktober 2026</p>
+    <p class="meta">Mobile App Apex Performance (Android und iOS)<br>Gültig ab: 9. November 2026</p>
   </div>
 </section>
 <main>
@@ -105,7 +105,7 @@ footer a{color:var(--muted)}
     <tr><td data-label="Kategorie">Körpermaße und Bewertungen</td><td data-label="Daten">Größe, Gewicht und Umfänge (Schultern, Brust, Oberarm, Taille, Oberschenkel, Waden, Gesäß) mit dem Messdatum; Ergebnisse des FMS (Functional Movement Screen) und Notizen des Trainers</td><td data-label="Quelle">Trainer</td></tr>
     <tr><td data-label="Kategorie">Herzfrequenz während des Trainings (nur iOS, mit Ihrer Erlaubnis)</td><td data-label="Daten">niedrigste, höchste und durchschnittliche Herzfrequenz während eines Trainings mit Ihrem Trainer, berechnet aus Apple Health (Apple Watch oder Brustgurt); Beginn und Ende des Trainings</td><td data-label="Quelle">Ihr Gerät (Apple Health), Trainer</td></tr>
     <tr><td data-label="Kategorie">Gerät und Benachrichtigungen</td><td data-label="Daten">Token für Push-Benachrichtigungen, Plattform (Android/iOS), App-Version, Betriebssystemversion, Gerätemodell</td><td data-label="Quelle">Ihr Gerät</td></tr>
-    <tr><td data-label="Kategorie">Technische Protokolle</td><td data-label="Daten">IP-Adresse, Zeitpunkt und Art der Anfragen an den Server, Fehlerprotokolle</td><td data-label="Quelle">Server</td></tr>
+    <tr><td data-label="Kategorie">Technische Protokolle</td><td data-label="Daten">IP-Adresse, Zeitpunkt und Art der Anfragen an den Server, Fehlerprotokolle</td><td data-label="Quelle">Server</td></tr><tr><td data-label="Kategorie">Absturzberichte</td><td data-label="Daten">wenn die App abstürzt: Stelle im Code, an der es passiert ist, App-Version, Version des Betriebssystems, Gerätemodell, Zeitpunkt des Absturzes und eine zufällige Kennung der Installation (nicht mit Ihrem Namen oder Konto verknüpft)</td><td data-label="Quelle">Ihr Gerät</td></tr>
   </table></div>
   <p><strong>Apple Health:</strong> Wenn Sie es erlauben, liest die App Herzfrequenzmessungen aus Apple Health auf Ihrem iPhone, und zwar nur für den Zeitraum zwischen dem von Ihrem Trainer markierten Beginn und Ende eines Trainings. Sie berechnet die niedrigste, höchste und durchschnittliche Herzfrequenz auf Ihrem Gerät und übermittelt nur diese drei Werte; einzelne Messwerte verlassen Ihr Gerät nie. Die App schreibt keine Daten in Apple Health, liest keine anderen Gesundheitsdaten und verwendet Daten aus Apple Health weder für Werbung noch gibt sie diese an Dritte weiter.</p>
   <p>Körpermaße, FMS-Bewertungen und die Herzfrequenz können Rückschlüsse auf Ihre Gesundheit und Fitness zulassen. Wir verarbeiten sie ausschließlich, damit Sie und Ihr Trainer Ihre Fortschritte verfolgen und Ihr Training planen können.</p>
@@ -118,13 +118,14 @@ footer a{color:var(--muted)}
     <li><strong>Herzfrequenz aus Apple Health</strong> – Anzeige der niedrigsten, höchsten und durchschnittlichen Herzfrequenz zu einem Training, damit Sie und Ihr Trainer die Trainingsbelastung und Ihre kardiovaskuläre Fitness verfolgen können. Rechtsgrundlage: Ihre ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO), die Sie erteilen, indem Sie der App das Lesen Ihrer Herzfrequenz erlauben. Sie können sie jederzeit in den iPhone-Einstellungen widerrufen (Einstellungen → Datenschutz &amp; Sicherheit → Health → Apex); die gespeicherten Werte löschen wir auf Anfrage an <a href="mailto:info@rdd.software">info@rdd.software</a>.</li>
     <li><strong>Push-Benachrichtigungen</strong> – über neue Anfragen, Terminänderungen und neue Messungen. Rechtsgrundlage: Ihre Einwilligung, die Sie durch das Zulassen von Benachrichtigungen auf Ihrem Gerät erteilen und jederzeit in den Geräteeinstellungen widerrufen können.</li>
     <li><strong>System-E-Mails</strong> – z. B. Anmeldedaten, Passwortänderungen, das Ergebnis eines Workout-Imports. Rechtsgrundlage: Vertragserfüllung.</li>
-    <li><strong>Sicherheit und Zuverlässigkeit</strong> – Verhinderung von Missbrauch und Fehlerbehebung anhand technischer Protokolle. Rechtsgrundlage: berechtigtes Interesse (Art. 6 Abs. 1 lit. f).</li>
+    <li><strong>Sicherheit und Zuverlässigkeit</strong> – Verhinderung von Missbrauch und Fehlerbehebung anhand technischer Protokolle und Absturzberichte. Rechtsgrundlage: berechtigtes Interesse (Art. 6 Abs. 1 lit. f).</li>
   </ul>
 
   <h2>4. Wer Zugriff auf die Daten hat</h2>
   <ul>
     <li><strong>Trainer und Administratoren des Zentrums</strong> – sehen die Daten ihrer Kunden, die sie für ihre Arbeit benötigen (Termine, Guthaben, Messwerte, FMS, Herzfrequenz während des Trainings).</li>
     <li><strong>Google (Firebase Cloud Messaging)</strong> – verarbeitet das Geräte-Token und den Inhalt der Benachrichtigungen, um Push-Benachrichtigungen zuzustellen. <a href="https://firebase.google.com/support/privacy">Datenschutz bei Firebase</a>.</li>
+<li><strong>Google (Firebase Crashlytics)</strong> – erhält Absturzberichte der App, damit wir Fehler finden und beheben können. <a href="https://firebase.google.com/support/privacy">Datenschutz bei Firebase</a>.</li>
     <li><strong>YouTube (Google)</strong> – Workout-Videos werden über den eingebetteten YouTube-Player nur angezeigt, wenn Sie ein Video starten. YouTube erhält dann Ihre IP-Adresse und Geräteinformationen gemäß seiner <a href="https://policies.google.com/privacy">Datenschutzerklärung</a>.</li>
     <li><strong>Server</strong> – die App und alle Daten werden auf unserem eigenen Server (Windows Server) gehostet, der von R.D.D. in Rijeka, Kroatien, betrieben wird. Wir speichern keine Daten bei externen Hosting-Anbietern.</li>
     <li><strong>Google (Gmail)</strong> – System-E-Mails werden über den E-Mail-Dienst von Google versendet, sodass Google die E-Mail-Adresse des Empfängers und den Inhalt der Nachricht verarbeitet.</li>
@@ -136,7 +137,7 @@ footer a{color:var(--muted)}
   <p>Nach der Anmeldung speichert die App auf Ihrem Gerät lediglich ein Zugriffstoken, das mit einem Schlüssel aus dem sicheren Speicher des Geräts (Android Keystore oder iOS Keychain) verschlüsselt ist. Ihr Passwort wird nicht auf dem Gerät gespeichert. Das Token wird beim Abmelden gelöscht; unter Android wird es zudem bei der Deinstallation der App gelöscht und ist von Gerätesicherungen ausgenommen.</p>
 
   <h2>6. Wie lange wir Daten speichern</h2>
-  <p>Wir speichern Daten, solange Ihr Konto aktiv ist. Nach Schließung des Kontos oder auf Ihren Löschantrag hin löschen oder anonymisieren wir die Daten innerhalb von 30 Tagen, mit Ausnahme von Daten, die wir aufgrund gesetzlicher Pflichten länger aufbewahren müssen (z. B. Buchhaltungsunterlagen). Technische Protokolle werden höchstens 90 Tage gespeichert. Durch das Abmelden wird das Benachrichtigungstoken ungültig, sodass das Gerät keine Benachrichtigungen mehr erhält; der Gerätedatensatz wird zusammen mit Ihrem Konto gelöscht.</p>
+  <p>Wir speichern Daten, solange Ihr Konto aktiv ist. Nach Schließung des Kontos oder auf Ihren Löschantrag hin löschen oder anonymisieren wir die Daten innerhalb von 30 Tagen, mit Ausnahme von Daten, die wir aufgrund gesetzlicher Pflichten länger aufbewahren müssen (z. B. Buchhaltungsunterlagen). Technische Protokolle und Absturzberichte werden höchstens 90 Tage gespeichert. Durch das Abmelden wird das Benachrichtigungstoken ungültig, sodass das Gerät keine Benachrichtigungen mehr erhält; der Gerätedatensatz wird zusammen mit Ihrem Konto gelöscht.</p>
 
   <h2>7. Löschung Ihres Kontos und Ihrer Daten</h2>
   <p>Sie können die Löschung Ihres Kontos und der zugehörigen Daten per E-Mail an <a href="mailto:info@rdd.software">info@rdd.software</a> mit dem Betreff „Kontolöschung“ von der mit Ihrem Konto verknüpften E-Mail-Adresse aus oder persönlich im Zentrum Apex Performance beantragen. Bei der Löschung werden Ihr Benutzerkonto, Ihr Profil, Ihr Profilbild, Ihre Körpermaße, FMS-Bewertungen, Anfragen und Geräte-Tokens entfernt. Wir bearbeiten Anträge innerhalb von 30 Tagen. Sie können uns auch bitten, nur bestimmte Daten (z. B. Ihr Profilbild oder Ihre Messwerte) zu löschen, ohne Ihr Konto zu schließen.</p>
