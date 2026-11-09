@@ -31,6 +31,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.LibraryAdd
 import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -98,9 +99,11 @@ import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 import software.rdd.apexperformance.ui.components.SHOW_MORE_PAGE_SIZE
@@ -152,6 +155,9 @@ class TrainingFormScreen private constructor(
     private var isCompleted by mutableStateOf(training?.isCompleted ?: false)
     // Planned trainings are saved without starting; others start on save.
     private var isPlanned by mutableStateOf(training?.let { !it.isCompleted && it.startedAt == null } ?: false)
+    // When the coach wrote the new training's name: its start, so the time
+    // is right even when the form stays open during the training.
+    private var startedAt by mutableStateOf<Instant?>(null)
     // The client gets a push about a new training, about an edit only when asked.
     private var notifyClient by mutableStateOf(training == null)
     private var exercises by mutableStateOf(
@@ -195,6 +201,8 @@ class TrainingFormScreen private constructor(
         val navigator = LocalNavigator.current
 
         LaunchedEffect(Unit) { loadWorkouts() }
+        // A copied training comes with its name.
+        LaunchedEffect(Unit) { startTimerIfNeeded() }
         LaunchedEffect(Unit) { loadTemplates() }
 
         ScrollScreen(
@@ -235,13 +243,20 @@ class TrainingFormScreen private constructor(
             ) {
                 PlainTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        startTimerIfNeeded()
+                    },
                     placeholder = stringResource(R.string.name),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 12.dp)
                 )
                 Divider()
+                startedAt?.takeIf { startsOnSave }?.let { start ->
+                    TrainingTimerRow(start)
+                    Divider()
+                }
                 if (!isTemplate) {
                     DateRow()
                     Divider()
@@ -344,6 +359,35 @@ class TrainingFormScreen private constructor(
                     todayContentColor = ApexColors.main
                 )
             )
+        }
+    }
+
+    @Composable
+    private fun TrainingTimerRow(start: Instant) {
+        // Ticks every second while the form is open.
+        var now by remember { mutableStateOf(Instant.now()) }
+        LaunchedEffect(start) {
+            while (true) {
+                now = Instant.now()
+                delay(1_000)
+            }
+        }
+        val seconds = maxOf(0L, now.epochSecond - start.epochSecond)
+        val elapsed = if (seconds >= 3600) {
+            String.format(Locale.ROOT, "%d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60)
+        } else {
+            String.format(Locale.ROOT, "%d:%02d", seconds / 60, seconds % 60)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(Icons.Outlined.Timer, contentDescription = null, tint = ApexColors.orange)
+            Text(stringResource(R.string.training_in_progress), style = ApexText.body, color = ApexColors.orange, modifier = Modifier.weight(1f))
+            Text(elapsed, style = ApexText.body, color = ApexColors.orange)
         }
     }
 
@@ -849,6 +893,7 @@ class TrainingFormScreen private constructor(
     // Fills the name, note and exercises from the chosen template, like the web.
     private fun applyTemplate(template: TrainingTemplate) {
         name = template.name
+        startTimerIfNeeded()
         note = template.note.orEmpty()
         exercises = template.exercises.sortedBy { it.order }.map { ExerciseDraft.from(it) }
     }
@@ -969,10 +1014,16 @@ class TrainingFormScreen private constructor(
     private val startsOnSave: Boolean
         get() = !isTemplate && canBePlanned && !isPlanned
 
+    // A new training starts when its name is written, not when it is saved.
+    private fun startTimerIfNeeded() {
+        if (startedAt == null && training == null && !isTemplate && name.isNotBlank()) startedAt = Instant.now()
+    }
+
     // Saves the training; one not marked as planned is also marked as
     // started now (in progress).
     private suspend fun save(navigator: Navigator) {
         val starting = startsOnSave
+        val start = startedAt ?: Instant.now()
         if (isTemplate) {
             saveTemplate(navigator)
             return
@@ -987,7 +1038,7 @@ class TrainingFormScreen private constructor(
                 name = name.trim(),
                 // ISO 8601 without fractions, like ISO8601DateFormatter on iOS.
                 // A started training happens today.
-                date = (if (starting) Instant.now() else date).truncatedTo(ChronoUnit.SECONDS).toString(),
+                date = (if (starting) start else date).truncatedTo(ChronoUnit.SECONDS).toString(),
                 note = trimmedNote.ifEmpty { null },
                 isCompleted = isCompleted,
                 exercises = exercises.mapNotNull { it.request },
@@ -995,7 +1046,7 @@ class TrainingFormScreen private constructor(
             )
 
             var saved = Training.save(request, training?.id)
-            if (starting) saved = saved.settingTimes(Instant.now(), null)
+            if (starting) saved = saved.settingTimes(start, null)
             onSaved?.invoke(saved)
             ToastManager.show(if (starting) R.string.training_started_toast else R.string.training_saved_successfully, ToastType.SUCCESS)
             navigator.pop()

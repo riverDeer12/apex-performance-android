@@ -1,2 +1,2 @@
 Novosti:
-- Kad je na Google Playu dostupna nova verzija, aplikacija to javi pri pokretanju i ažurira se jednim dodirom.
+- Novi trening počinje čim trener upiše naziv, a ne tek kad ga spremi. U obrascu se vidi vrijeme koje teče, pa je početak treninga točan i kad obrazac ostane otvoren tijekom treninga.
