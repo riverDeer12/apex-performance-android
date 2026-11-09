@@ -62,10 +62,12 @@ keyPassword=...
 
 ## Publishing on Google Play
 
-Releases go to a Google Play testing track with the **Publish to Google Play** workflow
-(Actions → Publish to Google Play → Run workflow): it builds the signed release bundle (AAB)
-and uploads it with the release notes from `release-notes.txt`. Testers of the track get every
-update from the Play Store.
+Releases go to Google Play testing tracks with the **Publish to Google Play** workflow
+(Actions → Publish to Google Play → Run workflow): it builds the signed release bundle (AAB),
+uploads it with the release notes from `release-notes.txt` and by default releases it to both
+**internal testing** and **closed testing** (the `alpha` track). Testers of both tracks get every
+update from the Play Store. "closed, version already uploaded" releases the version already on
+internal testing to closed testing without a new upload.
 
 Every release: bump `versionCode` (and `versionName`) in `app/build.gradle.kts` and write what
 changed in `release-notes.txt` on `production`, then run the workflow. It needs these repository
