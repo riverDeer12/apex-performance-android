@@ -231,8 +231,8 @@ class PlayStoreScreenshots {
             "enter",
             "clock -e hhmm 0941",
             "battery -e level 100 -e plugged false",
-            // Full mobile signal only: the emulator's system UI draws the demo
-            // Wi-Fi icon twice.
+            // No Wi-Fi: the emulator's system UI draws the demo Wi-Fi icon twice.
+            // The mobile signal doesn't always show on the emulator.
             "network -e wifi hide",
             "network -e mobile show -e datatype none -e level 4 -e fully true",
             "notifications -e visible false"
