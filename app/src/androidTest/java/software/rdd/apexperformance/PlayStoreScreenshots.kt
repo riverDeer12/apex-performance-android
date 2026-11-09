@@ -230,8 +230,8 @@ class PlayStoreScreenshots {
             "enter",
             "clock -e hhmm 0941",
             "battery -e level 100 -e plugged false",
-            "network -e wifi show -e level 4",
-            "network -e mobile show -e datatype none -e level 4",
+            "network -e wifi show -e level 4 -e fully true",
+            "network -e mobile show -e datatype none -e level 4 -e fully true",
             "notifications -e visible false"
         )
         for (command in commands) {
