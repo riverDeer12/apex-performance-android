@@ -21,6 +21,8 @@ adb shell cmd overlay enable com.android.internal.systemui.navbar.gestural || tr
 # Clean status bar: 9:41, full battery and signal, no notification icons.
 adb shell settings put global sysui_demo_allowed 1
 echo "Demo mode allowed: $(adb shell settings get global sysui_demo_allowed)"
+# SystemUI starts showing demo mode when this is on (what "enter" sets).
+adb shell settings put global sysui_tuner_demo_on 1
 demo() { adb shell am broadcast -a com.android.systemui.demo -e command "$@"; }
 demo enter
 demo clock -e hhmm 0941
@@ -43,6 +45,8 @@ demo exit
 rm -rf play-screenshots
 adb pull "$device_dir" play-screenshots || true
 adb logcat -d > logcat.txt || true
+
+grep "Demo mode" logcat.txt | head -12 || true
 
 # am instrument exits with 0 even when the test fails.
 if ! grep -q "^OK (" instrument.log; then
