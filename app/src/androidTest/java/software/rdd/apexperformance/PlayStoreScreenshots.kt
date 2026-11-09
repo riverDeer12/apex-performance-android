@@ -92,7 +92,7 @@ class PlayStoreScreenshots {
         // Training progress, scrolled to the muscle groups.
         node("training-progress-row").performScrollTo().performClick()
         waitForTag("muscle-groups-chart")
-        node("muscle-groups-chart").performScrollTo()
+        scrollToEnd("muscle-groups-chart")
         screenshot(4, "training_progress")
 
         // The latest training with its sets.
@@ -204,7 +204,47 @@ class PlayStoreScreenshots {
         compose.waitForIdle()
     }
 
+    // Scrolls the screen holding the node to its end (the node is its last card).
+    private fun scrollToEnd(tag: String) {
+        waitForTag(tag)
+        val containers = compose.onAllNodes(
+            hasScrollAction() and hasAnyDescendant(hasTestTag(tag)),
+            useUnmergedTree = true
+        )
+        val index = containers.fetchSemanticsNodes().withIndex().minBy { it.value.boundsInRoot.height }.index
+        repeat(3) {
+            containers[index].performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 100_000f) }
+            compose.waitForIdle()
+            val viewport = containers[index].fetchSemanticsNode().boundsInRoot
+            val bounds = node(tag).fetchSemanticsNode().boundsInRoot
+            if (bounds.bottom <= viewport.bottom + 1) return
+        }
+        throw AssertionError("$language: couldn't scroll to \"$tag\"")
+    }
+
+    // Clean status bar: 9:41, full battery and signal (system UI demo mode,
+    // allowed by the workflow). Sent before every screenshot, as the system
+    // UI can leave demo mode while the app restarts.
+    private fun cleanStatusBar() {
+        val commands = listOf(
+            "enter",
+            "clock -e hhmm 0941",
+            "battery -e level 100 -e plugged false",
+            "network -e wifi show -e level 4",
+            "network -e mobile show -e datatype none -e level 4",
+            "notifications -e visible false"
+        )
+        for (command in commands) {
+            runCatching {
+                instrumentation.uiAutomation
+                    .executeShellCommand("am broadcast -a com.android.systemui.demo -e command $command")
+                    .let { descriptor -> android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() } }
+            }
+        }
+    }
+
     private fun screenshot(number: Int, name: String) {
+        if (number > 0) cleanStatusBar()
         compose.waitForIdle()
         instrumentation.waitForIdleSync()
         // The settled frame is drawn on the next vsync.
