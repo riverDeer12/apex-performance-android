@@ -46,6 +46,8 @@ object ApiClient {
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
+        // Debug builds can answer with demo data for store screenshots.
+        .let(BuildTypeNetwork::configure)
         .build()
 
     suspend inline fun <reified T> get(path: String): T =

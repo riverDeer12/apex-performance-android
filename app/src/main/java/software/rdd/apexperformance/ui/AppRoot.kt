@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -312,6 +313,7 @@ private fun HomeView() {
             state.tabs.forEach { tab ->
                 val (icon, label) = tab.iconAndLabel()
                 NavigationBarItem(
+                    modifier = Modifier.testTag("tab-${tab.name.lowercase()}"),
                     selected = tab == state.selectedTab,
                     onClick = { state.select(tab) },
                     icon = {
@@ -347,7 +349,8 @@ private fun HomeView() {
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
                     // Above the tab bar.
-                    .padding(end = 16.dp, bottom = 92.dp),
+                    .padding(end = 16.dp, bottom = 92.dp)
+                    .testTag("chat-button"),
                 onClick = { state.showsChat = true }
             )
         }

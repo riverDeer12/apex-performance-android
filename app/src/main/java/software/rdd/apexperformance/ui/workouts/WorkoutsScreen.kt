@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.workouts
 
+import androidx.compose.ui.platform.testTag
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -275,6 +276,7 @@ class WorkoutsScreen(
                 val isSelected = category == option
                 Row(
                     modifier = Modifier
+                        .testTag("category-${option.value}")
                         .weight(1f)
                         .fillMaxHeight()
                         .heightIn(min = 44.dp)
@@ -342,7 +344,7 @@ class WorkoutsScreen(
     private fun WorkoutRow(workout: Workout, onClick: () -> Unit) {
         var showMenu by remember { mutableStateOf(false) }
 
-        Box {
+        Box(modifier = Modifier.testTag("workout-row")) {
             WorkoutRowContent(
                 workout,
                 Modifier.combinedClickable(

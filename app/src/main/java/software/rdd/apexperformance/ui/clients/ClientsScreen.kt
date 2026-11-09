@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.clients
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -180,6 +181,7 @@ class ClientsScreen : Screen() {
         SettingsRow(
             icon = Icons.Outlined.Person,
             iconTint = ApexColors.main,
+            modifier = Modifier.testTag("client-row"),
             title = "${client.firstName} ${client.lastName}",
             subtitle = if (plan != null) "$credits · $plan" else credits,
             showChevron = true,

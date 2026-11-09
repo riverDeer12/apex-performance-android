@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.chat
 
+import androidx.compose.ui.platform.testTag
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -189,7 +190,7 @@ fun ChatImageBubble(attachment: ChatAttachment, conversationId: String) {
     ) {
         val loaded = data
         when {
-            loaded != null -> ChatPicture(loaded, ContentScale.Crop, Modifier.fillMaxSize())
+            loaded != null -> ChatPicture(loaded, ContentScale.Crop, Modifier.fillMaxSize().testTag("chat-image"))
             failed -> Icon(Icons.Outlined.Image, contentDescription = null, tint = ApexColors.secondaryLabel)
             else -> SmallProgress()
         }

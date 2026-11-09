@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -207,7 +208,7 @@ class TrainingDetailScreen(
         // Clients see the card once the coach marked the training.
         if (!isStaff && startedAt == null && heartRate == null) return
 
-        CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.training_time)) {
+        CardView(modifier = Modifier.testTag("training-times").padding(horizontal = 20.dp), title = stringResource(R.string.training_time)) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 if (startedAt != null) {
                     Row {
@@ -423,7 +424,7 @@ internal fun TrainingExerciseCards(exercises: List<Training.Exercise>) {
 
 @Composable
 private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isInSuperset: Boolean) {
-    CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
+    CardView(modifier = Modifier.testTag("exercise-card").padding(horizontal = 20.dp)) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (isInSuperset) {
                 // Exercises of a superset are done one after another without rest.

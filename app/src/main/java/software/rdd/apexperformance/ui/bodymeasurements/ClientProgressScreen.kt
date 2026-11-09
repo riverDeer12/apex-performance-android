@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.bodymeasurements
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -115,6 +116,7 @@ class ClientProgressScreen : Screen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .apexCard()
+                        .testTag("training-progress-row")
                         .clickable { navigator.push(ClientTrainingProgressScreen(clientName = "", trainings = trainings)) }
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -238,7 +240,7 @@ class ClientProgressScreen : Screen() {
                     letterSpacing = 0.8.sp,
                     color = ApexColors.secondaryLabel
                 )
-                Text(review.content, style = ApexText.subheadline)
+                Text(review.content, style = ApexText.subheadline, modifier = Modifier.testTag("monthly-review"))
             } else if (!isLoading) {
                 Text(stringResource(R.string.no_monthly_reviews), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
             }
@@ -319,6 +321,7 @@ class ClientProgressScreen : Screen() {
                     if (latest != null) {
                         Text(
                             "${formatMeasurement(latest.weight)} KG",
+                            modifier = Modifier.testTag("body-mass-value"),
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp,

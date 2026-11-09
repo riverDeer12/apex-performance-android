@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.home
 
+import androidx.compose.ui.platform.testTag
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -161,6 +162,7 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                 if (!firstName.isNullOrEmpty()) {
                     Text(
                         stringResource(R.string.hello_name, firstName).uppercase(),
+                        modifier = Modifier.testTag("home-greeting"),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp,
@@ -227,6 +229,7 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                             )
                             Text(
                                 appointmentDateAndTime(appointment.startTime),
+                                modifier = Modifier.testTag("next-appointment"),
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -381,7 +384,7 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
 
             HorizontalDivider(color = ApexColors.border, thickness = 1.dp)
 
-            ShortcutRow(stringResource(R.string.progress), Icons.Outlined.BarChart) {
+            ShortcutRow(stringResource(R.string.progress), Icons.Outlined.BarChart, tag = "progress-row") {
                 navigator.push(ClientProgressScreen())
             }
 
@@ -407,9 +410,10 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
     }
 
     @Composable
-    private fun ShortcutRow(title: String, icon: ImageVector, onClick: () -> Unit) {
+    private fun ShortcutRow(title: String, icon: ImageVector, tag: String = "shortcut-row", onClick: () -> Unit) {
         Row(
             modifier = Modifier
+                .testTag(tag)
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(vertical = 14.dp),

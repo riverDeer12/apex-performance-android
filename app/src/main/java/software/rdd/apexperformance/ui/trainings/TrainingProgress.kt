@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -359,7 +360,11 @@ private fun MuscleGroupsCard(sessions: List<Session>, workouts: List<Workout>) {
     val colors = sliceColors()
     val percent = NumberFormat.getPercentInstance().apply { maximumFractionDigits = 0 }
 
-    CardView(title = stringResource(R.string.muscle_group_distribution)) {
+    // Tagged for the store screenshots once the muscles of the workouts are known.
+    CardView(
+        modifier = Modifier.testTag(if (workouts.isEmpty()) "muscle-groups-card" else "muscle-groups-chart"),
+        title = stringResource(R.string.muscle_group_distribution)
+    ) {
         if (groups.isEmpty()) {
             Text(stringResource(R.string.no_sets_logged), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
         } else {
