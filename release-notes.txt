@@ -1,2 +1,2 @@
 Novosti:
-- Aplikacija sada automatski prijavljuje rušenja (Firebase Crashlytics), kako bismo greške mogli brže pronaći i ispraviti.
+- Kad je na Google Playu dostupna nova verzija, aplikacija to javi pri pokretanju i ažurira se jednim dodirom.
