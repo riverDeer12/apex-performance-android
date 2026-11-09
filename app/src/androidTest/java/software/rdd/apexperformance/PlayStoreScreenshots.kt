@@ -239,7 +239,8 @@ class PlayStoreScreenshots {
                 instrumentation.uiAutomation
                     .executeShellCommand("am broadcast -a com.android.systemui.demo -e command $command")
                     .let { descriptor -> android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() } }
-            }
+                    .let { Log.d(TAG, "Demo mode $command: ${it.decodeToString().trim()}") }
+            }.onFailure { Log.w(TAG, "Demo mode $command failed", it) }
         }
     }
 

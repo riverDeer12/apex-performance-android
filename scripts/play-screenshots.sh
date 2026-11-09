@@ -20,7 +20,8 @@ adb shell cmd overlay enable com.android.internal.systemui.navbar.gestural || tr
 
 # Clean status bar: 9:41, full battery and signal, no notification icons.
 adb shell settings put global sysui_demo_allowed 1
-demo() { adb shell am broadcast -a com.android.systemui.demo -e command "$@" > /dev/null; }
+echo "Demo mode allowed: $(adb shell settings get global sysui_demo_allowed)"
+demo() { adb shell am broadcast -a com.android.systemui.demo -e command "$@"; }
 demo enter
 demo clock -e hhmm 0941
 demo battery -e level 100 -e plugged false
