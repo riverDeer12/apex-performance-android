@@ -26,6 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.network.DemoAPI
+import software.rdd.apexperformance.core.util.ScreenshotMode
 import java.io.File
 import java.util.Locale
 
@@ -230,7 +231,9 @@ class PlayStoreScreenshots {
             "enter",
             "clock -e hhmm 0941",
             "battery -e level 100 -e plugged false",
-            "network -e wifi show -e level 4 -e fully true",
+            // No Wi-Fi: the emulator's system UI draws the demo Wi-Fi icon twice.
+            // The mobile signal doesn't always show on the emulator.
+            "network -e wifi hide",
             "network -e mobile show -e datatype none -e level 4 -e fully true",
             "notifications -e visible false"
         )
@@ -246,6 +249,16 @@ class PlayStoreScreenshots {
 
     private fun screenshot(number: Int, name: String) {
         if (number > 0) cleanStatusBar()
+        // The floating chat button would cover the bottom of the content.
+        instrumentation.runOnMainSync { ScreenshotMode.hidesChatButton = true }
+        try {
+            capture(number, name)
+        } finally {
+            instrumentation.runOnMainSync { ScreenshotMode.hidesChatButton = false }
+        }
+    }
+
+    private fun capture(number: Int, name: String) {
         compose.waitForIdle()
         instrumentation.waitForIdleSync()
         // The settled frame is drawn on the next vsync.

@@ -59,6 +59,7 @@ import software.rdd.apexperformance.core.util.AppUpdateChecker
 import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.core.util.Permissions
 import software.rdd.apexperformance.core.util.Roles
+import software.rdd.apexperformance.core.util.ScreenshotMode
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.ui.appointments.AppointmentRequestsScreen
 import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
@@ -342,7 +343,7 @@ private fun HomeView() {
     }
 
         // Chat opens from a floating button over every tab.
-        if (state.canChat && !state.showsChat) {
+        if (state.canChat && !state.showsChat && !ScreenshotMode.hidesChatButton) {
             ChatFloatingButton(
                 unreadCount = ChatStore.unreadCount,
                 modifier = Modifier
