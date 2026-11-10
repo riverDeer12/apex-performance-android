@@ -270,8 +270,8 @@ class NotificationsScreen : Screen() {
                                     Text(notification.body, style = ApexText.footnote, color = ApexColors.secondaryLabel)
                                     Text(
                                         DateUtils.getRelativeTimeSpanString(notification.createdAt.toEpochMilli()).toString(),
-                                        style = ApexText.caption,
-                                        color = ApexColors.tertiaryLabel
+                                        style = ApexText.footnote,
+                                        color = ApexColors.secondaryLabel
                                     )
                                 }
                                 if (!notification.isRead) {

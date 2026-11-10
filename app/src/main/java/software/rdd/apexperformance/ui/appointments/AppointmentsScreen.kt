@@ -250,7 +250,7 @@ class AppointmentsScreen : Screen() {
                         color = ApexColors.secondaryLabel
                     )
                     if (request.comment.isNotEmpty()) {
-                        Text(request.comment, style = ApexText.caption, color = ApexColors.secondaryLabel, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(request.comment, style = ApexText.footnote, color = ApexColors.secondaryLabel, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }

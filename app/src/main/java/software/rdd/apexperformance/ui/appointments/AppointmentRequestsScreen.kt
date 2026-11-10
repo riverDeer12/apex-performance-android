@@ -132,12 +132,12 @@ class AppointmentRequestsScreen : Screen() {
                     color = ApexColors.secondaryLabel
                 )
                 if (request.comment.isNotEmpty()) {
-                    Text(request.comment, style = ApexText.caption, color = ApexColors.secondaryLabel, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(request.comment, style = ApexText.footnote, color = ApexColors.secondaryLabel, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
                 Text(
                     stringResource(R.string.sent_at) + " " + DateFormats.dateAndTime(request.createdAt),
-                    style = ApexText.caption2,
-                    color = ApexColors.tertiaryLabel
+                    style = ApexText.footnote,
+                    color = ApexColors.secondaryLabel
                 )
             }
         }
