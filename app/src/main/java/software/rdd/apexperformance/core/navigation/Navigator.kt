@@ -97,6 +97,17 @@ class Navigator(root: Screen) {
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator") }
 
+// The screen being composed, so its bars can tell whether it is the first
+// screen of its stack (also while it slides out under a pushed one).
+val LocalScreen = staticCompositionLocalOf<Screen?> { null }
+
+// True for the first screen of a stack, e.g. the root screen of a tab.
+val isRootScreen: Boolean
+    @Composable get() {
+        val screen = LocalScreen.current ?: return !LocalNavigator.current.canPop
+        return LocalNavigator.current.stack.firstOrNull() === screen
+    }
+
 @Composable
 fun NavigatorHost(navigator: Navigator) {
     val stateHolder = rememberSaveableStateHolder()
@@ -128,7 +139,9 @@ fun NavigatorHost(navigator: Navigator) {
             label = "navigation"
         ) { screen ->
             stateHolder.SaveableStateProvider(screen.key) {
-                screen.Content()
+                CompositionLocalProvider(LocalScreen provides screen) {
+                    screen.Content()
+                }
             }
         }
     }

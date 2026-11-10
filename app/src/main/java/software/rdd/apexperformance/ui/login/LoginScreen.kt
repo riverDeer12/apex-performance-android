@@ -191,9 +191,8 @@ fun LoginScreen() {
                         }
                     }
 
-                    // The main color is white in dark mode, so the text uses
-                    // the background colour (white / black).
-                    val onMain = if (ApexColors.isDark) Color.Black else Color.White
+                    // Dark text on the sky blue, like the other filled buttons.
+                    val onMain = ApexColors.onAccent
 
                     Box(
                         modifier = Modifier

@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -125,7 +126,7 @@ class EditProfileScreen(
                         Text(
                             stringResource(if (profile.hasProfilePicture) R.string.change_profile_picture else R.string.upload_profile_picture),
                             color = ApexColors.main,
-                            style = ApexText.body
+                            style = ApexText.body.copy(fontWeight = FontWeight.SemiBold)
                         )
                     }
 

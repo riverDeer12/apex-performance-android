@@ -475,14 +475,14 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        stringResource(R.string.clients).uppercase(),
+                        stringResource(R.string.clients),
                         style = ApexText.footnote,
                         color = ApexColors.secondaryLabel,
                         modifier = Modifier.weight(1f)
                     )
                     if (selectedClients.isNotEmpty()) {
                         Text(
-                            stringResource(R.string.selected_count, selectedClients.size).uppercase(),
+                            stringResource(R.string.selected_count, selectedClients.size),
                             style = ApexText.footnote,
                             color = ApexColors.secondaryLabel
                         )
@@ -615,11 +615,11 @@ internal fun DayPickerDialog(date: Instant, onSelect: (Instant) -> Unit, onDismi
                     val time = date.atZone(DateFormats.zone).toLocalTime()
                     onSelect(day.atTime(time).atZone(DateFormats.zone).toInstant())
                 }
-            }) { Text(stringResource(android.R.string.ok), color = ApexColors.main) }
+            }) { Text(stringResource(android.R.string.ok), color = ApexColors.main, fontWeight = FontWeight.SemiBold) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = ApexColors.main)
+                Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
             }
         },
         colors = DatePickerDefaults.colors(containerColor = ApexColors.background)

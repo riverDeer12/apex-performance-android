@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,11 +59,26 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
+import software.rdd.apexperformance.core.navigation.isRootScreen
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
+// Chat button shown at the start of the top bar of each tab's first screen,
+// provided by the tabs for users who can chat (null otherwise).
+val LocalChatButton = compositionLocalOf<(@Composable () -> Unit)?> { null }
+
+// The chat button when this is the first screen of a tab and the user can chat.
+@Composable
+fun BoxScope.TopBarChatButton() {
+    val chatButton = LocalChatButton.current
+    if (chatButton != null && isRootScreen) {
+        Box(modifier = Modifier.align(Alignment.CenterStart)) { chatButton() }
+    }
+}
+
 // Inline navigation bar: back chevron on the left, title in the middle and
-// actions (checkmark, plus...) on the right, as on iOS.
+// actions (checkmark, plus...) on the right, as on iOS. The first screen of
+// a tab shows the chat button where the back chevron would be.
 @Composable
 fun TopBar(
     title: String? = null,
@@ -92,6 +108,8 @@ fun TopBar(
                     modifier = Modifier.size(20.dp)
                 )
             }
+        } else {
+            TopBarChatButton()
         }
 
         if (title != null) {
@@ -248,7 +266,7 @@ fun ConfirmDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(dismissText, color = ApexColors.main)
+                Text(dismissText, color = ApexColors.main, fontWeight = FontWeight.SemiBold)
             }
         }
     )
@@ -264,8 +282,8 @@ fun FormSection(
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         if (header != null) {
             Text(
-                header.uppercase(),
-                style = ApexText.footnote,
+                header,
+                style = ApexText.footnote.copy(fontWeight = FontWeight.Medium),
                 color = ApexColors.secondaryLabel,
                 modifier = Modifier.padding(start = 16.dp, bottom = 6.dp)
             )
@@ -313,7 +331,7 @@ fun <T> MenuPicker(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     selectedText,
-                    style = ApexText.body,
+                    style = ApexText.body.copy(fontWeight = FontWeight.SemiBold),
                     color = if (enabled) ApexColors.main else ApexColors.tertiaryLabel,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

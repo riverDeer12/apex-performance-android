@@ -171,7 +171,7 @@ class CreateAppointmentScreen : Screen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(stringResource(R.string.select_day), style = ApexText.body, modifier = Modifier.weight(1f))
-                    Text(DateFormats.date(selectedDay), style = ApexText.body, color = ApexColors.main)
+                    Text(DateFormats.date(selectedDay), style = ApexText.body, color = ApexColors.main, fontWeight = FontWeight.SemiBold)
                 }
             }
 
@@ -256,11 +256,11 @@ class CreateAppointmentScreen : Screen() {
                                 launch { loadTimeSlots() }
                             }
                         }
-                    }) { Text(stringResource(android.R.string.ok), color = ApexColors.main) }
+                    }) { Text(stringResource(android.R.string.ok), color = ApexColors.main, fontWeight = FontWeight.SemiBold) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDatePicker = false }) {
-                        Text(stringResource(R.string.cancel), color = ApexColors.main)
+                        Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
                     }
                 },
                 colors = DatePickerDefaults.colors(containerColor = ApexColors.background)

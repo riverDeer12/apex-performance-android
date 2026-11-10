@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil3.compose.SubcomposeAsyncImage
+import software.rdd.apexperformance.model.WorkoutCategory
 import software.rdd.apexperformance.ui.theme.ApexColors
 
 object YouTubeVideo {
@@ -83,15 +85,21 @@ private fun html(videoId: String) = """
 """.trimIndent()
 
 @Composable
-fun WorkoutThumbnail(url: String?, modifier: Modifier = Modifier) {
+fun WorkoutThumbnail(url: String?, modifier: Modifier = Modifier, category: WorkoutCategory? = null) {
+    // Without a picture: an icon on a soft colour of the workout's category.
+    val (icon, tint) = when (category) {
+        WorkoutCategory.MOBILITY_FLEXIBILITY -> Icons.Outlined.SelfImprovement to ApexColors.teal
+        WorkoutCategory.STRENGTH_CONDITIONING -> Icons.Filled.FitnessCenter to ApexColors.orange
+        null -> Icons.Filled.FitnessCenter to ApexColors.accent
+    }
     val placeholder = @Composable {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ApexColors.main.copy(alpha = 0.12f)),
+                .background(tint.copy(alpha = 0.16f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.FitnessCenter, contentDescription = null, tint = ApexColors.main, modifier = Modifier.size(22.dp))
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(24.dp))
         }
     }
 

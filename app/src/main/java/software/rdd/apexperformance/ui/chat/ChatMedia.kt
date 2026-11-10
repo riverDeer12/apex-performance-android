@@ -239,14 +239,15 @@ fun ChatWorkoutCard(workout: Workout?) {
     ) {
         WorkoutThumbnail(
             workout?.thumbnailUrl,
+            category = workout?.workoutCategory,
             modifier = Modifier
                 .size(56.dp)
                 .clip(RoundedCornerShape(10.dp))
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                stringResource(R.string.chat_shared_workout).uppercase(),
-                style = ApexText.caption.copy(fontWeight = FontWeight.SemiBold),
+                stringResource(R.string.chat_shared_workout),
+                style = ApexText.footnote.copy(fontWeight = FontWeight.Medium),
                 color = ApexColors.secondaryLabel
             )
             Text(
@@ -316,6 +317,7 @@ class ChatWorkoutPickerScreen(private val onPick: (Workout) -> Unit) : Screen() 
                         ) {
                             WorkoutThumbnail(
                                 workout.thumbnailUrl,
+                                category = workout.workoutCategory,
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(RoundedCornerShape(8.dp))

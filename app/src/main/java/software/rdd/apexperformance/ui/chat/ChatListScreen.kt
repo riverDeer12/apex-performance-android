@@ -26,7 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -341,19 +341,20 @@ class ChatContactListScreen(
     }
 }
 
-// Round chat button floating over the tabs, with the unread count.
+// Round chat button in the top bar of each tab's first screen, with the
+// unread badge. Opens the chat over the tabs.
 @Composable
-fun ChatFloatingButton(unreadCount: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Box(modifier = modifier) {
+fun ChatTopBarButton(unreadCount: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(modifier = modifier.size(48.dp), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
-                .size(56.dp)
-                .shadow(8.dp, CircleShape)
-                .background(ApexColors.accent, CircleShape)
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(ApexColors.accent.copy(alpha = 0.16f))
                 .clickable(onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.Forum, contentDescription = stringResource(R.string.tab_chat), tint = ApexColors.onAccent)
+            Icon(Icons.Filled.Forum, contentDescription = stringResource(R.string.tab_chat), tint = ApexColors.accent, modifier = Modifier.size(20.dp))
         }
         if (unreadCount > 0) {
             Text(
@@ -363,7 +364,7 @@ fun ChatFloatingButton(unreadCount: Int, modifier: Modifier = Modifier, onClick:
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .background(ApexColors.red, RoundedCornerShape(50))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                    .padding(horizontal = 5.dp, vertical = 1.dp)
             )
         }
     }

@@ -56,6 +56,7 @@ import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.ClientGoal
 import software.rdd.apexperformance.model.MonthlyReview
+import software.rdd.apexperformance.ui.components.ExpandableText
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
@@ -101,7 +102,7 @@ fun ClientGoalContent(goal: ClientGoal, modifier: Modifier = Modifier) {
                     Text(DateFormats.date(it), style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold))
                 }
                 goal.nextAssessment?.takeIf { it.isNotEmpty() }?.let {
-                    Text(it, style = ApexText.subheadline)
+                    ExpandableText(it, style = ApexText.subheadline)
                 }
             }
         }
@@ -113,7 +114,7 @@ private fun GoalSection(title: String, icon: ImageVector, text: String?) {
     if (text.isNullOrEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         GoalLabel(title, icon)
-        Text(text, style = ApexText.subheadline)
+        ExpandableText(text, style = ApexText.subheadline, collapsedLines = 4)
     }
 }
 
@@ -224,11 +225,11 @@ class ClientGoalFormScreen(
                             val day = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
                             nextAssessmentDate = day.atTime(current.toLocalTime()).atZone(zone).toInstant()
                         }
-                    }) { Text(stringResource(android.R.string.ok), color = ApexColors.main) }
+                    }) { Text(stringResource(android.R.string.ok), color = ApexColors.main, fontWeight = FontWeight.SemiBold) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDatePicker = false }) {
-                        Text(stringResource(R.string.cancel), color = ApexColors.main)
+                        Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
                     }
                 },
                 colors = DatePickerDefaults.colors(containerColor = ApexColors.background)
@@ -354,10 +355,10 @@ private fun monthName(month: Int, locale: Locale = Locale.getDefault()): String 
     Month.of(month).getDisplayName(DateTextStyle.FULL_STANDALONE, locale)
         .replaceFirstChar { it.titlecase(locale) }
 
-// Month name and year in capitals, e.g. "LISTOPAD 2026".
+// Month name and year, e.g. "Listopad 2026".
 @Composable
 fun MonthTitle(date: LocalDate, modifier: Modifier = Modifier, style: TextStyle = ApexText.body) {
-    Text(monthYearTitle(date).uppercase(), style = style, modifier = modifier)
+    Text(monthYearTitle(date), style = style, modifier = modifier)
 }
 
 // Client's monthly reviews, newest first.
@@ -393,9 +394,9 @@ class MonthlyReviewsScreen(private val reviews: List<MonthlyReview>) : Screen() 
                 ) {
                     MonthTitle(
                         review.monthDate,
-                        style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     )
-                    Text(review.content, style = ApexText.subheadline)
+                    ExpandableText(review.content, style = ApexText.subheadline, collapsedLines = 4)
                 }
             }
         }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -32,6 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -88,8 +91,12 @@ fun TrainingProgress(
     isLoading: Boolean = false
 ) {
     val sessions = remember(trainings, period) { buildSessions(trainings, period) }
+    // All completed trainings, for the summary of the last weeks whatever the period.
+    val allSessions = remember(trainings) { buildSessions(trainings, null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        if (allSessions.isNotEmpty()) HighlightCard(allSessions)
+
         if (sessions.isEmpty()) {
             CardView {
                 if (isLoading) {
@@ -103,20 +110,22 @@ fun TrainingProgress(
         } else {
             SummaryCard(sessions)
             MaxWeightCard(sessions)
-            ChartCard(stringResource(R.string.volume_per_training)) {
+            val volumePoints = sessions.filter { it.volume > 0 }.map { ChartPoint(it.date, it.volume) }
+            ChartCard(stringResource(R.string.volume_per_training), volumePoints, caption = firstLastCaption(volumePoints, "kg")) {
                 BarChart(sessions.map { ChartPoint(it.date, it.volume) }, unit = ChronoUnit.DAYS)
             }
-            ChartCard(stringResource(R.string.total_reps_per_training)) {
-                LineChart(sessions.map { ChartPoint(it.date, it.reps.toDouble()) })
+            val repPoints = sessions.map { ChartPoint(it.date, it.reps.toDouble()) }
+            ChartCard(stringResource(R.string.total_reps_per_training), repPoints) {
+                LineChart(repPoints)
             }
-            ChartCard(stringResource(R.string.average_reps_per_set)) {
-                LineChart(
-                    sessions
-                        .filter { it.repSets > 0 }
-                        .map { ChartPoint(it.date, it.reps.toDouble() / it.repSets) }
-                )
+            val averagePoints = sessions
+                .filter { it.repSets > 0 }
+                .map { ChartPoint(it.date, it.reps.toDouble() / it.repSets) }
+            ChartCard(stringResource(R.string.average_reps_per_set), averagePoints) {
+                LineChart(averagePoints)
             }
-            ChartCard(stringResource(R.string.trainings_per_week)) {
+            // No change badge: the first and last week say little about a trend.
+            ChartCard(stringResource(R.string.trainings_per_week), points = emptyList()) {
                 BarChart(trainingsPerWeek(sessions), unit = ChronoUnit.WEEKS)
             }
             MuscleGroupsCard(sessions, workouts)
@@ -139,9 +148,10 @@ private class Session(
     val repSets: Int
 )
 
-private fun buildSessions(trainings: List<Training>, period: ProgressPeriod): List<Session> =
+// Completed trainings in the period (all of them without one).
+private fun buildSessions(trainings: List<Training>, period: ProgressPeriod?): List<Session> =
     trainings
-        .filter { it.isCompleted && period.includes(it.date) }
+        .filter { it.isCompleted && (period == null || period.includes(it.date)) }
         .sortedBy { it.date }
         .map { training ->
             val sets = training.exercises.flatMap { it.sets }
@@ -164,6 +174,106 @@ private fun buildSessions(trainings: List<Training>, period: ProgressPeriod): Li
 // First number in the repetitions text, e.g. 8 for "8-10".
 private fun parseReps(value: String?): Int? =
     value?.trim()?.takeWhile { it.isDigit() }?.toIntOrNull()
+
+// MARK: - Highlight
+
+// Accent card at the top: volume of the last 30 days against the 30 days
+// before ("+12% volume"), or the trainings this month when there is nothing
+// to compare, and the weeks in a row with a training. Only computed numbers.
+@Composable
+private fun HighlightCard(sessions: List<Session>) {
+    val now = Instant.now()
+    val day = 86_400L
+    val last30 = sessions.filter { it.date.isAfter(now.minusSeconds(30 * day)) && !it.date.isAfter(now) }
+    val previous30 = sessions.filter { it.date.isAfter(now.minusSeconds(60 * day)) && !it.date.isAfter(now.minusSeconds(30 * day)) }
+    val lastVolume = last30.sumOf { it.volume }
+    val previousVolume = previous30.sumOf { it.volume }
+
+    val title: String
+    val value: String
+    if (previousVolume > 0 && last30.isNotEmpty()) {
+        val change = Math.round((lastVolume - previousVolume) / previousVolume * 100).toInt()
+        title = stringResource(R.string.last_30_days)
+        value = stringResource(R.string.volume_change, (if (change > 0) "+" else "") + "$change%")
+    } else {
+        val thisMonth = java.time.YearMonth.now(DateFormats.zone)
+        val count = sessions.count { java.time.YearMonth.from(it.date.atZone(DateFormats.zone)) == thisMonth }
+        title = stringResource(R.string.this_month)
+        value = pluralStringResource(R.plurals.trainings_count, count, count)
+    }
+
+    val streak = weeksInARow(sessions)
+    val line = when {
+        streak >= 2 -> pluralStringResource(R.plurals.weeks_in_a_row, streak, streak)
+        last30.isNotEmpty() -> pluralStringResource(R.plurals.trainings_last_30_days, last30.size, last30.size)
+        else -> null
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("progress-highlight")
+            .clip(RoundedCornerShape(14.dp))
+            .background(ApexColors.accent)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(title, style = ApexText.subheadline.copy(fontWeight = FontWeight.Medium), color = ApexColors.onAccent.copy(alpha = 0.8f))
+        Text(value, style = TextStyle(fontSize = 26.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp), color = ApexColors.onAccent)
+        if (line != null) {
+            Text(line, style = ApexText.subheadline, color = ApexColors.onAccent)
+        }
+    }
+}
+
+// Weeks in a row with at least one training, up to this week (or the last
+// one, when there is no training yet this week).
+private fun weeksInARow(sessions: List<Session>): Int {
+    val firstDay: DayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
+    fun weekStart(date: LocalDate): LocalDate = date.with(TemporalAdjusters.previousOrSame(firstDay))
+    val weeks = sessions.map { weekStart(DateFormats.localDate(it.date)) }.toSet()
+    var week = weekStart(LocalDate.now(DateFormats.zone))
+    if (week !in weeks) week = week.minusWeeks(1)
+    var count = 0
+    while (week in weeks) {
+        count += 1
+        week = week.minusWeeks(1)
+    }
+    return count
+}
+
+// Change from the first to the last value, e.g. "↑ 29%" in green or "↓ 8%"
+// in orange; nothing with fewer than two values or a first value of zero.
+@Composable
+private fun ChangeBadge(points: List<ChartPoint>) {
+    if (points.size < 2) return
+    val first = points.first().value
+    val last = points.last().value
+    if (first <= 0) return
+    val change = Math.round((last - first) / first * 100).toInt()
+    val (arrow, color) = when {
+        change > 0 -> "↑" to ApexColors.green
+        change < 0 -> "↓" to ApexColors.orange
+        else -> "→" to ApexColors.secondaryLabel
+    }
+    Text(
+        "$arrow ${kotlin.math.abs(change)}%",
+        style = ApexText.subheadline.copy(fontWeight = FontWeight.Bold),
+        color = color
+    )
+}
+
+// "Last 6,700 kg · first 5,200 kg", for charts with at least two values.
+@Composable
+private fun firstLastCaption(points: List<ChartPoint>, unit: String): String? {
+    if (points.size < 2) return null
+    val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+    return stringResource(
+        R.string.last_and_first_value,
+        "${format.format(points.last().value)} $unit",
+        "${format.format(points.first().value)} $unit"
+    )
+}
 
 // MARK: - Summary
 
@@ -235,7 +345,9 @@ private fun MaxWeightCard(sessions: List<Session>) {
 
     CardView {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ApexLabel(stringResource(R.string.max_weight))
+            CardTitle(stringResource(R.string.max_weight))
+            Spacer(Modifier.width(8.dp))
+            ChangeBadge(points)
             Spacer(Modifier.weight(1f))
             if (selected != null) {
                 Box(modifier = Modifier.widthIn(max = 200.dp)) {
@@ -245,14 +357,14 @@ private fun MaxWeightCard(sessions: List<Session>) {
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            selected.name.uppercase(),
-                            style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp),
+                            selected.name,
+                            style = ApexText.footnote.copy(fontWeight = FontWeight.SemiBold),
                             color = ApexColors.accent,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
                         )
-                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = ApexColors.accent, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = ApexColors.accent, modifier = Modifier.size(16.dp))
                     }
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }, containerColor = ApexColors.card) {
                         options.forEach { option ->
@@ -278,6 +390,7 @@ private fun MaxWeightCard(sessions: List<Session>) {
             Text(stringResource(R.string.no_weights_logged), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
         } else {
             BarChart(points, unit = ChronoUnit.DAYS, height = 150.dp)
+            firstLastCaption(points, "kg")?.let { ChartCaption(it) }
         }
     }
 }
@@ -382,8 +495,8 @@ private fun MuscleGroupsCard(sessions: List<Session>, workouts: List<Workout>) {
                                 )
                                 Spacer(Modifier.width(6.dp))
                                 Text(
-                                    group.name.uppercase(),
-                                    style = ApexText.caption,
+                                    group.name,
+                                    style = ApexText.footnote,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
@@ -391,7 +504,7 @@ private fun MuscleGroupsCard(sessions: List<Session>, workouts: List<Workout>) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(
                                     percent.format(group.sets.toDouble() / total),
-                                    style = ApexText.caption,
+                                    style = ApexText.footnote,
                                     color = ApexColors.secondaryLabel
                                 )
                             }
@@ -399,7 +512,7 @@ private fun MuscleGroupsCard(sessions: List<Session>, workouts: List<Workout>) {
                     }
                 }
 
-                Text(stringResource(R.string.share_of_logged_sets), style = ApexText.caption2, color = ApexColors.secondaryLabel)
+                Text(stringResource(R.string.share_of_logged_sets), style = ApexText.footnote, color = ApexColors.secondaryLabel)
             }
         }
     }
@@ -438,11 +551,28 @@ private fun DonutChart(values: List<Int>, colors: List<Color>, modifier: Modifie
 
 // MARK: - Chart helpers
 
+// Chart with its title, the change over the period on the right of the
+// title and an optional caption under it.
 @Composable
-private fun ChartCard(title: String, content: @Composable () -> Unit) {
-    CardView(title = title) {
+private fun ChartCard(title: String, points: List<ChartPoint>, caption: String? = null, content: @Composable () -> Unit) {
+    CardView {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CardTitle(title, modifier = Modifier.weight(1f))
+            ChangeBadge(points)
+        }
         content()
+        caption?.let { ChartCaption(it) }
     }
+}
+
+@Composable
+private fun CardTitle(text: String, modifier: Modifier = Modifier) {
+    Text(text, style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold), color = ApexColors.label, modifier = modifier)
+}
+
+@Composable
+private fun ChartCaption(text: String) {
+    Text(text, style = ApexText.footnote, color = ApexColors.secondaryLabel)
 }
 
 private val axisDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.")

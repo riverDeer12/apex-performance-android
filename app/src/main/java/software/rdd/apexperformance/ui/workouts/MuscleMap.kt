@@ -134,7 +134,7 @@ private fun MuscleLegendRow(title: String, names: List<String>, color: Color) {
                 .background(color, CircleShape)
         )
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title.uppercase(), style = ApexText.caption.copy(fontWeight = FontWeight.SemiBold), color = ApexColors.secondaryLabel)
+            Text(title, style = ApexText.caption.copy(fontWeight = FontWeight.SemiBold), color = ApexColors.secondaryLabel)
             Text(names.joinToString(" · "), style = ApexText.subheadline, color = ApexColors.label)
         }
     }

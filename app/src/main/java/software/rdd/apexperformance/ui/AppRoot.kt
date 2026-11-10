@@ -32,6 +32,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,13 +60,13 @@ import software.rdd.apexperformance.core.util.AppUpdateChecker
 import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.core.util.Permissions
 import software.rdd.apexperformance.core.util.Roles
-import software.rdd.apexperformance.core.util.ScreenshotMode
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.ui.appointments.AppointmentRequestsScreen
 import software.rdd.apexperformance.ui.appointments.AppointmentsScreen
 import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
-import software.rdd.apexperformance.ui.chat.ChatFloatingButton
+import software.rdd.apexperformance.ui.chat.ChatTopBarButton
+import software.rdd.apexperformance.ui.components.LocalChatButton
 import software.rdd.apexperformance.ui.home.CooperationRulesGate
 import software.rdd.apexperformance.ui.home.CooperationRulesPopup
 import software.rdd.apexperformance.ui.home.NotificationInbox
@@ -169,7 +170,7 @@ class HomeState {
     var selectedTab by mutableStateOf(tabs.first())
 
     // Chat is between coaches and their clients. It opens over the tabs
-    // from a floating button, with its own stack.
+    // from a button in the top bar, with its own stack.
     val canChat: Boolean = AuthManager.hasRole(Roles.CLIENT) || AuthManager.hasRole(Roles.COACH)
     var showsChat by mutableStateOf(false)
     private var chatNavigatorOrNull: Navigator? = null
@@ -304,8 +305,20 @@ private fun HomeView() {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             // Each tab keeps its own stack, like a NavigationStack per tab on iOS.
-            androidx.compose.runtime.key(state.selectedTab) {
-                NavigatorHost(state.navigator(state.selectedTab))
+            // Chat opens from a round button in the top bar of each tab's first screen.
+            val chatButton: (@Composable () -> Unit)? = if (state.canChat) {
+                {
+                    ChatTopBarButton(
+                        unreadCount = ChatStore.unreadCount,
+                        modifier = Modifier.testTag("chat-button"),
+                        onClick = { state.showsChat = true }
+                    )
+                }
+            } else null
+            CompositionLocalProvider(LocalChatButton provides chatButton) {
+                androidx.compose.runtime.key(state.selectedTab) {
+                    NavigatorHost(state.navigator(state.selectedTab))
+                }
             }
         }
 
@@ -341,20 +354,6 @@ private fun HomeView() {
             }
         }
     }
-
-        // Chat opens from a floating button over every tab.
-        if (state.canChat && !state.showsChat && !ScreenshotMode.hidesChatButton) {
-            ChatFloatingButton(
-                unreadCount = ChatStore.unreadCount,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .navigationBarsPadding()
-                    // Above the tab bar.
-                    .padding(end = 16.dp, bottom = 92.dp)
-                    .testTag("chat-button"),
-                onClick = { state.showsChat = true }
-            )
-        }
 
         if (state.showsChat) {
             Box(modifier = Modifier.fillMaxSize().background(ApexColors.groupedBackground)) {

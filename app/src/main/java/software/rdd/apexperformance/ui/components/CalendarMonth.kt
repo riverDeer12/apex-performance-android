@@ -148,8 +148,7 @@ private fun DayCell(
                 "${day.dayOfMonth}",
                 style = ApexText.subheadline.copy(fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal),
                 color = when {
-                    // The main color is white in dark mode.
-                    isSelected -> if (ApexColors.isDark) Color.Black else Color.White
+                    isSelected -> ApexColors.onAccent
                     isToday -> ApexColors.main
                     else -> ApexColors.label
                 }

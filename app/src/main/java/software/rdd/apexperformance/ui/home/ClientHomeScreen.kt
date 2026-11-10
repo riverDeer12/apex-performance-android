@@ -37,6 +37,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,10 +85,15 @@ import software.rdd.apexperformance.ui.components.ApexSectionTitle
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.ProfilePicture
 import software.rdd.apexperformance.ui.components.ScrollScreen
+import software.rdd.apexperformance.ui.components.ShowMoreLink
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
+import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.workouts.WorkoutsScreen
+import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 // Client's home: greeting, next training with booking, package,
 // goal and plan, and shortcuts to trainings, progress and workouts.
@@ -154,26 +162,24 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(modifier = Modifier.clip(CircleShape)) {
-                ProfilePicture(profile, size = 44.dp)
+                ProfilePicture(profile, size = 48.dp)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 val firstName = client?.firstName
                 if (!firstName.isNullOrEmpty()) {
                     Text(
-                        stringResource(R.string.hello_name, firstName).uppercase(),
+                        stringResource(R.string.hello_name, firstName),
                         modifier = Modifier.testTag("home-greeting"),
-                        fontSize = 16.sp,
+                        fontSize = 22.sp,
+                        lineHeight = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp,
                         color = ApexColors.label
                     )
                 }
                 Text(
-                    stringResource(R.string.ready_for_next_training).uppercase(),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 0.8.sp,
+                    stringResource(R.string.ready_for_next_training),
+                    style = ApexText.subheadline,
                     color = ApexColors.secondaryLabel
                 )
             }
@@ -221,19 +227,25 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                                 stringResource(
                                     if (appointment.isPending) R.string.next_appointment_pending
                                     else R.string.next_appointment
-                                ).uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 1.2.sp,
-                                color = Color.White.copy(alpha = 0.8f)
+                                ),
+                                style = ApexText.footnote.copy(fontWeight = FontWeight.Medium),
+                                color = Color.White.copy(alpha = 0.85f)
                             )
                             Text(
                                 appointmentDateAndTime(appointment.startTime),
                                 modifier = Modifier.testTag("next-appointment"),
-                                fontSize = 17.sp,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
+                            // Length of the training, from its start and end.
+                            appointment.durationMinutes?.let { minutes ->
+                                Text(
+                                    stringResource(R.string.duration_minutes, minutes),
+                                    style = ApexText.footnote,
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
+                            }
                         }
                         isLoading -> CircularProgressIndicator(
                             color = Color.White,
@@ -241,21 +253,56 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                             modifier = Modifier.size(20.dp)
                         )
                         else -> Text(
-                            stringResource(R.string.no_upcoming_appointments).uppercase(),
-                            fontSize = 14.sp,
+                            stringResource(R.string.no_upcoming_appointments),
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp,
                             color = Color.White
                         )
                     }
                 }
 
                 if (canGetAppointments) {
-                    ApexCompactButton(stringResource(R.string.book_appointment)) {
+                    ApexCompactButton(
+                        stringResource(R.string.book_appointment),
+                        modifier = Modifier.testTag("book-appointment-button")
+                    ) {
                         navigator.push(CreateAppointmentScreen())
                     }
                 }
             }
+
+            // How long until an approved training, e.g. "in 2 days".
+            if (appointment != null && !appointment.isPending) {
+                countdownText(appointment.startTime)?.let { countdown ->
+                    Text(
+                        countdown,
+                        style = ApexText.footnote.copy(fontWeight = FontWeight.SemiBold),
+                        color = ApexColors.onAccent,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(12.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(ApexColors.accent)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        }
+    }
+
+    // "in 45 min", "in 5 h" or "in 2 days" until the start; null once started.
+    @Composable
+    private fun countdownText(start: Instant): String? {
+        val minutes = Duration.between(Instant.now(), start).toMinutes()
+        if (minutes < 0) return null
+        val days = ChronoUnit.DAYS.between(
+            LocalDate.now(DateFormats.zone),
+            start.atZone(DateFormats.zone).toLocalDate()
+        ).toInt()
+        return when {
+            minutes < 60 -> stringResource(R.string.countdown_minutes, maxOf(minutes, 1).toInt())
+            minutes < 24 * 60 || days < 1 -> stringResource(R.string.countdown_hours, (minutes / 60).toInt())
+            else -> pluralStringResource(R.plurals.countdown_days, days, days)
         }
     }
 
@@ -280,41 +327,40 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                 Chevron()
             }
 
-            Row {
-                SmallCaps(stringResource(R.string.package_done_of_total, summary.done, summary.total))
-                Spacer(Modifier.weight(1f))
-                SmallCaps(stringResource(R.string.package_remaining, summary.remaining))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.package_done_of_total, summary.done, summary.total),
+                    style = ApexText.subheadline.copy(fontWeight = FontWeight.Medium),
+                    color = ApexColors.label,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    stringResource(R.string.package_remaining, summary.remaining),
+                    style = ApexText.subheadline,
+                    color = ApexColors.secondaryLabel
+                )
             }
 
-            ApexProgressBar(summary.progress)
+            ApexProgressBar(summary.progress, height = 8.dp)
         }
-    }
-
-    @Composable
-    private fun SmallCaps(text: String) {
-        Text(
-            text.uppercase(),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.6.sp,
-            color = ApexColors.secondaryLabel
-        )
     }
 
     @Composable
     private fun GoalCard(goal: ClientGoal) {
         val navigator = LocalNavigator.current
+        val openDetail = { navigator.push(ClientGoalDetailScreen(goal)) }
+        // Lines cut after three lines: "Show more" opens the whole goal and plan.
+        val truncated = remember(goal) { mutableStateMapOf<Int, Boolean>() }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .apexCard()
-                .clickable { navigator.push(ClientGoalDetailScreen(goal)) }
+                .clickable(onClick = openDetail)
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Box(modifier = Modifier.width(34.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.width(34.dp).padding(top = 2.dp), contentAlignment = Alignment.Center) {
                 Icon(
                     Icons.Outlined.TrackChanges,
                     contentDescription = null,
@@ -325,46 +371,40 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                ApexSectionTitle(
-                    stringResource(R.string.my_goal_and_plan),
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ApexSectionTitle(stringResource(R.string.my_goal_and_plan), modifier = Modifier.weight(1f))
+                    Chevron()
+                }
 
-                goal.goal?.takeIf { it.isNotEmpty() }?.let {
-                    GoalLine(stringResource(R.string.goal_line, it))
+                val lines = buildList {
+                    goal.goal?.takeIf { it.isNotEmpty() }?.let { add(stringResource(R.string.goal_line, it)) }
+                    goal.currentBlock?.takeIf { it.isNotEmpty() }?.let { add(stringResource(R.string.current_block_line, it)) }
+                    goal.focus?.takeIf { it.isNotEmpty() }?.let { add(stringResource(R.string.focus_line, it)) }
+                    val date = goal.nextAssessmentDate
+                    val text = goal.nextAssessment
+                    if (date != null) {
+                        add(stringResource(R.string.next_assessment_line, DateFormats.date(date)))
+                    } else if (!text.isNullOrEmpty()) {
+                        add(stringResource(R.string.next_assessment_line, text))
+                    }
                 }
-                goal.currentBlock?.takeIf { it.isNotEmpty() }?.let {
-                    GoalLine(stringResource(R.string.current_block_line, it))
+                lines.forEachIndexed { index, line ->
+                    Text(
+                        line,
+                        style = ApexText.subheadline,
+                        color = if (index == 0) ApexColors.label else ApexColors.secondaryLabel,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        onTextLayout = { truncated[index] = it.hasVisualOverflow }
+                    )
                 }
-                goal.focus?.takeIf { it.isNotEmpty() }?.let {
-                    GoalLine(stringResource(R.string.focus_line, it))
-                }
-                val date = goal.nextAssessmentDate
-                val text = goal.nextAssessment
-                if (date != null) {
-                    GoalLine(stringResource(R.string.next_assessment_line, DateFormats.date(date)))
-                } else if (!text.isNullOrEmpty()) {
-                    GoalLine(stringResource(R.string.next_assessment_line, text))
+                if (truncated.values.any { it }) {
+                    ShowMoreLink(onClick = openDetail)
                 }
             }
-
-            Chevron()
         }
-    }
-
-    @Composable
-    private fun GoalLine(text: String) {
-        Text(
-            text.uppercase(),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = 0.4.sp,
-            color = ApexColors.secondaryLabel,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
     }
 
     @Composable
@@ -421,13 +461,11 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Box(modifier = Modifier.width(26.dp), contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = null, tint = ApexColors.label, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = ApexColors.accent, modifier = Modifier.size(22.dp))
             }
             Text(
-                title.uppercase(),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp,
+                title,
+                style = ApexText.body.copy(fontWeight = FontWeight.SemiBold),
                 color = ApexColors.label,
                 modifier = Modifier.weight(1f)
             )
@@ -506,7 +544,11 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
 
     // MARK: - Data
 
-    private class NextAppointment(val startTime: Instant, val isPending: Boolean)
+    private class NextAppointment(val startTime: Instant, val endTime: Instant, val isPending: Boolean) {
+        // Null when the end isn't after the start.
+        val durationMinutes: Int?
+            get() = Duration.between(startTime, endTime).toMinutes().toInt().takeIf { it > 0 }
+    }
 
     // Next approved appointment, or the next one waiting for approval.
     private val nextAppointment: NextAppointment?
@@ -515,11 +557,11 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
             approvedAppointments
                 .filter { it.startTime.isAfter(now) }
                 .minByOrNull { it.startTime }
-                ?.let { return NextAppointment(it.startTime, isPending = false) }
+                ?.let { return NextAppointment(it.startTime, it.endTime, isPending = false) }
             pendingAppointments
                 .filter { it.startTime.isAfter(now) }
                 .minByOrNull { it.startTime }
-                ?.let { return NextAppointment(it.startTime, isPending = true) }
+                ?.let { return NextAppointment(it.startTime, it.endTime, isPending = true) }
             return null
         }
 

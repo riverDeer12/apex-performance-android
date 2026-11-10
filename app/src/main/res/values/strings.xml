@@ -396,7 +396,7 @@
     <string name="pace_per_km">Pace per km (min/km) – walking, running</string>
     <string name="pace_type">Distance and pace</string>
     <string name="pace_type_hint">For workouts done over a distance (walking, rowing, cycling): sets record the distance and duration, and the pace is shown from them.</string>
-    <string name="package_done_of_total">%1$d / %2$d done</string>
+    <string name="package_done_of_total">%1$d of %2$d trainings done</string>
     <string name="package_remaining">%d left</string>
     <string name="package_trainings">%d trainings</string>
     <string name="password">Password</string>
@@ -598,4 +598,32 @@
     <string name="x_test">X Test</string>
     <string name="year">Year</string>
     <string name="you_will_be_signed_out">You will be signed out</string>
+    <string name="show_more_text">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="countdown_minutes">in %d min</string>
+    <string name="countdown_hours">in %d h</string>
+    <string name="last_time_value">Last time %s</string>
+    <string name="quick_add_rep">+1 rep</string>
+    <string name="quick_add_weight">+2.5 kg</string>
+    <string name="repeat_set">Repeat set</string>
+    <string name="last_30_days">Last 30 days</string>
+    <string name="volume_change">%s volume</string>
+    <string name="this_month">This month</string>
+    <string name="last_and_first_value">Last %1$s · first %2$s</string>
+    <plurals name="countdown_days">
+        <item quantity="one">in %d day</item>
+        <item quantity="other">in %d days</item>
+    </plurals>
+    <plurals name="trainings_count">
+        <item quantity="one">%d training</item>
+        <item quantity="other">%d trainings</item>
+    </plurals>
+    <plurals name="weeks_in_a_row">
+        <item quantity="one">%d week in a row with a training</item>
+        <item quantity="other">%d weeks in a row with a training</item>
+    </plurals>
+    <plurals name="trainings_last_30_days">
+        <item quantity="one">%d training in the last 30 days</item>
+        <item quantity="other">%d trainings in the last 30 days</item>
+    </plurals>
 </resources>

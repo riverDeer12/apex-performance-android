@@ -41,7 +41,7 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
 // Shared look of the iOS redesign (ApexStyle.swift): dark or warm light
-// background, flat cards, uppercase spaced headings and a sky blue accent.
+// background, flat cards, Michroma headings, sentence case text and one sky blue.
 
 // Flat card background used across the app (apexCardBackground).
 fun Modifier.apexCard(cornerRadius: Dp = 14.dp): Modifier {
@@ -52,7 +52,7 @@ fun Modifier.apexCard(cornerRadius: Dp = 14.dp): Modifier {
         .border(1.dp, ApexColors.border, shape)
 }
 
-// Big uppercase screen title, e.g. "MOJI TRENINZI".
+// Big uppercase Michroma screen title, e.g. "MOJI TRENINZI".
 @Composable
 fun ApexTitle(text: String, modifier: Modifier = Modifier) {
     Text(text.uppercase(), style = ApexText.screenTitle, modifier = modifier)
@@ -64,10 +64,10 @@ fun ApexSectionTitle(text: String, modifier: Modifier = Modifier, color: Color =
     Text(text.uppercase(), style = ApexText.sectionTitle, color = color, modifier = modifier)
 }
 
-// Small uppercase label above values and sections, e.g. "SLJEDEĆI TRENING".
+// Small label above values and sections in sentence case, e.g. "Sljedeći trening".
 @Composable
 fun ApexLabel(text: String, modifier: Modifier = Modifier, color: Color = ApexColors.secondaryLabel) {
-    Text(text.uppercase(), style = ApexText.label, color = color, modifier = modifier)
+    Text(text, style = ApexText.label, color = color, modifier = modifier)
 }
 
 // "APEX" wordmark with an uppercase screen title and an optional subtitle.
@@ -99,8 +99,7 @@ fun ApexScreenHeader(
     }
 }
 
-// Full width accent button with an uppercase title and an arrow,
-// e.g. "REZERVIRAJ TERMIN  →".
+// Full width accent button with a title and an arrow, e.g. "Rezerviraj termin  →".
 @Composable
 fun ApexPrimaryButton(
     text: String,
@@ -121,10 +120,9 @@ fun ApexPrimaryButton(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text.uppercase(),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.2.sp,
+            text,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
             color = ApexColors.onAccent,
             modifier = Modifier.weight(1f)
         )
@@ -137,7 +135,7 @@ fun ApexPrimaryButton(
     }
 }
 
-// Outlined red button for destructive actions, e.g. "OTKAŽI TERMIN".
+// Outlined red button for destructive actions, e.g. "Otkaži termin".
 @Composable
 fun ApexDestructiveButton(
     text: String,
@@ -160,24 +158,23 @@ fun ApexDestructiveButton(
             SmallProgress(ApexColors.red)
         } else {
             Text(
-                text.uppercase(),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.2.sp,
+                text,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = ApexColors.red
             )
         }
     }
 }
 
-// Thin progress bar in the accent color. `value` is 0...1.
+// Progress bar in the accent color. `value` is 0...1.
 @Composable
-fun ApexProgressBar(value: Double, modifier: Modifier = Modifier) {
+fun ApexProgressBar(value: Double, modifier: Modifier = Modifier, height: Dp = 5.dp) {
     val fraction = value.coerceIn(0.0, 1.0).toFloat()
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(5.dp)
+            .height(height)
             .clip(RoundedCornerShape(50))
             .background(ApexColors.label.copy(alpha = 0.1f))
     ) {

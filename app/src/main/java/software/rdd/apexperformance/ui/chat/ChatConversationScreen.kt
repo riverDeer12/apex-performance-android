@@ -564,7 +564,7 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
             },
             dismissButton = {
                 TextButton(onClick = { showReport = false }) {
-                    Text(stringResource(R.string.cancel), color = ApexColors.main)
+                    Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
                 }
             }
         )
