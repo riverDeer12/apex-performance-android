@@ -87,10 +87,9 @@ private fun BodyMassCard(measurements: List<BodyMeasurement>, period: ProgressPe
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    "${formatMeasurement(latest)} KG",
+                    "${formatMeasurement(latest)} kg",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp,
                     color = ApexColors.label,
                     modifier = Modifier.alignByBaseline()
                 )
@@ -223,7 +222,7 @@ private fun TableRow(
     changeColor: Color = ApexColors.secondaryLabel
 ) {
     val style = if (isHeader) {
-        ApexText.caption2.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+        ApexText.caption2.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
     } else {
         ApexText.subheadline
     }
@@ -235,10 +234,10 @@ private fun TableRow(
             .padding(vertical = if (isHeader) 6.dp else 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label.uppercase(), style = style, color = color, modifier = Modifier.weight(1f))
-        Text(value.uppercase(), style = style, color = color, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
+        Text(label, style = style, color = color, modifier = Modifier.weight(1f))
+        Text(value, style = style, color = color, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
         Text(
-            change.uppercase(),
+            change,
             style = style,
             color = if (isHeader) ApexColors.secondaryLabel else changeColor,
             textAlign = TextAlign.End,

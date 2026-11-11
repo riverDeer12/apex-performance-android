@@ -65,6 +65,7 @@ import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.workouts.WorkoutDetailScreen
 import software.rdd.apexperformance.model.TrainingTemplate
+import software.rdd.apexperformance.ui.components.ExpandableText
 import software.rdd.apexperformance.ui.components.ApexPictureBackground
 import software.rdd.apexperformance.ui.components.ApexTitle
 import software.rdd.apexperformance.ui.components.CardView
@@ -145,7 +146,7 @@ class TrainingDetailScreen(
             val note = training.note
             if (!note.isNullOrEmpty()) {
                 CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.notes)) {
-                    Text(note, style = ApexText.body, modifier = Modifier.fillMaxWidth())
+                    ExpandableText(note, modifier = Modifier.fillMaxWidth())
                 }
             }
         }
@@ -180,7 +181,7 @@ class TrainingDetailScreen(
         ) {
             Text(
                 DateFormats.date(training.date),
-                style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold)
             )
             ApexTitle(training.name)
 
@@ -454,8 +455,8 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "$label ${exercise.workoutName.localized}".uppercase(),
-                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp),
+                    "$label ${exercise.workoutName.localized}",
+                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                     modifier = Modifier.weight(1f)
                 )
                 if (isOpening) {
@@ -502,10 +503,11 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
 
             val note = exercise.note
             if (!note.isNullOrEmpty()) {
-                Text(
+                ExpandableText(
                     note,
-                    style = ApexText.caption,
+                    style = ApexText.footnote,
                     color = ApexColors.secondaryLabel,
+                    collapsedLines = 2,
                     modifier = Modifier.padding(top = 10.dp)
                 )
             }
@@ -524,11 +526,10 @@ private fun TrainingSetRow(
     isDropSet: Boolean = false
 ) {
     val style = if (isHeader) {
-        TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp, color = ApexColors.secondaryLabel)
+        TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
     } else {
         ApexText.subheadline.copy(color = ApexColors.label)
     }
-    fun text(value: String) = if (isHeader) value.uppercase() else value
 
     Row(
         modifier = Modifier
@@ -537,7 +538,7 @@ private fun TrainingSetRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text(set),
+            set,
             style = if (isDropSet) ApexText.caption.copy(fontWeight = FontWeight.SemiBold, color = ApexColors.main) else style,
             maxLines = 1,
             softWrap = false,
@@ -545,10 +546,10 @@ private fun TrainingSetRow(
                 .width(64.dp)
                 .padding(start = if (isDropSet) 8.dp else 0.dp)
         )
-        Text(text(reps), style = style, modifier = Modifier.weight(1f))
-        Text(text(weight), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
+        Text(reps, style = style, modifier = Modifier.weight(1f))
+        Text(weight, style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
         if (time != null) {
-            Text(text(time), style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
+            Text(time, style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
         }
     }
 }
@@ -557,8 +558,8 @@ private fun TrainingSetRow(
 @Composable
 internal fun SupersetBadge(modifier: Modifier = Modifier) {
     Text(
-        stringResource(R.string.superset).uppercase(),
-        style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
+        stringResource(R.string.superset),
+        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold),
         color = ApexColors.onAccent,
         modifier = modifier
             .background(ApexColors.accent, CircleShape)
@@ -611,7 +612,7 @@ internal fun TemplateNameDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel), color = ApexColors.main)
+                Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
             }
         }
     )

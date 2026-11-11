@@ -235,14 +235,14 @@ internal fun TrainingCard(training: Training, imageUrl: String? = null, onClick:
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     DateFormats.date(training.date),
-                    style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 )
 
                 if (!training.isCompleted) {
                     val tint = if (training.isInProgress) ApexColors.blue else ApexColors.orange
                     Text(
-                        stringResource(if (training.isInProgress) R.string.in_progress else R.string.planned).uppercase(),
-                        style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
+                        stringResource(if (training.isInProgress) R.string.in_progress else R.string.planned),
+                        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold),
                         color = tint,
                         modifier = Modifier
                             .background(tint.copy(alpha = 0.15f), CircleShape)
@@ -259,10 +259,10 @@ internal fun TrainingCard(training: Training, imageUrl: String? = null, onClick:
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                val style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.8.sp)
+                val style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Medium)
                 exerciseNames.take(3).forEach { name ->
                     Text(
-                        name.uppercase(),
+                        name,
                         style = style,
                         color = ApexColors.secondaryLabel,
                         maxLines = 1,

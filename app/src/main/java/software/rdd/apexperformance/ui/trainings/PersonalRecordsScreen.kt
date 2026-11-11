@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -141,16 +142,16 @@ class PersonalRecordsScreen(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    exercise.name.uppercase(),
-                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp),
+                    exercise.name,
+                    style = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Bold),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false)
                 )
                 if (exercise.isRecent) {
                     Text(
-                        stringResource(R.string.new_record).uppercase(),
-                        style = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp),
+                        stringResource(R.string.new_record),
+                        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold),
                         color = ApexColors.onAccent,
                         modifier = Modifier
                             .background(ApexColors.accent, CircleShape)
@@ -211,10 +212,11 @@ class PersonalRecordsScreen(
                 maxLines = 1
             )
             Text(
-                label.uppercase(),
-                style = TextStyle(fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.6.sp),
+                label,
+                style = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Medium),
                 color = ApexColors.secondaryLabel,
-                maxLines = 1,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             val reps = record?.reps

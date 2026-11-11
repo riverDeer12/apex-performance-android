@@ -197,10 +197,9 @@ class UserProfileScreen : Screen() {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        fullName(profile).uppercase(),
+                        fullName(profile),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp,
                         textAlign = TextAlign.Center
                     )
                     Text("@${AuthManager.username}", style = ApexText.subheadline, color = ApexColors.secondaryLabel)
@@ -218,10 +217,9 @@ class UserProfileScreen : Screen() {
                     Text(
                         stringResource(
                             if (profile.hasProfilePicture) R.string.change_profile_picture else R.string.upload_profile_picture
-                        ).uppercase(),
-                        fontSize = 12.sp,
+                        ),
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp,
                         color = ApexColors.label
                     )
                 }

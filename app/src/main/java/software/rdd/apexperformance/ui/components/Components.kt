@@ -73,7 +73,12 @@ fun CardView(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (title != null) {
-            ApexLabel(title, modifier = Modifier.padding(top = 2.dp))
+            Text(
+                title,
+                style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                color = ApexColors.label,
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
         content()
     }

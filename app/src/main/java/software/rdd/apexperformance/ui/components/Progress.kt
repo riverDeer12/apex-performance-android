@@ -65,10 +65,8 @@ fun ProgressPeriodMenu(period: ProgressPeriod, onSelect: (ProgressPeriod) -> Uni
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                stringResource(period.title).uppercase(),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.sp,
+                stringResource(period.title),
+                style = ApexText.footnote.copy(fontWeight = FontWeight.Medium),
                 color = ApexColors.secondaryLabel
             )
             Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = ApexColors.secondaryLabel, modifier = Modifier.size(14.dp))
@@ -94,23 +92,22 @@ fun ApexTitleBar(subtitle: String? = null, modifier: Modifier = Modifier) {
         Text("APEX", style = ApexText.heading(16).copy(letterSpacing = 4.sp))
         if (subtitle != null) {
             Text(
-                subtitle.uppercase(),
-                fontSize = 8.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.5.sp,
+                subtitle,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
                 color = ApexColors.secondaryLabel
             )
         }
     }
 }
 
-// Small accent button used on pictures, e.g. "REZERVIRAJ TERMIN →".
+// Small accent button used on pictures, e.g. "Rezerviraj termin →".
 @Composable
 fun ApexCompactButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Row(
         modifier = modifier
-            .heightIn(min = 34.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .heightIn(min = 40.dp)
+            .clip(RoundedCornerShape(10.dp))
             .background(ApexColors.accent)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp),
@@ -118,13 +115,12 @@ fun ApexCompactButton(text: String, modifier: Modifier = Modifier, onClick: () -
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text.uppercase(),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 0.8.sp,
+            text,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
             maxLines = 1,
             color = ApexColors.onAccent
         )
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = ApexColors.onAccent, modifier = Modifier.size(12.dp))
+        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = ApexColors.onAccent, modifier = Modifier.size(16.dp))
     }
 }

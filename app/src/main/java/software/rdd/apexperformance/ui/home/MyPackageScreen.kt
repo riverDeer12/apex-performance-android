@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -138,10 +139,9 @@ class MyPackageScreen(
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        stringResource(R.string.cancelation_terms_by_agreement).uppercase(),
-                        fontSize = 11.sp,
+                        stringResource(R.string.cancelation_terms_by_agreement),
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.6.sp,
                         color = ApexColors.secondaryLabel
                     )
                 }
@@ -166,10 +166,9 @@ class MyPackageScreen(
                 Spacer(Modifier.weight(1f))
                 if (summary.isActive) {
                     Text(
-                        stringResource(R.string.active_package).uppercase(),
-                        fontSize = 10.sp,
+                        stringResource(R.string.active_package),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.6.sp,
                         color = ApexColors.green,
                         modifier = Modifier
                             .border(1.dp, ApexColors.green.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
@@ -192,10 +191,9 @@ class MyPackageScreen(
             }
 
             Text(
-                stringResource(R.string.remaining_includes_reserved, summary.remaining, summary.reserved).uppercase(),
-                fontSize = 11.sp,
+                stringResource(R.string.remaining_includes_reserved, summary.remaining, summary.reserved),
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
-                letterSpacing = 0.5.sp,
                 color = ApexColors.secondaryLabel
             )
 
@@ -222,12 +220,12 @@ class MyPackageScreen(
         ) {
             Text("$value", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = ApexColors.label)
             Text(
-                label.uppercase(),
-                fontSize = 9.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.6.sp,
+                label,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
                 color = ApexColors.secondaryLabel,
-                maxLines = 1,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -280,8 +278,8 @@ class MyPackageScreen(
                     )
                     if (appointment.status.name == BusinessStatus.PENDING) {
                         Text(
-                            stringResource(R.string.pending).uppercase(),
-                            fontSize = 10.sp,
+                            stringResource(R.string.pending),
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = ApexColors.orange
                         )

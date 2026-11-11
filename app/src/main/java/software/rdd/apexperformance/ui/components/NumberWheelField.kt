@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.model.setDuration
 import software.rdd.apexperformance.ui.theme.ApexColors
@@ -67,23 +69,18 @@ fun NumberWheelField(
     allowsEmpty: Boolean = false,
     title: String? = null,
     // Text shown instead of the number, e.g. reps written as "8-10".
-    displayText: String? = null
+    displayText: String? = null,
+    // Bigger field with bigger numbers, e.g. the sets of a training.
+    large: Boolean = false
 ) {
     var isPresented by remember { mutableStateOf(false) }
 
-    Text(
+    WheelFieldValue(
         displayText ?: value?.let { formatWheelNumber(it, step) } ?: "—",
-        style = ApexText.body,
-        color = if (value == null && displayText == null) ApexColors.secondaryLabel else ApexColors.label,
-        maxLines = 1,
-        textAlign = TextAlign.Center,
+        isEmpty = value == null && displayText == null,
+        large = large,
         modifier = modifier
-            .widthIn(min = 44.dp)
-            .clip(RoundedCornerShape(7.dp))
-            .background(ApexColors.label.copy(alpha = 0.06f))
-            .clickable { isPresented = true }
-            .padding(horizontal = 8.dp, vertical = 5.dp)
-    )
+    ) { isPresented = true }
 
     if (isPresented) {
         NumberWheelSheet(
@@ -99,6 +96,29 @@ fun NumberWheelField(
                 isPresented = false
             },
             onDismiss = { isPresented = false }
+        )
+    }
+}
+
+// The value of a wheel field, tapped to open its wheels.
+@Composable
+private fun WheelFieldValue(text: String, isEmpty: Boolean, large: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .widthIn(min = 44.dp)
+            .heightIn(min = if (large) 46.dp else 0.dp)
+            .clip(RoundedCornerShape(if (large) 10.dp else 7.dp))
+            .background(ApexColors.label.copy(alpha = if (large) 0.07f else 0.06f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = if (large) 6.dp else 8.dp, vertical = 5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text,
+            style = if (large) ApexText.body.copy(fontSize = 19.sp, fontWeight = FontWeight.SemiBold) else ApexText.body,
+            color = if (isEmpty) ApexColors.secondaryLabel else ApexColors.label,
+            maxLines = 1,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -204,23 +224,18 @@ fun DurationWheelField(
     // Value the wheels start at when there is no value yet.
     defaultSeconds: Int = 60,
     title: String? = null,
-    showsHours: Boolean = false
+    showsHours: Boolean = false,
+    // Bigger field with bigger numbers, e.g. the sets of a training.
+    large: Boolean = false
 ) {
     var isPresented by remember { mutableStateOf(false) }
 
-    Text(
+    WheelFieldValue(
         seconds?.let { setDuration(it) } ?: "—",
-        style = ApexText.body,
-        color = if (seconds == null) ApexColors.secondaryLabel else ApexColors.label,
-        maxLines = 1,
-        textAlign = TextAlign.Center,
+        isEmpty = seconds == null,
+        large = large,
         modifier = modifier
-            .widthIn(min = 44.dp)
-            .clip(RoundedCornerShape(7.dp))
-            .background(ApexColors.label.copy(alpha = 0.06f))
-            .clickable { isPresented = true }
-            .padding(horizontal = 8.dp, vertical = 5.dp)
-    )
+    ) { isPresented = true }
 
     if (isPresented) {
         DurationWheelSheet(

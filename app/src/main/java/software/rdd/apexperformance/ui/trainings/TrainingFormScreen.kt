@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,6 +29,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -361,11 +365,11 @@ class TrainingFormScreen private constructor(
                         val time = date.atZone(DateFormats.zone).toLocalTime()
                         date = day.atTime(time).atZone(DateFormats.zone).toInstant()
                     }
-                }) { Text(stringResource(android.R.string.ok), color = ApexColors.main) }
+                }) { Text(stringResource(android.R.string.ok), color = ApexColors.main, fontWeight = FontWeight.SemiBold) }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(R.string.cancel), color = ApexColors.main)
+                    Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
                 }
             },
             colors = DatePickerDefaults.colors(containerColor = ApexColors.background)
@@ -491,7 +495,7 @@ class TrainingFormScreen private constructor(
         // Other sets have repetitions, weight and a duration, none of them required.
         val paceType = paceTypeOf(exercise)
 
-        Section(header = { ExerciseHeader(index, exercise, label) }) {
+        Section(header = { ExerciseHeader(index, exercise, label, previous, paceType) }) {
             // Exercise picker.
             Row(
                 modifier = Modifier
@@ -524,24 +528,18 @@ class TrainingFormScreen private constructor(
 
             if (exercise.sets.isNotEmpty()) {
                 Divider()
-                SetsHeader(previous, paceType)
+                SetsHeader(paceType)
             }
 
             val setNumbers = setNumbers(exercise.sets.map { it.isDropSet })
             exercise.sets.forEachIndexed { setIndex, set ->
                 key(set.id) {
-                    SetRow(exercise.id, setIndex, setNumbers[setIndex], set, previous, paceType)
+                    SetRow(exercise.id, setNumbers[setIndex], set, paceType)
                 }
             }
 
-            Divider()
-            ButtonRow(
-                Icons.Filled.Add,
-                stringResource(R.string.add_set),
-                enabled = exercise.sets.size < ExerciseDraft.MAX_SETS
-            ) {
-                updateExercise(exercise.id) { it.addingSet() }
-            }
+            // +1 rep and +2.5 kg change the last set, "Repeat set" adds a copy of it.
+            QuickSetButtons(exercise, isRepsAndWeight = paceType == null && workouts.firstOrNull { it.id == exercise.workoutId }?.isTimed != true)
 
             // Same exercise right after the last set, with less weight.
             Divider()
@@ -555,7 +553,7 @@ class TrainingFormScreen private constructor(
 
             if (previous != null) {
                 Divider()
-                PreviousSetsView(previous, currentCount = exercise.sets.size, paceType = paceType) {
+                PreviousSetsView(previous, paceType = paceType) {
                     updateExercise(exercise.id) { draft -> draft.copy(sets = previous.sets.map { SetDraft.from(it) }) }
                 }
             }
@@ -573,17 +571,31 @@ class TrainingFormScreen private constructor(
     }
 
     @Composable
-    private fun ExerciseHeader(index: Int, exercise: ExerciseDraft, label: String) {
+    private fun ExerciseHeader(index: Int, exercise: ExerciseDraft, label: String, previous: PreviousSets?, paceType: String?) {
         var showMenu by remember { mutableStateOf(false) }
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                "$label ${stringResource(R.string.exercise)}".uppercase(),
-                style = ApexText.footnote,
+                "$label ${stringResource(R.string.exercise)}",
+                style = ApexText.footnote.copy(fontWeight = FontWeight.Medium),
                 color = ApexColors.secondaryLabel
             )
             if (isInSuperset(index)) SupersetBadge()
-            Spacer(Modifier.weight(1f))
+            // The best set of the previous training, e.g. "Last time 6 × 70 kg".
+            val topSet = previous?.topSet
+            if (topSet != null) {
+                Text(
+                    stringResource(R.string.last_time_value, setDescription(topSet, paceType)),
+                    style = ApexText.footnote.copy(fontWeight = FontWeight.Medium),
+                    color = ApexColors.secondaryLabel,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                Spacer(Modifier.weight(1f))
+            }
 
             Box {
                 Icon(
@@ -657,30 +669,29 @@ class TrainingFormScreen private constructor(
         }
     }
 
-    // Width of the previous training's sets on the side, narrower next to three fields.
-    private fun previousWidth(paceType: String?) = if (paceType == null) 64.dp else 92.dp
-
-    // Column titles of the sets, with the previous training's date.
+    // Column titles of the sets.
     @Composable
-    private fun SetsHeader(previous: PreviousSets?, paceType: String?) {
-        val style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
+    private fun SetsHeader(paceType: String?) {
+        val style = ApexText.footnote.copy(fontWeight = FontWeight.Medium, color = ApexColors.secondaryLabel)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 4.dp),
+                .padding(top = 10.dp, bottom = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("#", style = style, modifier = Modifier.width(22.dp))
             Text(
-                stringResource(if (paceType != null) R.string.time else R.string.reps).uppercase(),
+                stringResource(if (paceType != null) R.string.time else R.string.reps),
                 style = style,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
             Text("×", style = style.copy(color = Color.Transparent))
             Text(
-                stringResource(if (paceType != null) R.string.distance_meters else R.string.kg).uppercase(),
+                stringResource(if (paceType != null) R.string.distance_meters else R.string.kg),
                 style = style,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -689,23 +700,65 @@ class TrainingFormScreen private constructor(
             )
             if (paceType == null) {
                 Text(
-                    stringResource(R.string.time).uppercase(),
+                    stringResource(R.string.time),
                     style = style,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
             }
-            if (previous != null) {
-                Text(
-                    stringResource(R.string.last_time).uppercase(),
-                    style = style,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(previousWidth(paceType))
-                )
+        }
+    }
+
+    // Quick buttons under the sets: +1 rep and +2.5 kg on the last set and
+    // "Repeat set" (a copy of the last set that isn't a drop set). Exercises
+    // done for a time or a distance only have "Repeat set". No rest timer.
+    @OptIn(ExperimentalLayoutApi::class)
+    @Composable
+    private fun QuickSetButtons(exercise: ExerciseDraft, isRepsAndWeight: Boolean) {
+        val canAdd = exercise.sets.size < ExerciseDraft.MAX_SETS
+        val hasSets = exercise.sets.isNotEmpty()
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (isRepsAndWeight && hasSets) {
+                QuickSetButton(stringResource(R.string.quick_add_rep), enabled = exercise.sets.last().canAddRep) {
+                    updateExercise(exercise.id) { it.addingRepToLastSet() }
+                }
+                QuickSetButton(stringResource(R.string.quick_add_weight)) {
+                    updateExercise(exercise.id) { it.addingWeightToLastSet(2.5) }
+                }
             }
+            QuickSetButton(
+                stringResource(if (hasSets) R.string.repeat_set else R.string.add_set),
+                icon = if (hasSets) Icons.Filled.Repeat else Icons.Filled.Add,
+                enabled = canAdd
+            ) {
+                updateExercise(exercise.id) { it.addingSet() }
+            }
+        }
+    }
+
+    @Composable
+    private fun QuickSetButton(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector? = null, enabled: Boolean = true, onClick: () -> Unit) {
+        val color = if (enabled) ApexColors.accent else ApexColors.tertiaryLabel
+        Row(
+            modifier = Modifier
+                .heightIn(min = 40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(color.copy(alpha = 0.12f))
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (icon != null) Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+            Text(text, style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold), color = color)
         }
     }
 
@@ -715,10 +768,8 @@ class TrainingFormScreen private constructor(
     @Composable
     private fun SetRow(
         exerciseId: String,
-        setIndex: Int,
         number: Int?,
         set: SetDraft,
-        previous: PreviousSets?,
         paceType: String?
     ) {
         val dismissState = rememberSwipeToDismissBoxState(
@@ -767,12 +818,12 @@ class TrainingFormScreen private constructor(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(ApexColors.secondaryGroupedBackground)
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (number != null) {
-                    Text("$number", style = ApexText.body, color = ApexColors.secondaryLabel, modifier = Modifier.width(22.dp))
+                    Text("$number", style = ApexText.body.copy(fontWeight = FontWeight.SemiBold), color = ApexColors.secondaryLabel, modifier = Modifier.width(22.dp))
                 } else {
                     // Drop set of the set above.
                     Icon(
@@ -791,6 +842,7 @@ class TrainingFormScreen private constructor(
                         title = stringResource(R.string.time),
                         // Walks and rides over a distance can last over an hour.
                         showsHours = true,
+                        large = true,
                         modifier = Modifier.weight(1f)
                     )
                 } else {
@@ -803,6 +855,7 @@ class TrainingFormScreen private constructor(
                         title = stringResource(R.string.reps),
                         // Reps written as text earlier (e.g. "8-10") are kept as they are.
                         displayText = if (set.repsValue == null && set.reps.isNotEmpty()) set.reps else null,
+                        large = true,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -850,6 +903,7 @@ class TrainingFormScreen private constructor(
                         defaultValue = 20.0,
                         allowsEmpty = true,
                         title = stringResource(R.string.weight),
+                        large = true,
                         modifier = Modifier.weight(1f)
                     )
                     // How long the set lasted, optional for every exercise.
@@ -858,38 +912,26 @@ class TrainingFormScreen private constructor(
                         onSecondsChange = { value -> updateSet(exerciseId, set.id) { it.copy(durationSeconds = value) } },
                         title = stringResource(R.string.time),
                         showsHours = false,
+                        large = true,
                         modifier = Modifier.weight(1f)
-                    )
-                }
-                if (previous != null) {
-                    // Same set on the previous training, shown on the side.
-                    Text(
-                        previous.sets.getOrNull(setIndex)?.let { setDescription(it, paceType) } ?: "—",
-                        style = ApexText.footnote,
-                        color = ApexColors.secondaryLabel,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.width(previousWidth(paceType))
                     )
                 }
             }
         }
     }
 
-    // Copies the previous training's sets. Sets the current exercise
-    // doesn't have yet are listed so they aren't missed.
+    // The previous training's sets, with a button copying them.
     @Composable
-    private fun PreviousSetsView(previous: PreviousSets, currentCount: Int, paceType: String?, onUse: () -> Unit) {
+    private fun PreviousSetsView(previous: PreviousSets, paceType: String?, onUse: () -> Unit) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            previous.sets.forEachIndexed { index, set ->
-                if (index >= currentCount) {
-                    Text("${index + 1}. ${setDescription(set, paceType)}", style = ApexText.footnote, color = ApexColors.secondaryLabel)
-                }
-            }
+            Text(
+                "${stringResource(R.string.last_time)}: " + previous.sets.joinToString(", ") { setDescription(it, paceType) },
+                style = ApexText.footnote,
+                color = ApexColors.secondaryLabel
+            )
 
             Row(
                 modifier = Modifier
@@ -901,7 +943,7 @@ class TrainingFormScreen private constructor(
                 Icon(Icons.Outlined.ContentCopy, contentDescription = null, tint = ApexColors.main, modifier = Modifier.size(16.dp))
                 Text(
                     stringResource(R.string.use_previous_sets_from, DateFormats.date(previous.date)),
-                    style = ApexText.subheadline,
+                    style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
                     color = ApexColors.main
                 )
             }
@@ -982,7 +1024,18 @@ class TrainingFormScreen private constructor(
 
     // MARK: - Previous training
 
-    private class PreviousSets(val date: Instant, val sets: List<Training.ExerciseSet>)
+    private class PreviousSets(val date: Instant, val sets: List<Training.ExerciseSet>) {
+        // Heaviest set (most reps among equal weights) that isn't a drop set,
+        // else the last one: shown as "Last time 6 × 70 kg".
+        val topSet: Training.ExerciseSet?
+            get() {
+                val regular = sets.filter { !it.isDropSet }
+                return regular.filter { it.weight != null }
+                    .maxWithOrNull(compareBy<Training.ExerciseSet> { it.weight ?: 0.0 }.thenBy { it.reps?.trim()?.toIntOrNull() ?: 0 })
+                    ?: regular.lastOrNull()
+                    ?: sets.lastOrNull()
+            }
+    }
 
     // Sets of the same exercise from the client's latest training
     // before this one, or null when the client didn't do it yet.
@@ -1161,6 +1214,21 @@ private data class ExerciseDraft(
         )
     }
 
+    // +1 repetition on the last set (empty counts as 0), up to 100.
+    fun addingRepToLastSet(): ExerciseDraft {
+        val last = sets.lastOrNull() ?: return this
+        if (!last.canAddRep) return this
+        val reps = ((last.repsValue ?: 0.0) + 1).coerceAtMost(100.0)
+        return copy(sets = sets.dropLast(1) + last.withRepsValue(reps))
+    }
+
+    // More weight on the last set (empty counts as 0), up to 300 kg like the wheel.
+    fun addingWeightToLastSet(kilograms: Double): ExerciseDraft {
+        val last = sets.lastOrNull() ?: return this
+        val weight = ((last.weightValue ?: 0.0) + kilograms).coerceAtMost(300.0)
+        return copy(sets = sets.dropLast(1) + last.withWeightValue(weight))
+    }
+
     // Adds a drop set after the set at the index and its drop sets:
     // the same reps with about a fifth less weight.
     fun addingDropSet(after: Int): ExerciseDraft {
@@ -1228,6 +1296,9 @@ private data class SetDraft(
     val repsValue: Double? get() = trimmedReps.toIntOrNull()?.toDouble()
 
     fun withRepsValue(value: Double?) = copy(reps = value?.toInt()?.toString().orEmpty())
+
+    // Reps written as text (e.g. "8-10") aren't changed by "+1 rep".
+    val canAddRep: Boolean get() = trimmedReps.isEmpty() || repsValue != null
 
     // Weight for the wheel.
     val weightValue: Double? get() = parsedWeight
@@ -1381,7 +1452,7 @@ private class WorkoutPickerScreen(
     @Composable
     private fun SectionTitle(text: String) {
         Text(
-            text.uppercase(),
+            text,
             style = ApexText.footnote,
             color = ApexColors.secondaryLabel,
             modifier = Modifier.padding(start = 36.dp, end = 20.dp, top = 8.dp)

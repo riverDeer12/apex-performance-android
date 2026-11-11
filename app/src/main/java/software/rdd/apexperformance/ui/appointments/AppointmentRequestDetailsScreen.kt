@@ -34,6 +34,7 @@ import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.core.util.localized
 import software.rdd.apexperformance.model.AppointmentRequest
+import software.rdd.apexperformance.ui.components.ExpandableText
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.RowDivider
@@ -68,7 +69,7 @@ class AppointmentRequestDetailsScreen(private val request: AppointmentRequest) :
                         HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(stringResource(R.string.comment), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
-                            Text(request.comment, style = ApexText.subheadline)
+                            ExpandableText(request.comment, style = ApexText.subheadline)
                         }
                     }
                 }

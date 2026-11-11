@@ -22,6 +22,7 @@ import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.ui.components.ApexTitleBar
+import software.rdd.apexperformance.ui.components.TopBarChatButton
 import software.rdd.apexperformance.ui.theme.ApexColors
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -54,6 +55,8 @@ fun ApexTitleTopBar(subtitle: String? = null, trailing: (@Composable () -> Unit)
                     modifier = Modifier.size(20.dp)
                 )
             }
+        } else {
+            TopBarChatButton()
         }
 
         ApexTitleBar(subtitle = subtitle, modifier = Modifier.align(Alignment.Center))

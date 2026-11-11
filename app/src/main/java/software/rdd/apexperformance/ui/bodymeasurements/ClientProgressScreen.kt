@@ -49,6 +49,7 @@ import software.rdd.apexperformance.model.BodyMeasurement
 import software.rdd.apexperformance.model.MonthlyReview
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.ui.clients.MonthlyReviewsScreen
+import software.rdd.apexperformance.ui.components.ExpandableText
 import software.rdd.apexperformance.ui.components.ApexSectionTitle
 import software.rdd.apexperformance.ui.components.ApexTitle
 import software.rdd.apexperformance.ui.components.Chevron
@@ -65,6 +66,7 @@ import software.rdd.apexperformance.ui.trainings.PersonalRecordsScreen
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToLong
 
@@ -175,9 +177,8 @@ class ClientProgressScreen : Screen() {
                 ) {
                     Text(
                         monthTitle(month),
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.sp,
                         color = ApexColors.secondaryLabel
                     )
                     Icon(
@@ -235,12 +236,11 @@ class ClientProgressScreen : Screen() {
             if (review != null) {
                 Text(
                     monthTitle(review.monthDate),
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.8.sp,
                     color = ApexColors.secondaryLabel
                 )
-                Text(review.content, style = ApexText.subheadline, modifier = Modifier.testTag("monthly-review"))
+                ExpandableText(review.content, style = ApexText.subheadline, collapsedLines = 4, modifier = Modifier.testTag("monthly-review"))
             } else if (!isLoading) {
                 Text(stringResource(R.string.no_monthly_reviews), style = ApexText.subheadline, color = ApexColors.secondaryLabel)
             }
@@ -254,7 +254,7 @@ class ClientProgressScreen : Screen() {
         }
     }
 
-    // Uppercase accent link with a chevron, e.g. "PRETHODNE RECENZIJE >".
+    // Accent link with a chevron, e.g. "Prethodne recenzije >".
     @Composable
     private fun AccentLink(@StringRes title: Int, fillsWidth: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
         Row(
@@ -266,10 +266,9 @@ class ClientProgressScreen : Screen() {
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                stringResource(title).uppercase(),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp,
+                stringResource(title),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = ApexColors.accent,
                 modifier = if (fillsWidth) Modifier.weight(1f) else Modifier
             )
@@ -320,11 +319,10 @@ class ClientProgressScreen : Screen() {
                     ApexSectionTitle(stringResource(R.string.body_mass))
                     if (latest != null) {
                         Text(
-                            "${formatMeasurement(latest.weight)} KG",
+                            "${formatMeasurement(latest.weight)} kg",
                             modifier = Modifier.testTag("body-mass-value"),
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp,
                             color = ApexColors.label
                         )
                     } else {
@@ -344,10 +342,8 @@ class ClientProgressScreen : Screen() {
                             stringResource(
                                 R.string.compared_to_month,
                                 monthName(previous.measuredAt.atZone(DateFormats.zone).month)
-                            ).uppercase(),
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.6.sp,
+                            ),
+                            fontSize = 13.sp,
                             color = ApexColors.secondaryLabel
                         )
                     }
@@ -394,7 +390,7 @@ class ClientProgressScreen : Screen() {
             ) {
                 ApexSectionTitle(stringResource(R.string.body_circumferences))
                 Spacer(Modifier.weight(1f))
-                Text("CM", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
+                Text("CM", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
             }
 
             if (latest != null) {
@@ -408,7 +404,7 @@ class ClientProgressScreen : Screen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            stringResource(row.title).uppercase(),
+                            stringResource(row.title),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
                             color = ApexColors.label,
@@ -490,9 +486,9 @@ class ClientProgressScreen : Screen() {
     }
 }
 
-// Month name and year of a month, e.g. "LISTOPAD 2026".
+// Month name and year of a month, e.g. "Listopad 2026".
 fun monthTitle(month: YearMonth): String =
-    "${monthName(month.month)} ${month.year}".uppercase()
+    "${monthName(month.month).replaceFirstChar { it.titlecase(Locale.getDefault()) }} ${month.year}"
 
 fun monthTitle(date: LocalDate): String = monthTitle(YearMonth.from(date))
 

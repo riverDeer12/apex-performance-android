@@ -157,9 +157,12 @@ class WorkoutsScreen(
             topBar = {
                 TopBar {
                     if (canManageWorkouts) {
-                        ToolbarIcon(Icons.Filled.Add, stringResource(R.string.new_workout)) {
-                            navigator.push(WorkoutEditScreen { created -> workouts = workouts + created })
-                        }
+                        // New workout, import and the import template in one "+" menu.
+                        AddMenu(
+                            onNew = { navigator.push(WorkoutEditScreen { created -> workouts = workouts + created }) },
+                            onImport = { fileImporter.launch(arrayOf(XLSX_MIME_TYPE)) },
+                            onTemplate = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(importTemplateUrl))) }
+                        )
                     }
                 }
             },
@@ -167,30 +170,6 @@ class WorkoutsScreen(
             onRefresh = { loadWorkouts() }
         ) {
             ApexScreenHeader(stringResource(title), stringResource(subtitle))
-
-            if (canManageWorkouts) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ImportButton(
-                        text = stringResource(R.string.import_workouts),
-                        icon = Icons.Outlined.FileDownload,
-                        filled = true,
-                        isLoading = isImporting,
-                        modifier = Modifier.weight(1f)
-                    ) { fileImporter.launch(arrayOf(XLSX_MIME_TYPE)) }
-
-                    ImportButton(
-                        text = stringResource(R.string.download_template),
-                        icon = Icons.Outlined.Description,
-                        filled = false,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(importTemplateUrl)))
-                    }
-                }
-            }
 
             SearchField()
 
@@ -232,32 +211,40 @@ class WorkoutsScreen(
     }
 
     @Composable
-    private fun ImportButton(
-        text: String,
-        icon: ImageVector,
-        filled: Boolean,
-        modifier: Modifier = Modifier,
-        isLoading: Boolean = false,
-        onClick: () -> Unit
-    ) {
-        // The main color is white in dark mode, so filled buttons use
-        // the background colour (white / black) for their content.
-        val content = if (!filled) ApexColors.main else if (ApexColors.isDark) Color.Black else Color.White
-        Row(
-            modifier = modifier
-                .height(44.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(if (filled) ApexColors.main else ApexColors.main.copy(alpha = 0.12f))
-                .clickable(enabled = !isLoading, onClick = onClick),
-            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(color = content, strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
-            } else {
-                Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
+    private fun AddMenu(onNew: () -> Unit, onImport: () -> Unit, onTemplate: () -> Unit) {
+        var expanded by remember { mutableStateOf(false) }
+        Box {
+            ToolbarIcon(Icons.Filled.Add, stringResource(R.string.new_workout), isLoading = isImporting) { expanded = true }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                containerColor = ApexColors.background
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.new_workout)) },
+                    leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null, tint = ApexColors.accent) },
+                    onClick = {
+                        expanded = false
+                        onNew()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.import_workouts)) },
+                    leadingIcon = { Icon(Icons.Outlined.FileDownload, contentDescription = null, tint = ApexColors.accent) },
+                    onClick = {
+                        expanded = false
+                        onImport()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.download_template)) },
+                    leadingIcon = { Icon(Icons.Outlined.Description, contentDescription = null, tint = ApexColors.accent) },
+                    onClick = {
+                        expanded = false
+                        onTemplate()
+                    }
+                )
             }
-            Text(text, color = content, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
         }
     }
 
@@ -281,23 +268,22 @@ class WorkoutsScreen(
                         .fillMaxHeight()
                         .heightIn(min = 44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) ApexColors.main else ApexColors.main.copy(alpha = 0.1f))
+                        .background(if (isSelected) ApexColors.accent else ApexColors.accent.copy(alpha = 0.12f))
                         .selectable(selected = isSelected, role = Role.Tab) { category = if (isSelected) null else option }
                         .padding(horizontal = 8.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // The main color is white in dark mode, so the selected
-                    // button's text takes the background color.
-                    val color = if (isSelected) ApexColors.background else ApexColors.main
+                    val color = if (isSelected) ApexColors.onAccent else ApexColors.accent
                     Icon(
                         if (option == WorkoutCategory.MOBILITY_FLEXIBILITY) Icons.Outlined.SelfImprovement else Icons.Outlined.FitnessCenter,
                         contentDescription = null,
                         tint = color,
                         modifier = Modifier.size(18.dp)
                     )
+                    // With the number of workouts, e.g. "Mobility and flexibility · 11".
                     Text(
-                        stringResource(option.title),
+                        "${stringResource(option.title)} · ${visibleWorkouts.count { it.workoutCategory == option }}",
                         style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
                         color = color,
                         textAlign = TextAlign.Center
@@ -384,7 +370,7 @@ class WorkoutsScreen(
                     .size(width = 96.dp, height = 54.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
-                WorkoutThumbnail(workout.thumbnailUrl)
+                WorkoutThumbnail(workout.thumbnailUrl, category = workout.workoutCategory)
             }
 
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -394,10 +380,17 @@ class WorkoutsScreen(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (workout.workoutTypes.isNotEmpty()) {
+                // Primary muscles as on the muscle map, otherwise the types.
+                val context = LocalContext.current
+                val subtitle = if (workout.muscles.isNotEmpty()) {
+                    workout.muscles.joinToString(", ") { WorkoutMuscle.name(context, it) }
+                } else {
+                    workout.workoutTypes.joinToString(", ") { it.name.localized }
+                }
+                if (subtitle.isNotEmpty()) {
                     Text(
-                        workout.workoutTypes.joinToString(", ") { it.name.localized },
-                        style = ApexText.caption,
+                        subtitle,
+                        style = ApexText.footnote,
                         color = ApexColors.secondaryLabel,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

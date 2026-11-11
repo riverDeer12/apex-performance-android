@@ -26,7 +26,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.network.DemoAPI
-import software.rdd.apexperformance.core.util.ScreenshotMode
 import java.io.File
 import java.util.Locale
 
@@ -103,7 +102,10 @@ class PlayStoreScreenshots {
         scrollToTop("training-times")
         screenshot(2, "training_details")
 
-        // Chat with the coach: a picture and a shared workout.
+        // Chat with the coach: a picture and a shared workout. The chat button
+        // is in the top bar of home's first screen: tapping the open tab again
+        // goes back to it from progress.
+        click("tab-home")
         click("tab-home")
         click("chat-button")
         click("chat-row")
@@ -249,13 +251,7 @@ class PlayStoreScreenshots {
 
     private fun screenshot(number: Int, name: String) {
         if (number > 0) cleanStatusBar()
-        // The floating chat button would cover the bottom of the content.
-        instrumentation.runOnMainSync { ScreenshotMode.hidesChatButton = true }
-        try {
-            capture(number, name)
-        } finally {
-            instrumentation.runOnMainSync { ScreenshotMode.hidesChatButton = false }
-        }
+        capture(number, name)
     }
 
     private fun capture(number: Int, name: String) {

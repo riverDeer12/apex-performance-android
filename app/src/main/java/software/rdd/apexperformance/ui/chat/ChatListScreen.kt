@@ -10,12 +10,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.PauseCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -26,7 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -341,29 +344,29 @@ class ChatContactListScreen(
     }
 }
 
-// Round chat button floating over the tabs, with the unread count.
+// Chat button in the top bar of each tab's first screen, styled like the
+// notification bell: outlined sky blue icon with the red unread badge.
 @Composable
-fun ChatFloatingButton(unreadCount: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Box(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .shadow(8.dp, CircleShape)
-                .background(ApexColors.accent, CircleShape)
-                .clickable(onClick = onClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Filled.Forum, contentDescription = stringResource(R.string.tab_chat), tint = ApexColors.onAccent)
-        }
+fun ChatTopBarButton(unreadCount: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = stringResource(R.string.tab_chat), tint = ApexColors.main)
         if (unreadCount > 0) {
             Text(
                 if (unreadCount > 99) "99+" else unreadCount.toString(),
-                style = ApexText.caption.copy(fontWeight = FontWeight.Bold, fontSize = 11.sp),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
                 color = Color.White,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.Center)
+                    .offset(x = 9.dp, y = (-9).dp)
+                    .widthIn(min = 16.dp)
                     .background(ApexColors.red, RoundedCornerShape(50))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                    .padding(horizontal = 4.dp, vertical = 1.dp)
             )
         }
     }

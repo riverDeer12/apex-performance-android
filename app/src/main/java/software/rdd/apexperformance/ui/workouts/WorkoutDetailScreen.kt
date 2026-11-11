@@ -43,6 +43,7 @@ import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Workout
 import software.rdd.apexperformance.model.deleteWorkout
 import software.rdd.apexperformance.ui.components.CardView
+import software.rdd.apexperformance.ui.components.ExpandableText
 import software.rdd.apexperformance.ui.components.ConfirmDialog
 import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.ScrollScreen
@@ -81,7 +82,7 @@ class WorkoutDetailScreen(
                                 onSaved(updated)
                             })
                         }) {
-                            Text(stringResource(R.string.edit), color = ApexColors.main, style = ApexText.body)
+                            Text(stringResource(R.string.edit), color = ApexColors.main, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
                         }
                         IconButton(onClick = { showDeleteDialog = true }, enabled = !isDeleting) {
                             if (isDeleting) {
@@ -119,7 +120,7 @@ class WorkoutDetailScreen(
                         workout.workoutTypes.forEach { type ->
                             Text(
                                 type.name.localized,
-                                style = ApexText.subheadline.copy(fontWeight = FontWeight.Medium),
+                                style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
                                 color = ApexColors.main,
                                 modifier = Modifier
                                     .clip(CircleShape)
@@ -132,7 +133,7 @@ class WorkoutDetailScreen(
             }
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.description)) {
-                Text(workout.description.localized.ifEmpty { "—" }, style = ApexText.body, modifier = Modifier.fillMaxWidth())
+                ExpandableText(workout.description.localized.ifEmpty { "—" }, modifier = Modifier.fillMaxWidth(), collapsedLines = 5)
             }
 
             if (workout.muscles.isNotEmpty() || workout.secondaryMuscles.isNotEmpty()) {
@@ -192,7 +193,7 @@ class WorkoutDetailScreen(
             if (isPlayingVideo && videoId != null) {
                 YouTubePlayer(videoId, modifier = Modifier.fillMaxSize())
             } else {
-                WorkoutThumbnail(workout.thumbnailUrl, modifier = Modifier.fillMaxSize())
+                WorkoutThumbnail(workout.thumbnailUrl, modifier = Modifier.fillMaxSize(), category = workout.workoutCategory)
                 if (videoId != null) {
                     Box(
                         modifier = Modifier

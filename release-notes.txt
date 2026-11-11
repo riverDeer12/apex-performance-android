@@ -1,3 +1,8 @@
 Novosti:
-- Novi trening počinje čim trener upiše naziv, a ne tek kad ga spremi. U obrascu se vidi vrijeme koje teče.
-- Ako trener zaključa mobitel ili izađe iz aplikacije dok trening traje, trening se automatski spremi kao "u tijeku", pa se ništa ne izgubi.
+- Osvježen izgled: jedna svijetloplava boja, manji naslovi, čitljiviji tekst.
+- Chat je gumb u gornjoj traci i više ne prekriva sadržaj.
+- Početna: trajanje i odbrojavanje do sljedećeg treninga, cijeli cilj i plan.
+- Unos serija: veća polja, "Prošli put" uz vježbu, gumbi +1 pon., +2,5 kg i Ponovi seriju.
+- Vježbe: ikone po kategoriji, mišići u popisu, broj vježbi u filtrima.
+- Napredak: sažetak zadnjih 30 dana i promjena uz grafove.
+- Dugi tekstovi imaju "Prikaži više".

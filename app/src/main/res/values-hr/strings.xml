@@ -395,7 +395,7 @@
     <string name="pace_per_km">Pace po km (min/km) – hodanje, trčanje</string>
     <string name="pace_type">Udaljenost i pace</string>
     <string name="pace_type_hint">Za vježbe na udaljenost (hodanje, veslanje, bicikl): serije bilježe udaljenost i trajanje, a iz njih se prikazuje pace.</string>
-    <string name="package_done_of_total">%1$d / %2$d odrađeno</string>
+    <string name="package_done_of_total">%1$d od %2$d treninga odrađeno</string>
     <string name="package_remaining">%d preostalo</string>
     <string name="package_trainings">%d treninga</string>
     <string name="password">Lozinka</string>
@@ -590,11 +590,43 @@
     <string name="workout_not_available">Vježba nije dostupna</string>
     <string name="workout_types">Vrste vježbi</string>
     <string name="workout_updated_successfully">Vježba je uspješno ažurirana.</string>
-    <string name="workouts">Treninzi</string>
+    <string name="workouts">Vježbe</string>
     <string name="workouts_import_started">Uvoz je pokrenut. Rezultat ćete dobiti e-poštom.</string>
     <string name="workouts_subtitle">Pregled svih vježbi</string>
     <string name="write_comment_for_cancelation">Molimo upišite razlog otkazivanja u nastavku:</string>
     <string name="x_test">X test</string>
     <string name="year">Godina</string>
     <string name="you_will_be_signed_out">Bit ćete odjavljeni.</string>
+    <string name="show_more_text">Prikaži više</string>
+    <string name="show_less">Prikaži manje</string>
+    <string name="countdown_minutes">za %d min</string>
+    <string name="countdown_hours">za %d h</string>
+    <string name="last_time_value">Prošli put %s</string>
+    <string name="quick_add_rep">+1 pon.</string>
+    <string name="quick_add_weight">+2,5 kg</string>
+    <string name="repeat_set">Ponovi seriju</string>
+    <string name="last_30_days">Zadnjih 30 dana</string>
+    <string name="volume_change">%s volumena</string>
+    <string name="this_month">Ovaj mjesec</string>
+    <string name="last_and_first_value">Zadnje %1$s · prvo %2$s</string>
+    <plurals name="countdown_days">
+        <item quantity="one">za %d dan</item>
+        <item quantity="few">za %d dana</item>
+        <item quantity="other">za %d dana</item>
+    </plurals>
+    <plurals name="trainings_count">
+        <item quantity="one">%d trening</item>
+        <item quantity="few">%d treninga</item>
+        <item quantity="other">%d treninga</item>
+    </plurals>
+    <plurals name="weeks_in_a_row">
+        <item quantity="one">%d tjedan zaredom s treningom</item>
+        <item quantity="few">%d tjedna zaredom s treningom</item>
+        <item quantity="other">%d tjedana zaredom s treningom</item>
+    </plurals>
+    <plurals name="trainings_last_30_days">
+        <item quantity="one">%d trening u zadnjih 30 dana</item>
+        <item quantity="few">%d treninga u zadnjih 30 dana</item>
+        <item quantity="other">%d treninga u zadnjih 30 dana</item>
+    </plurals>
 </resources>

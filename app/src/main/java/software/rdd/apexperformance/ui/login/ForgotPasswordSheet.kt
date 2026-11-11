@@ -104,7 +104,7 @@ fun ForgotPasswordSheet(onDismiss: () -> Unit) {
                     .padding(horizontal = 8.dp)
             ) {
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.CenterStart)) {
-                    Text(stringResource(R.string.close), color = ApexColors.main, style = ApexText.body)
+                    Text(stringResource(R.string.close), color = ApexColors.main, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
                 }
                 Text(
                     stringResource(R.string.forgot_password),

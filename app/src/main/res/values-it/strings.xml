@@ -395,7 +395,7 @@
     <string name="pace_per_km">Passo per km (min/km) – camminata, corsa</string>
     <string name="pace_type">Distanza e passo</string>
     <string name="pace_type_hint">Per esercizi su distanza (camminata, vogatore, bici): le serie registrano distanza e durata e ne mostrano il passo.</string>
-    <string name="package_done_of_total">%1$d / %2$d completati</string>
+    <string name="package_done_of_total">%1$d di %2$d allenamenti svolti</string>
     <string name="package_remaining">%d rimanenti</string>
     <string name="package_trainings">%d allenamenti</string>
     <string name="password">Password</string>
@@ -590,11 +590,43 @@
     <string name="workout_not_available">Esercizio non disponibile</string>
     <string name="workout_types">Tipi di esercizio</string>
     <string name="workout_updated_successfully">Esercizio aggiornato con successo.</string>
-    <string name="workouts">Allenamenti</string>
+    <string name="workouts">Esercizi</string>
     <string name="workouts_import_started">Importazione avviata. Riceverai il risultato via email.</string>
     <string name="workouts_subtitle">Elenco di tutti gli esercizi</string>
     <string name="write_comment_for_cancelation">Scrivi qui sotto il motivo dell’annullamento:</string>
     <string name="x_test">Test X</string>
     <string name="year">Anno</string>
     <string name="you_will_be_signed_out">Verrai disconnesso.</string>
+    <string name="show_more_text">Mostra di più</string>
+    <string name="show_less">Mostra meno</string>
+    <string name="countdown_minutes">tra %d min</string>
+    <string name="countdown_hours">tra %d h</string>
+    <string name="last_time_value">L\'ultima volta %s</string>
+    <string name="quick_add_rep">+1 rip.</string>
+    <string name="quick_add_weight">+2,5 kg</string>
+    <string name="repeat_set">Ripeti serie</string>
+    <string name="last_30_days">Ultimi 30 giorni</string>
+    <string name="volume_change">%s di volume</string>
+    <string name="this_month">Questo mese</string>
+    <string name="last_and_first_value">Ultimo %1$s · primo %2$s</string>
+    <plurals name="countdown_days">
+        <item quantity="one">tra %d giorno</item>
+        <item quantity="many">tra %d giorni</item>
+        <item quantity="other">tra %d giorni</item>
+    </plurals>
+    <plurals name="trainings_count">
+        <item quantity="one">%d allenamento</item>
+        <item quantity="many">%d allenamenti</item>
+        <item quantity="other">%d allenamenti</item>
+    </plurals>
+    <plurals name="weeks_in_a_row">
+        <item quantity="one">%d settimana di fila con un allenamento</item>
+        <item quantity="many">%d settimane di fila con un allenamento</item>
+        <item quantity="other">%d settimane di fila con un allenamento</item>
+    </plurals>
+    <plurals name="trainings_last_30_days">
+        <item quantity="one">%d allenamento negli ultimi 30 giorni</item>
+        <item quantity="many">%d allenamenti negli ultimi 30 giorni</item>
+        <item quantity="other">%d allenamenti negli ultimi 30 giorni</item>
+    </plurals>
 </resources>
