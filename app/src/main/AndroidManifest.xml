@@ -39,6 +39,11 @@
             </intent-filter>
         </service>
 
+        <!-- "End training" of the reminder that a training is still running. -->
+        <receiver
+            android:name=".core.network.EndTrainingReceiver"
+            android:exported="false" />
+
         <!-- Notifications sent while the app is in the background use this channel. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
