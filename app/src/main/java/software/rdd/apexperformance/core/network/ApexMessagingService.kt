@@ -20,8 +20,15 @@ class ApexMessagingService : FirebaseMessagingService() {
     }
 
     // Background notifications are shown by the system. This is called only
-    // while the app is in the foreground, where they are shown too, as on iOS.
+    // while the app is in the foreground, where they are shown too, as on iOS,
+    // and for data-only messages (the training end reminder) always.
     override fun onMessageReceived(message: RemoteMessage) {
+        // Data only, so it comes here in the background too: shown with "End training".
+        TrainingEndReminder.parse(message.data)?.let {
+            TrainingEndReminder.show(this, it)
+            return
+        }
+
         val notification = message.notification ?: return
 
         // The bell shows the new notification too.

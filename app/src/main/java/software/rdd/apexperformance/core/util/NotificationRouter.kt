@@ -35,7 +35,8 @@ object NotificationRouter {
 
     fun handle(notificationType: String, conversationId: String? = null, trainingId: String? = null) {
         when (notificationType) {
-            "training" -> {
+            // The reminder to end a training still running opens it too.
+            "training", "training_end_reminder" -> {
                 pendingTrainingId = trainingId
                 pendingTab = AppTab.TRAININGS
             }

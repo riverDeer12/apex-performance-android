@@ -33,7 +33,13 @@ data class Training(
     data class HeartRate(val min: Int, val max: Int, val average: Int)
 
     @Serializable
-    data class TimesRequest(val startedAt: String?, val endedAt: String?)
+    data class TimesRequest(
+        val startedAt: String?,
+        val endedAt: String?,
+        // Only if the training still runs with this start (the end reminder's
+        // button tapped after it was ended or restarted elsewhere).
+        val onlyIfRunning: Boolean? = null
+    )
 
     @Serializable
     data class TimesResponse(
@@ -111,6 +117,14 @@ data class Training(
     private data class CompletionResponse(val isCompleted: Boolean, val completedAt: IsoInstant? = null)
 
     companion object {
+        // "End training" of the reminder that a training still runs an hour after its start.
+        suspend fun endFromReminder(id: String, startedAt: java.time.Instant) {
+            ApiClient.request<TimesRequest, TimesResponse>(
+                "trainings/$id/times", HttpMethod.PUT,
+                TimesRequest(startedAt.toString(), java.time.Instant.now().toString(), onlyIfRunning = true)
+            )
+        }
+
         // All trainings the logged user can see, newest first.
         suspend fun loadAll(): List<Training> =
             ApiClient.get<List<Training>>("trainings").sortedByDescending { it.date }
