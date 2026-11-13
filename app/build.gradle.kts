@@ -30,8 +30,8 @@ android {
         applicationId = "software.rdd.apexperformance"
         minSdk = 26
         targetSdk = 36
-        versionCode = 39
-        versionName = "1.40"
+        versionCode = 40
+        versionName = "1.41"
 
         // Store screenshots (androidTest), see .github/workflows/play-screenshots.yml.
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

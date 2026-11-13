@@ -485,6 +485,13 @@
     <string name="select_coaches">Coach auswählen</string>
     <string name="select_day">Tag auswählen</string>
     <string name="select_exercise">Übung auswählen</string>
+    <string name="add_new_exercise">Neue Übung hinzufügen</string>
+    <string name="add_new_exercise_named">Neue Übung „%1$s“ hinzufügen</string>
+    <string name="no_exercise_found_add_hint">Keine solche Übung. Füge sie als neue hinzu, sie kommt sofort ins Training.</string>
+    <string name="new_exercise">Neue Übung</string>
+    <string name="quick_new_exercise_hint">Die Übung wird sofort zum Training hinzugefügt. Beschreibung, Video und Muskeln kannst du später unter Übungen bearbeiten.</string>
+    <string name="add_to_training">Zum Training hinzufügen</string>
+    <string name="exercise_added_to_training">Neue Übung zum Training hinzugefügt.</string>
     <string name="select_time_slot">Zeitfenster auswählen</string>
     <string name="select_value">Wert auswählen</string>
     <string name="selected_count">Ausgewählt: %d</string>
