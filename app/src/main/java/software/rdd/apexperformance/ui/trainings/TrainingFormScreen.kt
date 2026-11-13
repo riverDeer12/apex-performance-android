@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Cancel
@@ -78,25 +79,33 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import software.rdd.apexperformance.R
+import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.launch
 import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.ApiClient
+import software.rdd.apexperformance.core.network.ApiException
+import software.rdd.apexperformance.core.network.HttpMethod
 import software.rdd.apexperformance.core.util.DateFormats
+import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
+import software.rdd.apexperformance.model.LocalizedText
 import software.rdd.apexperformance.model.PaceType
 import software.rdd.apexperformance.model.SaveTrainingRequest
 import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.TrainingTemplate
+import software.rdd.apexperformance.model.UpdateWorkoutRequest
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.model.WorkoutCategory
 import software.rdd.apexperformance.model.formatPace
 import software.rdd.apexperformance.model.setNumbers
 import software.rdd.apexperformance.ui.components.Chevron
+import software.rdd.apexperformance.ui.components.FormSection
 import software.rdd.apexperformance.ui.components.MenuPicker
 import software.rdd.apexperformance.ui.components.NotifyClientRow
 import software.rdd.apexperformance.ui.components.DurationWheelField
@@ -104,6 +113,7 @@ import software.rdd.apexperformance.ui.components.NumberWheelField
 import software.rdd.apexperformance.ui.components.PlainTextField
 import software.rdd.apexperformance.ui.components.SaveAction
 import software.rdd.apexperformance.ui.components.ScrollScreen
+import software.rdd.apexperformance.ui.components.SmallProgress
 import software.rdd.apexperformance.ui.components.TopBar
 import software.rdd.apexperformance.ui.components.apexCard
 import software.rdd.apexperformance.ui.theme.ApexColors
@@ -505,7 +515,8 @@ class TrainingFormScreen private constructor(
                             WorkoutPickerScreen(
                                 workouts = { workouts },
                                 trainingName = name,
-                                selection = exercise.workoutId
+                                selection = exercise.workoutId,
+                                onCreated = if (canCreateWorkouts) this@TrainingFormScreen::addCreatedWorkout else null
                             ) { id -> updateExercise(exercise.id) { it.copy(workoutId = id, paceType = null) } }
                         )
                     }
@@ -963,6 +974,16 @@ class TrainingFormScreen private constructor(
     // Pace type of the exercise's workout: its sets record a distance and show
     // a pace. Sets that already have a distance keep it shown (also when the
     // workout was changed since), like the web.
+    // Like the Workouts tab: everyone but clients can add workouts.
+    private val canCreateWorkouts: Boolean get() = !AuthManager.hasRole(Roles.CLIENT)
+
+    // A workout added from the picker goes into the list at its place,
+    // so its exercise shows its name and the next pickers have it.
+    private fun addCreatedWorkout(created: Workout) {
+        if (workouts.any { it.id == created.id }) return
+        workouts = (workouts + created).sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.localized })
+    }
+
     private fun paceTypeOf(exercise: ExerciseDraft): String? =
         workouts.firstOrNull { it.id == exercise.workoutId }?.paceType
             ?: exercise.paceType
@@ -1363,11 +1384,15 @@ private data class SetDraft(
 
 // Searchable list of all workouts to choose a training exercise, with
 // the ones that fit the training's name on top (GET workouts/suggested).
+// A coach who can't find the exercise adds it here with just a name and
+// a category; it is picked right away and edited later in Workouts.
 private class WorkoutPickerScreen(
     // Read when shown, as the form may still be loading them.
     private val workouts: () -> List<Workout>,
     private val trainingName: String,
     private val selection: String?,
+    // Given when the user can add workouts: gets the new one.
+    private val onCreated: ((Workout) -> Unit)? = null,
     private val onSelect: (String) -> Unit
 ) : Screen() {
 
@@ -1446,6 +1471,53 @@ private class WorkoutPickerScreen(
                     navigator.pop()
                 }
             }
+
+            // At the end of the list, and the only row when the search finds nothing.
+            if (onCreated != null && all.isNotEmpty()) {
+                AddWorkoutRow(showNotFound = filtered.isEmpty() && searchText.isNotBlank()) {
+                    navigator.push(QuickWorkoutScreen(searchText.trim()) { created ->
+                        onCreated?.invoke(created)
+                        onSelect(created.id)
+                        // Back to the training form: closes the quick form and the picker.
+                        navigator.pop()
+                        navigator.pop()
+                    })
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun AddWorkoutRow(showNotFound: Boolean, onClick: () -> Unit) {
+        val query = searchText.trim()
+        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(ApexColors.secondaryGroupedBackground)
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.AddCircle, contentDescription = null, tint = ApexColors.main, modifier = Modifier.size(22.dp))
+                Text(
+                    if (query.isEmpty()) stringResource(R.string.add_new_exercise)
+                    else stringResource(R.string.add_new_exercise_named, query),
+                    style = ApexText.body,
+                    color = ApexColors.main,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showNotFound) {
+                Text(
+                    stringResource(R.string.no_exercise_found_add_hint),
+                    style = ApexText.footnote,
+                    color = ApexColors.secondaryLabel,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp)
+                )
+            }
         }
     }
 
@@ -1487,5 +1559,124 @@ private class WorkoutPickerScreen(
                 }
             }
         }
+    }
+}
+
+// MARK: - Quick new workout
+
+// Short form to add a workout from the training form: only the name (from
+// the search) and the category. The API needs a description, so the name
+// stands in for it; muscles are guessed from the name. The rest
+// (description, video, types, muscles) is edited later in Workouts.
+private class QuickWorkoutScreen(
+    initialName: String,
+    private val onCreated: (Workout) -> Unit
+) : Screen() {
+
+    private var name by mutableStateOf(initialName.take(MAX_NAME_LENGTH))
+    private var category by mutableStateOf(WorkoutCategory.STRENGTH_CONDITIONING)
+    private var isSaving by mutableStateOf(false)
+
+    private val isValid: Boolean
+        get() = name.trim().let { it.isNotEmpty() && it.length <= MAX_NAME_LENGTH }
+
+    @Composable
+    override fun Content() {
+        ScrollScreen(
+            topBar = {
+                TopBar(title = stringResource(R.string.new_exercise)) {
+                    TextButton(onClick = { launch { save() } }, enabled = isValid && !isSaving) {
+                        if (isSaving) {
+                            SmallProgress()
+                        } else {
+                            Text(
+                                stringResource(R.string.add_to_training),
+                                color = if (isValid) ApexColors.main else ApexColors.tertiaryLabel,
+                                style = ApexText.body.copy(fontWeight = FontWeight.SemiBold)
+                            )
+                        }
+                    }
+                }
+            }
+        ) {
+            FormSection(header = stringResource(R.string.name)) {
+                PlainTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    placeholder = stringResource(R.string.name),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                )
+            }
+
+            FormSection(
+                header = stringResource(R.string.category),
+                footer = {
+                    Text(stringResource(R.string.quick_new_exercise_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                }
+            ) {
+                WorkoutCategory.entries.forEach { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { category = option }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(option.title), style = ApexText.body, modifier = Modifier.weight(1f))
+                        if (option == category) {
+                            Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
+                        }
+                    }
+                    if (option != WorkoutCategory.entries.last()) {
+                        HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun save() {
+        if (!isValid || isSaving) return
+        isSaving = true
+        try {
+            val text = LocalizedText(mapOf("HR" to name.trim()))
+            val request = UpdateWorkoutRequest(
+                name = text,
+                description = text,
+                thumbnailUrl = "",
+                videoUrl = "",
+                workoutTypes = emptyList(),
+                // Guessed from the name on the API.
+                muscles = null,
+                secondaryMuscles = null,
+                isTimed = false,
+                category = category.value
+            )
+            val created: Workout = ApiClient.request("workouts", HttpMethod.POST, request)
+            ToastManager.show(R.string.exercise_added_to_training, ToastType.SUCCESS)
+            onCreated(created)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: ApiException.Validation) {
+            if (e.response.errors?.get("generalErrors")?.contains(DUPLICATE_ERROR_CODE) == true) {
+                ToastManager.show(R.string.workout_duplicate, ToastType.ERROR)
+            } else {
+                showError(e)
+            }
+        } catch (e: Exception) {
+            showError(e)
+        } finally {
+            isSaving = false
+        }
+    }
+
+    private companion object {
+        // Same limit as the workout form and the API.
+        const val MAX_NAME_LENGTH = 60
+        // ErrorCodes.AlreadyExists on the API.
+        const val DUPLICATE_ERROR_CODE = "1300"
     }
 }

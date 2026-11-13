@@ -1,3 +1,4 @@
 Novosti:
+- Ako trener kod unosa vježbi u trening ne nađe vježbu, može je odmah dodati kao novu (naziv i kategorija) i ona ide ravno u trening. Ostalo se uređuje kasnije u Vježbama.
 - Kad trening traje već sat vremena, trener dobiva podsjetnik s gumbom "Završi trening" koji ga završava bez otvaranja aplikacije.
 - Dodir na podsjetnik otvara taj trening.

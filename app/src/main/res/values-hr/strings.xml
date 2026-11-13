@@ -485,6 +485,13 @@
     <string name="select_coaches">Odaberite trenera</string>
     <string name="select_day">Odaberite dan</string>
     <string name="select_exercise">Odaberi vježbu</string>
+    <string name="add_new_exercise">Dodaj novu vježbu</string>
+    <string name="add_new_exercise_named">Dodaj novu vježbu „%1$s”</string>
+    <string name="no_exercise_found_add_hint">Nema takve vježbe. Dodaj je kao novu i odmah ide u trening.</string>
+    <string name="new_exercise">Nova vježba</string>
+    <string name="quick_new_exercise_hint">Vježba se odmah dodaje u trening. Opis, video i mišiće možeš kasnije urediti u Vježbama.</string>
+    <string name="add_to_training">Dodaj u trening</string>
+    <string name="exercise_added_to_training">Nova vježba je dodana u trening.</string>
     <string name="select_time_slot">Vrijeme termina</string>
     <string name="select_value">Odaberite vrijednost</string>
     <string name="selected_count">Odabrano: %d</string>
