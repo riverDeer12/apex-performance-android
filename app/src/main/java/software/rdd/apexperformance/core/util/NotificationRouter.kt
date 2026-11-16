@@ -33,7 +33,15 @@ object NotificationRouter {
     // Training a tapped training push opens.
     var pendingTrainingId by mutableStateOf<String?>(null)
 
-    fun handle(notificationType: String, conversationId: String? = null, trainingId: String? = null) {
+    // Appointment a tapped reminder ("Trening za 2 h") opens.
+    var pendingAppointmentId by mutableStateOf<String?>(null)
+
+    fun handle(
+        notificationType: String,
+        conversationId: String? = null,
+        trainingId: String? = null,
+        appointmentId: String? = null
+    ) {
         when (notificationType) {
             // The reminder to end a training still running opens it too.
             "training", "training_end_reminder" -> {
@@ -46,6 +54,11 @@ object NotificationRouter {
             }
             "appointment_request" -> pendingTab = AppTab.APPOINTMENT_REQUESTS
             "appointment_updated" -> pendingTab = AppTab.APPOINTMENTS
+            // Two hours before an approved appointment: opens that appointment.
+            "appointment_reminder" -> {
+                pendingAppointmentId = appointmentId
+                pendingTab = AppTab.APPOINTMENTS
+            }
             "body_measurement" -> pendingTab = AppTab.BODY_MEASUREMENTS
             "client_goal", "monthly_review" -> pendingTab = AppTab.HOME
             "monthly_review_reminder" -> pendingTab = AppTab.CLIENTS

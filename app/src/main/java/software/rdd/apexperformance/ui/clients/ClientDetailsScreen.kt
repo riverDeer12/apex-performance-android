@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.clients
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.ui.platform.testTag
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -225,7 +227,12 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                     navigator.push(CreateBodyMeasurementScreen(client, onSuccess = { launch { refreshMeasurements() } }))
                 }
                 if (bodyMeasurements.isEmpty()) {
-                    EmptyText(stringResource(R.string.no_measurements))
+                    EmptyStateView(
+                        Icons.Outlined.Straighten,
+                        stringResource(R.string.no_measurements_client),
+                        buttonText = stringResource(R.string.add_measurement),
+                        onButtonClick = { navigator.push(CreateBodyMeasurementScreen(client, onSuccess = { launch { refreshMeasurements() } })) }
+                    )
                 } else {
                     val measurements = bodyMeasurements.sortedByDescending { it.measuredAt }
                     Column {
@@ -437,7 +444,12 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
             }
 
             if (trainings.isEmpty()) {
-                EmptyText(stringResource(R.string.no_trainings))
+                EmptyStateView(
+                    Icons.Outlined.FitnessCenter,
+                    stringResource(R.string.no_trainings),
+                    buttonText = stringResource(R.string.new_training),
+                    onButtonClick = { navigator.push(TrainingFormScreen(client.id, history = trainings, onSaved = { upsertTraining(it) })) }
+                )
             } else {
                 if (trainings.any { it.isCompleted }) {
                     SettingsRow(
@@ -446,7 +458,7 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                         modifier = Modifier.testTag("client-training-progress"),
                         title = stringResource(R.string.training_progress_title),
                         showChevron = true,
-                        onClick = { navigator.push(ClientTrainingProgressScreen(client.fullName, trainings)) }
+                        onClick = { navigator.push(ClientTrainingProgressScreen(client.fullName, trainings, clientId = client.id)) }
                     )
                     RowDivider()
 

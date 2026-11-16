@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.trainings
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -104,7 +106,7 @@ fun TrainingProgress(
                         CircularProgressIndicator(color = ApexColors.main)
                     }
                 } else {
-                    EmptyText(stringResource(R.string.no_completed_trainings_in_period))
+                    EmptyStateView(Icons.Outlined.Insights, stringResource(R.string.no_completed_trainings_in_period))
                 }
             }
         } else {

@@ -1,5 +1,12 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.outlined.Groups
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -168,7 +175,10 @@ class StaffTrainingsScreen : Screen() {
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredTrainings
                 if (list.isEmpty() && !isLoading) {
-                    EmptyText(stringResource(if (trainings.isEmpty()) R.string.no_trainings else R.string.no_trainings_found))
+                    EmptyStateView(
+                        if (trainings.isEmpty()) Icons.AutoMirrored.Outlined.Assignment else Icons.Outlined.SearchOff,
+                        stringResource(if (trainings.isEmpty()) R.string.no_staff_trainings else R.string.no_trainings_found)
+                    )
                 } else {
                     Column {
                         ShowMoreItems(list) { training ->
@@ -244,7 +254,8 @@ class StaffTrainingsScreen : Screen() {
             modifier = Modifier
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .height(34.dp)
+                .heightIn(min = 34.dp)
+                .height(IntrinsicSize.Min)
                 .clip(RoundedCornerShape(9.dp))
                 .background(ApexColors.systemGray5)
                 .padding(2.dp),
@@ -256,7 +267,8 @@ class StaffTrainingsScreen : Screen() {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .height(30.dp)
+                        .fillMaxHeight()
+                        .heightIn(min = 30.dp)
                         .clip(RoundedCornerShape(7.dp))
                         .background(if (isSelected) ApexColors.card else ApexColors.systemGray5)
                         .clickable { status = filter },
@@ -382,7 +394,7 @@ class ClientListScreen(
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredClients
                 if (list.isEmpty() && !isLoading) {
-                    EmptyText(stringResource(R.string.no_clients))
+                    EmptyStateView(Icons.Outlined.Groups, stringResource(R.string.no_clients))
                 } else {
                     Column {
                         ShowMoreItems(list) { client ->

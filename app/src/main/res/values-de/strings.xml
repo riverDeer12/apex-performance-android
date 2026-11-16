@@ -632,4 +632,46 @@
         <item quantity="one">%d Training in den letzten 30 Tagen</item>
         <item quantity="other">%d Trainings in den letzten 30 Tagen</item>
     </plurals>
+    <!-- UX round 2: Today, repeat training, offline saves, undo, records, widget, empty states. -->
+    <string name="undo">Rückgängig</string>
+    <string name="deleted">Gelöscht</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="discard">Verwerfen</string>
+    <string name="offline_banner">Keine Verbindung – ich speichere, sobald sie zurück ist</string>
+    <string name="offline_will_save">Keine Verbindung. Das Training bleibt auf dem Handy und wird gespeichert, sobald die Verbindung zurück ist.</string>
+    <string name="offline_synced">Gespeichert</string>
+    <string name="offline_save_rejected">Training \"%1$s\" wurde nicht gespeichert</string>
+    <string name="repeat_last_training">Letztes Training wiederholen</string>
+    <string name="repeat_last_training_hint">Füllt Übungen und Sätze aus dem letzten Training des Kunden aus (dem letzten mit diesem Namen, falls vorhanden).</string>
+    <string name="repeated_from_training">Aus dem Training %1$s · %2$s</string>
+    <string name="no_weight_records">Noch keine Rekorde. Hier erscheint der schwerste Satz jeder Übung.</string>
+    <string name="today">Heute</string>
+    <string name="tomorrow">Morgen</string>
+    <string name="widget_description">Dein nächstes Training und Paket oder die heutigen Termine und offenen Anfragen.</string>
+    <string name="widget_no_appointment">Kein Training gebucht</string>
+    <string name="widget_package">Paket %1$d / %2$d</string>
+    <string name="widget_no_more_today">Heute keine Termine mehr</string>
+    <string name="widget_pending_requests">Offene Anfragen: %1$d</string>
+    <string name="widget_open_app">Öffne Apex für deine Trainings</string>
+    <string name="widget_log_in">Melde dich bei Apex an</string>
+    <string name="today_appointments">Heutige Termine</string>
+    <string name="no_appointments_today">Heute hast du keine Termine.</string>
+    <string name="no_trainings_in_progress">Kein Training läuft gerade.</string>
+    <string name="pending_requests">Offene Anfragen</string>
+    <string name="no_pending_requests">Keine Anfragen warten auf dich.</string>
+    <string name="status_approved">Bestätigt</string>
+    <string name="status_pending">Ausstehend</string>
+    <string name="elapsed_minutes">%1$d Min.</string>
+    <string name="elapsed_hours_minutes">%1$d Std. %2$d Min.</string>
+    <string name="appointment_not_found">Dieser Termin ist nicht mehr unter deinen Terminen.</string>
+    <string name="no_sent_requests">Du hast noch keine Anfragen gesendet.</string>
+    <string name="request_appointment">Termin anfragen</string>
+    <string name="no_measurements_client">Der Kunde hat noch keine Messungen.</string>
+    <string name="add_measurement">Messung hinzufügen</string>
+    <string name="no_measurements_yet">Noch keine Messungen. Dein Coach trägt sie nach dem Messen ein.</string>
+    <string name="no_templates_yet">Noch keine Vorlagen. Erstelle eine oder speichere ein Training als Vorlage.</string>
+    <string name="no_staff_trainings">Noch keine Trainings. Starte mit \"Neues Training\".</string>
+    <string name="no_clients_found">Keine Kunden passen zur Suche.</string>
+    <string name="no_clients_yet">Noch keine Kunden.</string>
+    <string name="add_client">Kunden hinzufügen</string>
 </resources>

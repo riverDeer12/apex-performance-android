@@ -1,5 +1,8 @@
 package software.rdd.apexperformance.ui.clients
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -145,6 +148,15 @@ class ClientsScreen : Screen() {
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredClients
+                if (list.isEmpty() && !isLoading && errorMessage == null) {
+                    val isFiltering = searchText.isNotBlank() || planFilter != null
+                    EmptyStateView(
+                        if (isFiltering) Icons.Outlined.SearchOff else Icons.Outlined.Groups,
+                        stringResource(if (isFiltering) R.string.no_clients_found else R.string.no_clients_yet),
+                        buttonText = if (isFiltering) null else stringResource(R.string.add_client),
+                        onButtonClick = { navigator.push(CreateClientScreen()) }
+                    )
+                }
                 Column {
                     ShowMoreItems(list) { client ->
                         ClientRow(client) {

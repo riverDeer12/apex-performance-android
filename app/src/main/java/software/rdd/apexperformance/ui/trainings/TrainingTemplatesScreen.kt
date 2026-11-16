@@ -1,5 +1,8 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.compose.foundation.layout.heightIn
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.SearchOff
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -148,7 +151,10 @@ class TrainingTemplatesScreen : Screen() {
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredTemplates
                 if (list.isEmpty() && !isLoading) {
-                    EmptyText(stringResource(if (searchText.isEmpty()) R.string.no_templates else R.string.no_templates_found))
+                    EmptyStateView(
+                        if (searchText.isEmpty()) Icons.Outlined.ContentPaste else Icons.Outlined.SearchOff,
+                        stringResource(if (searchText.isEmpty()) R.string.no_templates_yet else R.string.no_templates_found)
+                    )
                 } else {
                     Column {
                         ShowMoreItems(list) { template ->
@@ -570,7 +576,7 @@ internal fun TrainingsSearchField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp)
+            .heightIn(min = 44.dp)
             .apexCard(cornerRadius = 10.dp)
             .padding(horizontal = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

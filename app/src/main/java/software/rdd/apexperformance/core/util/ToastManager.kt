@@ -24,7 +24,8 @@ enum class ToastType(val color: Color, val icon: ImageVector, @StringRes val tit
     SUCCESS(ApexColors.green, Icons.Filled.CheckCircle, R.string.success),
     WARNING(ApexColors.orange, Icons.Filled.Warning, R.string.warning),
     ERROR(ApexColors.red, Icons.Filled.Cancel, R.string.error),
-    INFO(ApexColors.secondaryLabel, Icons.Filled.Info, R.string.info)
+    // Dark gray in both appearances: white text on it stays readable in dark mode.
+    INFO(Color(0xFF48484A), Icons.Filled.Info, R.string.info)
 }
 
 // Message is a string resource for app messages, or text from mapError().
@@ -39,7 +40,10 @@ sealed interface UiText {
     }
 }
 
-data class Toast(val message: UiText, val type: ToastType, val id: Long = System.nanoTime())
+// Button on a toast, e.g. "Poništi" after deleting a set.
+class ToastAction(val label: UiText, val onClick: () -> Unit)
+
+data class Toast(val message: UiText, val type: ToastType, val action: ToastAction? = null, val id: Long = System.nanoTime())
 
 object ToastManager {
 
@@ -55,12 +59,28 @@ object ToastManager {
     fun show(message: String, type: ToastType, durationSeconds: Long = 5) =
         show(UiText.Raw(message), type, durationSeconds)
 
-    fun show(message: UiText, type: ToastType, durationSeconds: Long = 5) {
-        toast = Toast(message, type)
+    fun show(message: UiText, type: ToastType, durationSeconds: Long = 5, action: ToastAction? = null) {
+        toast = Toast(message, type, action)
         hideJob?.cancel()
         hideJob = scope.launch {
             delay(durationSeconds * 1000)
             toast = null
         }
+    }
+
+    // "Obrisano · Poništi": undo for about five seconds.
+    fun showUndo(@StringRes message: Int, onUndo: () -> Unit) =
+        show(UiText.Res(message), ToastType.INFO, 5, ToastAction(UiText.Res(R.string.undo), onUndo))
+
+    // Runs the toast's action and hides it.
+    fun performAction(toast: Toast) {
+        val action = toast.action ?: return
+        hide()
+        action.onClick()
+    }
+
+    fun hide() {
+        hideJob?.cancel()
+        toast = null
     }
 }

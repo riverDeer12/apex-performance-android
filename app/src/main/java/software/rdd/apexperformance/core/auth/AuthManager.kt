@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import software.rdd.apexperformance.core.network.ApiClient
+import software.rdd.apexperformance.core.widget.ApexWidget
 import software.rdd.apexperformance.core.network.HttpMethod
 import software.rdd.apexperformance.model.LoginRequest
 import software.rdd.apexperformance.model.LoginResponse
@@ -12,6 +13,7 @@ import software.rdd.apexperformance.model.LoginResponse
 object AuthManager {
 
     private lateinit var storage: TokenStorage
+    private var appContext: Context? = null
 
     // Decrypting on every request is wasteful, so the token is kept in memory.
     var token: String? by mutableStateOf(null)
@@ -26,6 +28,7 @@ object AuthManager {
         private set
 
     fun init(context: Context) {
+        appContext = context.applicationContext
         storage = TokenStorage(context)
         token = storage.getToken()
         validateToken()
@@ -57,6 +60,8 @@ object AuthManager {
         this.token = token
         sessionExpired = false
         isAuthenticated = true
+        // The widget shows the new user's data once home or appointments load.
+        appContext?.let { ApexWidget.loggedIn(it) }
     }
 
     // Logs out a user whose session ended (401 or expired token)
@@ -80,6 +85,7 @@ object AuthManager {
         token = null
         sessionExpired = false
         isAuthenticated = false
+        appContext?.let { ApexWidget.loggedOut(it) }
     }
 
     fun hasPermission(permission: String): Boolean = userPermissions.contains(permission)

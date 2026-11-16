@@ -26,7 +26,8 @@ enum class HttpMethod { GET, POST, PUT, PATCH, DELETE }
 
 sealed class ApiException(message: String) : Exception(message) {
     class Validation(val response: ApiErrorResponse) : ApiException(response.message)
-    class Server(message: String) : ApiException(message)
+    // HTTP status of the response, e.g. 404 or 500.
+    class Server(message: String, val code: Int = 0) : ApiException(message)
 }
 
 class UnauthorizedException : Exception("Unauthorized")
@@ -115,7 +116,7 @@ object ApiClient {
                 json.decodeFromString<ApiErrorResponse>(data.decodeToString())
             }.getOrNull()
             throw if (apiError != null) ApiException.Validation(apiError)
-            else ApiException.Server("")
+            else ApiException.Server("", response.code)
         }
 
         return data

@@ -59,6 +59,13 @@ import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Appointment
 import software.rdd.apexperformance.model.AppointmentRequest
 import software.rdd.apexperformance.model.AppointmentsStatus
+import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.ApexApp
+import software.rdd.apexperformance.core.widget.ApexWidget
+import software.rdd.apexperformance.core.widget.WidgetSnapshot
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
+import java.time.Instant
 import software.rdd.apexperformance.ui.components.ActionButton
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
@@ -82,6 +89,9 @@ class AppointmentsScreen : Screen() {
 
     private var appointments by mutableStateOf<List<Appointment>>(emptyList())
     private var pendingAppointments by mutableStateOf<List<Appointment>>(emptyList())
+    private var inProgressAppointments by mutableStateOf<List<Appointment>>(emptyList())
+    // Staff: trainings of their clients, for "Danas" (trainings in progress).
+    private var trainings by mutableStateOf<List<Training>>(emptyList())
     // Pending cancelation and join requests, shown to staff above the calendar.
     private var appointmentRequests by mutableStateOf<List<AppointmentRequest>>(emptyList())
     private var isInitialLoading by mutableStateOf(false)
@@ -114,6 +124,20 @@ class AppointmentsScreen : Screen() {
 
         // Reloads every time the screen is shown, like .task on iOS.
         LaunchedEffect(Unit) { loadData(showInitialSpinner = true) }
+
+        // The reminder before an appointment opens it.
+        val pendingAppointmentId = NotificationRouter.pendingAppointmentId
+        LaunchedEffect(pendingAppointmentId) {
+            val id = pendingAppointmentId ?: return@LaunchedEffect
+            NotificationRouter.pendingAppointmentId = null
+            if (findAppointment(id) == null) loadData(showInitialSpinner = false)
+            val appointment = findAppointment(id)
+            if (appointment != null) {
+                navigator.push(AppointmentDetailsScreen(appointment))
+            } else {
+                ToastManager.show(R.string.appointment_not_found, ToastType.INFO)
+            }
+        }
 
         // A request notification opens the requests from here when there is no requests tab.
         LaunchedEffect(NotificationRouter.opensAppointmentRequests) {
@@ -156,6 +180,36 @@ class AppointmentsScreen : Screen() {
                 modifier = Modifier.padding(horizontal = 20.dp)
             ) { navigator.push(CreateAppointmentScreen()) }
 
+            // Staff: today's appointments and trainings in progress first. The
+            // pending requests below belong to it (with an empty state).
+            if (!isClient) {
+                TodayOverview(
+                    appointments = todayAppointments,
+                    trainings = trainings,
+                    isLoading = isInitialLoading,
+                    onOpenAppointment = { navigator.push(AppointmentDetailsScreen(it)) },
+                    onOpenTraining = { training ->
+                        navigator.push(
+                            TrainingFormScreen(
+                                clientId = training.client.id,
+                                training = training,
+                                history = trainings.filter { it.client.id == training.client.id },
+                                onSaved = { saved -> trainings = trainings.map { if (it.id == saved.id) saved else it } }
+                            )
+                        )
+                    }
+                )
+
+                if (pendingAppointments.isEmpty() && cancelationRequests.isEmpty() && joinRequests.isEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SectionLabel(stringResource(R.string.pending_requests))
+                        CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
+                            EmptyStateView(Icons.Outlined.PendingActions, stringResource(R.string.no_pending_requests))
+                        }
+                    }
+                }
+            }
+
             if (pendingAppointments.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SectionLabel(stringResource(R.string.pending_approvals))
@@ -191,7 +245,7 @@ class AppointmentsScreen : Screen() {
                 CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                     val dayAppointments = appointmentsForSelectedDate
                     if (dayAppointments.isEmpty() && !isInitialLoading) {
-                        EmptyText(stringResource(R.string.no_appointments_for_selected_day))
+                        EmptyStateView(Icons.Outlined.EventBusy, stringResource(R.string.no_appointments_for_selected_day))
                     } else {
                         Column {
                             ShowMoreItems(dayAppointments) { appointment ->
@@ -392,7 +446,24 @@ class AppointmentsScreen : Screen() {
 
             appointments = response.approvedAppointments
             pendingAppointments = response.pendingAppointments
+            inProgressAppointments = response.inProgressAppointments
             appointmentRequests = requests.sortedBy { it.appointment.startTime }
+
+            if (!isClient) {
+                // Optional: "Danas" shows its appointments without them.
+                try {
+                    trainings = Training.loadAll()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    // Keeps what is shown.
+                }
+                ApexWidget.saveStaff(
+                    ApexApp.appContext,
+                    nextToday = WidgetSnapshot.nextToday(appointments + inProgressAppointments, Instant.now(), DateFormats.zone),
+                    pendingRequests = pendingAppointments.size + appointmentRequests.size
+                )
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -401,6 +472,19 @@ class AppointmentsScreen : Screen() {
             if (showInitialSpinner) isInitialLoading = false
         }
     }
+
+    // Today's appointments of every state, by time.
+    private val todayAppointments: List<Appointment>
+        get() {
+            val today = LocalDate.now()
+            return (inProgressAppointments + appointments + pendingAppointments)
+                .distinctBy { it.id }
+                .filter { DateFormats.localDate(it.startTime) == today }
+                .sortedBy { it.startTime }
+        }
+
+    private fun findAppointment(id: String): Appointment? =
+        (appointments + inProgressAppointments + pendingAppointments).firstOrNull { it.id.equals(id, ignoreCase = true) }
 
     // action is "approve" or "decline", same endpoints as the requests tab.
     private suspend fun processRequest(request: AppointmentRequest, action: String) {

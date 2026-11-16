@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.network.ApexMessagingService
+import software.rdd.apexperformance.core.network.OfflineTrainingQueue
 import software.rdd.apexperformance.core.util.AppLanguage
 import software.rdd.apexperformance.core.util.AppearanceSettings
 
@@ -18,6 +19,8 @@ class ApexApp : Application() {
 
         AppearanceSettings.init(this)
         AuthManager.init(this)
+        // Training saves made without a connection, sent when it returns.
+        OfflineTrainingQueue.init(this)
         createNotificationChannel()
     }
 

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.outlined.ContentCopy
@@ -65,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -88,6 +90,10 @@ import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.ApiException
 import software.rdd.apexperformance.core.network.HttpMethod
+import software.rdd.apexperformance.core.network.OfflineTrainingQueue
+import software.rdd.apexperformance.core.network.PendingTrainingSave
+import software.rdd.apexperformance.core.network.SaveFailure
+import software.rdd.apexperformance.core.network.SendResult
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
@@ -98,6 +104,7 @@ import software.rdd.apexperformance.model.SaveTrainingRequest
 import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
+import software.rdd.apexperformance.model.TrainingHistory
 import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.model.UpdateWorkoutRequest
 import software.rdd.apexperformance.model.Workout
@@ -202,6 +209,31 @@ class TrainingFormScreen private constructor(
     private var isSaving by mutableStateOf(false)
     private var showDatePicker by mutableStateOf(false)
 
+    // Training "Repeat last training" copied, shown under the button.
+    private var repeatedFrom by mutableStateOf<Training?>(null)
+
+    // This form's saves in the offline queue: kept when there is no
+    // connection and sent when it returns, then the form edits that training.
+    private val offlineKey = UUID.randomUUID().toString()
+
+    init {
+        OfflineTrainingQueue.observe(offlineKey) { saved ->
+            if (isTemplate) return@observe
+            autosaved = saved
+            notifyClient = false
+            onSaved?.invoke(saved)
+        }
+    }
+
+    override fun onDispose() {
+        OfflineTrainingQueue.stopObserving(offlineKey)
+        super.onDispose()
+    }
+
+    // Id of the training on the server: edited, autosaved or created by the queue.
+    private val serverTrainingId: String?
+        get() = currentTraining?.id ?: OfflineTrainingQueue.knownTrainingId(offlineKey)
+
     // Templates a new training can be filled from.
     private var templates by mutableStateOf<List<TrainingTemplate>>(emptyList())
     private var selectedTemplateId by mutableStateOf<String?>(null)
@@ -246,6 +278,10 @@ class TrainingFormScreen private constructor(
                 }
             }
         ) {
+            if (canRepeatLastTraining) {
+                RepeatLastTrainingSection()
+            }
+
             if (canUseTemplates && templates.isNotEmpty()) {
                 Section(
                     footer = { Text(stringResource(R.string.from_template_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
@@ -333,6 +369,58 @@ class TrainingFormScreen private constructor(
         }
 
         if (showDatePicker) TrainingDatePicker()
+    }
+
+    // MARK: - Repeat last training
+
+    // A new training of a client can start as a copy of their latest one.
+    private val canRepeatLastTraining: Boolean
+        get() {
+            val clientId = clientId ?: return false
+            return canUseTemplates && TrainingHistory.repeatSource(history, clientId, "") != null
+        }
+
+    @Composable
+    private fun RepeatLastTrainingSection() {
+        val source = repeatedFrom
+        Section(
+            footer = {
+                Text(
+                    if (source != null) stringResource(R.string.repeated_from_training, DateFormats.date(source.date), source.name)
+                    else stringResource(R.string.repeat_last_training_hint),
+                    style = ApexText.footnote,
+                    color = ApexColors.secondaryLabel
+                )
+            }
+        ) {
+            Row(
+                modifier = Modifier
+                    .testTag("repeat-last-training")
+                    .fillMaxWidth()
+                    .clickable { repeatLastTraining() }
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(Icons.Filled.History, contentDescription = null, tint = ApexColors.main, modifier = Modifier.size(20.dp))
+                Text(stringResource(R.string.repeat_last_training), style = ApexText.body, color = ApexColors.main)
+            }
+        }
+    }
+
+    // Fills the form from the client's latest training (the latest with the
+    // name being typed, if any): name, exercises in order, their sets with
+    // drop sets and notes. Not its times or completion; the coach edits on.
+    private fun repeatLastTraining() {
+        val clientId = clientId ?: return
+        val source = TrainingHistory.repeatSource(history, clientId, name, excludingId = serverTrainingId) ?: return
+        if (name.isBlank()) {
+            name = source.name
+            startTimerIfNeeded()
+        }
+        exercises = repeatedExercises(source)
+        selectedTemplateId = null
+        repeatedFrom = source
     }
 
     // MARK: - Form rows
@@ -787,7 +875,7 @@ class TrainingFormScreen private constructor(
             confirmValueChange = { value ->
                 when (value) {
                     SwipeToDismissBoxValue.EndToStart -> {
-                        updateExercise(exerciseId) { it.removingSet(set.id) }
+                        removeSet(exerciseId, set.id)
                         true
                     }
                     // Swiping right adds a drop set after this set; the row stays.
@@ -817,7 +905,8 @@ class TrainingFormScreen private constructor(
                         Icon(
                             Icons.Filled.SubdirectoryArrowRight,
                             contentDescription = stringResource(R.string.add_drop_set),
-                            tint = Color.White
+                            // Dark on the light blue, readable in dark mode too.
+                            tint = ApexColors.onAccent
                         )
                     } else {
                         Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.delete), tint = Color.White)
@@ -1031,16 +1120,21 @@ class TrainingFormScreen private constructor(
         exercises = exercises.toMutableList().apply { add(last + 1, draft) }
     }
 
+    // Removed right away, "Obrisano · Poništi" puts it back at its place.
     private fun removeExercise(index: Int) {
-        if (index !in exercises.indices) return
-        val list = exercises.toMutableList()
-        // When the first exercise of a superset is removed,
-        // the next one starts the superset instead.
-        if (!isLinked(index) && isLinked(index + 1)) {
-            list[index + 1] = list[index + 1].copy(isSupersetWithPrevious = false)
-        }
-        list.removeAt(index)
+        val (list, removed) = removingExercise(exercises, index) ?: return
         exercises = list
+        ToastManager.showUndo(R.string.deleted) { exercises = restoringExercise(exercises, removed) }
+    }
+
+    // A set or drop set, removed right away with "Poništi" for a few seconds.
+    private fun removeSet(exerciseId: String, setId: String) {
+        val exercise = exercises.firstOrNull { it.id == exerciseId } ?: return
+        val (updated, removed) = exercise.removingSetForUndo(setId) ?: return
+        updateExercise(exerciseId) { updated }
+        ToastManager.showUndo(R.string.deleted) {
+            updateExercise(removed.exerciseId) { it.restoringSet(removed) }
+        }
     }
 
     // MARK: - Previous training
@@ -1127,13 +1221,28 @@ class TrainingFormScreen private constructor(
                 // The client hears about the new training once.
                 notifyClient = autosaved == null && notifyClient
             )
-            var saved = Training.save(request, autosaved?.id)
-            if (autosaved == null) saved = saved.settingTimes(start, null)
-            autosaved = saved
-            notifyClient = false
-            // Nothing to discard any more: it is saved.
-            initialState = formState()
-            onSaved?.invoke(saved)
+            val knownId = autosaved?.id ?: OfflineTrainingQueue.knownTrainingId(offlineKey)
+            val entry = PendingTrainingSave(
+                key = offlineKey,
+                userId = AuthManager.userId,
+                trainingName = name.trim(),
+                trainingId = knownId,
+                request = request,
+                // A new training is marked as started once it is created.
+                startedAt = if (knownId == null) start.toString() else null,
+                timesSaved = knownId != null
+            )
+            // Without a connection the queue keeps it and sends it later.
+            when (val result = OfflineTrainingQueue.submit(entry)) {
+                is SendResult.Synced -> {
+                    autosaved = result.training
+                    notifyClient = false
+                    // Nothing to discard any more: it is saved.
+                    initialState = formState()
+                    onSaved?.invoke(result.training)
+                }
+                is SendResult.Failed -> Log.w("TrainingForm", "Training not autosaved", result.error)
+            }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             Log.w("TrainingForm", "Training not autosaved", e)
@@ -1171,11 +1280,32 @@ class TrainingFormScreen private constructor(
                 notifyClient = notifyClient
             )
 
-            var saved = Training.save(request, currentTraining?.id)
-            if (starting) saved = saved.settingTimes(start, null)
-            onSaved?.invoke(saved)
-            ToastManager.show(if (starting) R.string.training_started_toast else R.string.training_saved_successfully, ToastType.SUCCESS)
-            navigator.pop()
+            val entry = PendingTrainingSave(
+                key = offlineKey,
+                userId = AuthManager.userId,
+                trainingName = name.trim(),
+                trainingId = serverTrainingId,
+                request = request,
+                startedAt = if (starting) start.toString() else null,
+                timesSaved = !starting
+            )
+            when (val result = OfflineTrainingQueue.submit(entry)) {
+                is SendResult.Synced -> {
+                    onSaved?.invoke(result.training)
+                    ToastManager.show(if (starting) R.string.training_started_toast else R.string.training_saved_successfully, ToastType.SUCCESS)
+                    navigator.pop()
+                }
+                is SendResult.Failed -> {
+                    if (result.failure == SaveFailure.OFFLINE) {
+                        // Kept on the phone and sent when the connection returns.
+                        ToastManager.show(R.string.offline_will_save, ToastType.WARNING)
+                        initialState = formState()
+                        navigator.pop()
+                    } else {
+                        showError(result.error)
+                    }
+                }
+            }
         } catch (e: Exception) {
             showError(e)
         } finally {
@@ -1207,7 +1337,7 @@ class TrainingFormScreen private constructor(
 
 // MARK: - Drafts
 
-private data class ExerciseDraft(
+internal data class ExerciseDraft(
     val id: String = UUID.randomUUID().toString(),
     val workoutId: String? = null,
     val note: String = "",
@@ -1268,10 +1398,24 @@ private data class ExerciseDraft(
         return copy(sets = sets.toMutableList().apply { add(end, drop) })
     }
 
-    // Removes a set; the first one left can't be a drop set.
-    fun removingSet(id: String): ExerciseDraft {
+    // Removes a set; the first one left can't be a drop set. Returns
+    // what "Poništi" needs to put it back, null when there is no such set.
+    fun removingSetForUndo(id: String): Pair<ExerciseDraft, RemovedSet>? {
+        val index = sets.indexOfFirst { it.id == id }
+        if (index < 0) return null
         val left = sets.filter { it.id != id }
-        return copy(sets = left.mapIndexed { index, set -> if (index == 0) set.copy(isDropSet = false) else set })
+        // A drop set that became the first set is a drop set again after undo.
+        val promoted = if (index == 0) left.firstOrNull()?.takeIf { it.isDropSet }?.id else null
+        val updated = copy(sets = left.mapIndexed { i, set -> if (i == 0) set.copy(isDropSet = false) else set })
+        return updated to RemovedSet(this.id, sets[index], index, promoted)
+    }
+
+    // Puts a removed set back at its place.
+    fun restoringSet(removed: RemovedSet): ExerciseDraft {
+        if (sets.any { it.id == removed.set.id }) return this
+        val list = sets.map { if (it.id == removed.promotedDropSetId) it.copy(isDropSet = true) else it }.toMutableList()
+        list.add(removed.index.coerceIn(0, list.size), removed.set)
+        return copy(sets = list)
     }
 
     val request: SaveTrainingRequest.Exercise?
@@ -1300,7 +1444,7 @@ private data class ExerciseDraft(
     }
 }
 
-private data class SetDraft(
+internal data class SetDraft(
     val id: String = UUID.randomUUID().toString(),
     val reps: String = "",
     val weight: String = "",
@@ -1380,6 +1524,53 @@ private data class SetDraft(
     }
 }
 
+// A set deleted in the form, kept for "Poništi".
+internal data class RemovedSet(
+    val exerciseId: String,
+    val set: SetDraft,
+    val index: Int,
+    // Drop set that became the first set when this one was removed.
+    val promotedDropSetId: String?
+)
+
+// An exercise deleted in the form, kept for "Poništi".
+internal data class RemovedExercise(
+    val exercise: ExerciseDraft,
+    val index: Int,
+    // Next exercise that started the superset instead of the removed one.
+    val unlinkedNextId: String?
+)
+
+// Removes an exercise. When the first exercise of a superset is removed,
+// the next one starts the superset instead.
+internal fun removingExercise(exercises: List<ExerciseDraft>, index: Int): Pair<List<ExerciseDraft>, RemovedExercise>? {
+    if (index !in exercises.indices) return null
+    fun isLinked(i: Int) = i > 0 && i in exercises.indices && exercises[i].isSupersetWithPrevious
+    val list = exercises.toMutableList()
+    var unlinked: String? = null
+    if (!isLinked(index) && isLinked(index + 1)) {
+        list[index + 1] = list[index + 1].copy(isSupersetWithPrevious = false)
+        unlinked = list[index + 1].id
+    }
+    list.removeAt(index)
+    return list to RemovedExercise(exercises[index], index, unlinked)
+}
+
+// Puts a removed exercise back at its place (and its superset as it was).
+internal fun restoringExercise(exercises: List<ExerciseDraft>, removed: RemovedExercise): List<ExerciseDraft> {
+    if (exercises.any { it.id == removed.exercise.id }) return exercises
+    val list = exercises.map { if (it.id == removed.unlinkedNextId) it.copy(isSupersetWithPrevious = true) else it }.toMutableList()
+    list.add(removed.index.coerceIn(0, list.size), removed.exercise)
+    // The first exercise can't be in a superset with a previous one.
+    list[0] = list[0].copy(isSupersetWithPrevious = false)
+    return list
+}
+
+// Exercises of a training repeated in a new one: in order, with their sets
+// (repetitions, weight, pace, duration, drop sets) and notes.
+internal fun repeatedExercises(training: Training): List<ExerciseDraft> =
+    training.exercises.sortedBy { it.order }.map { ExerciseDraft.from(it) }
+
 // MARK: - Workout picker
 
 // Searchable list of all workouts to choose a training exercise, with
@@ -1421,7 +1612,7 @@ private class WorkoutPickerScreen(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
                     .fillMaxWidth()
-                    .height(44.dp)
+                    .heightIn(min = 44.dp)
                     .apexCard(cornerRadius = 10.dp)
                     .padding(horizontal = 14.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

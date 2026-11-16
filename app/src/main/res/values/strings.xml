@@ -633,4 +633,46 @@
         <item quantity="one">%d training in the last 30 days</item>
         <item quantity="other">%d trainings in the last 30 days</item>
     </plurals>
+    <!-- UX round 2: Today, repeat training, offline saves, undo, records, widget, empty states. -->
+    <string name="undo">Undo</string>
+    <string name="deleted">Deleted</string>
+    <string name="retry">Retry</string>
+    <string name="discard">Discard</string>
+    <string name="offline_banner">No connection – I\'ll save as soon as it\'s back</string>
+    <string name="offline_will_save">No connection. The training is kept on your phone and saved as soon as the connection is back.</string>
+    <string name="offline_synced">Saved</string>
+    <string name="offline_save_rejected">Training \"%1$s\" was not saved</string>
+    <string name="repeat_last_training">Repeat last training</string>
+    <string name="repeat_last_training_hint">Fills in the exercises and sets of the client\'s latest training (the latest with this name, if there is one).</string>
+    <string name="repeated_from_training">From training %1$s · %2$s</string>
+    <string name="no_weight_records">No records yet. The heaviest set of every exercise shows up here.</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="widget_description">Your next training and package, or your appointments today and pending requests.</string>
+    <string name="widget_no_appointment">No training booked</string>
+    <string name="widget_package">Package %1$d / %2$d</string>
+    <string name="widget_no_more_today">No more appointments today</string>
+    <string name="widget_pending_requests">Pending requests: %1$d</string>
+    <string name="widget_open_app">Open Apex to see your trainings</string>
+    <string name="widget_log_in">Log in to Apex</string>
+    <string name="today_appointments">Today\'s appointments</string>
+    <string name="no_appointments_today">You have no appointments today.</string>
+    <string name="no_trainings_in_progress">No training is in progress.</string>
+    <string name="pending_requests">Pending requests</string>
+    <string name="no_pending_requests">No requests are waiting for you.</string>
+    <string name="status_approved">Approved</string>
+    <string name="status_pending">Pending</string>
+    <string name="elapsed_minutes">%1$d min</string>
+    <string name="elapsed_hours_minutes">%1$d h %2$d min</string>
+    <string name="appointment_not_found">This appointment is no longer in your appointments.</string>
+    <string name="no_sent_requests">You haven\'t sent any requests yet.</string>
+    <string name="request_appointment">Request an appointment</string>
+    <string name="no_measurements_client">The client has no measurements yet.</string>
+    <string name="add_measurement">Add measurement</string>
+    <string name="no_measurements_yet">No measurements yet. Your coach adds them after measuring you.</string>
+    <string name="no_templates_yet">No templates yet. Create one or save a training as a template.</string>
+    <string name="no_staff_trainings">No trainings yet. Start with \"New training\".</string>
+    <string name="no_clients_found">No clients match the search.</string>
+    <string name="no_clients_yet">No clients yet.</string>
+    <string name="add_client">Add client</string>
 </resources>

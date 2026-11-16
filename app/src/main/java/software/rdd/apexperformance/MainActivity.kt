@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import software.rdd.apexperformance.core.auth.AuthManager
+import software.rdd.apexperformance.core.network.OfflineTrainingQueue
 import software.rdd.apexperformance.core.util.AppLanguage
 import software.rdd.apexperformance.core.util.AppUpdateChecker
 import software.rdd.apexperformance.core.util.NotificationRouter
@@ -64,6 +65,8 @@ class MainActivity : ComponentActivity() {
         CooperationRulesGate.checkLater()
         // Newer version on Google Play.
         AppUpdateChecker.check(this, updateLauncher)
+        // Training saves made without a connection.
+        OfflineTrainingQueue.syncLater()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -77,10 +80,12 @@ class MainActivity : ComponentActivity() {
         val type = intent?.getStringExtra(EXTRA_NOTIFICATION_TYPE) ?: return
         val conversationId = intent.getStringExtra(EXTRA_CONVERSATION_ID)
         val trainingId = intent.getStringExtra(EXTRA_TRAINING_ID)
+        val appointmentId = intent.getStringExtra(EXTRA_APPOINTMENT_ID)
         intent.removeExtra(EXTRA_NOTIFICATION_TYPE)
         intent.removeExtra(EXTRA_CONVERSATION_ID)
         intent.removeExtra(EXTRA_TRAINING_ID)
-        NotificationRouter.handle(type, conversationId, trainingId)
+        intent.removeExtra(EXTRA_APPOINTMENT_ID)
+        NotificationRouter.handle(type, conversationId, trainingId, appointmentId)
     }
 
     companion object {
@@ -89,5 +94,7 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_CONVERSATION_ID = "conversationId"
         // Training pushes open their training.
         const val EXTRA_TRAINING_ID = "trainingId"
+        // The appointment reminder opens its appointment.
+        const val EXTRA_APPOINTMENT_ID = "appointmentId"
     }
 }

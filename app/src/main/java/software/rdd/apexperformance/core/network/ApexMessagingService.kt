@@ -56,6 +56,9 @@ class ApexMessagingService : FirebaseMessagingService() {
             message.data[MainActivity.EXTRA_TRAINING_ID]?.let {
                 putExtra(MainActivity.EXTRA_TRAINING_ID, it)
             }
+            message.data[MainActivity.EXTRA_APPOINTMENT_ID]?.let {
+                putExtra(MainActivity.EXTRA_APPOINTMENT_ID, it)
+            }
         }
         val pendingIntent = PendingIntent.getActivity(
             this,

@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.appointments
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -81,7 +83,12 @@ class AppointmentRequestsScreen : Screen() {
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 if (isClient) {
                     if (sentRequests.isEmpty() && !isInitialLoading) {
-                        EmptyText(stringResource(R.string.no_requests))
+                        EmptyStateView(
+                            Icons.Outlined.PendingActions,
+                            stringResource(R.string.no_sent_requests),
+                            buttonText = stringResource(R.string.request_appointment),
+                            onButtonClick = { navigator.push(CreateAppointmentScreen()) }
+                        )
                     } else {
                         Column {
                             ShowMoreItems(sentRequests) { request ->
@@ -92,7 +99,7 @@ class AppointmentRequestsScreen : Screen() {
                     }
                 } else {
                     if (requests.isEmpty() && !isInitialLoading) {
-                        EmptyText(stringResource(R.string.no_requests))
+                        EmptyStateView(Icons.Outlined.PendingActions, stringResource(R.string.no_pending_requests))
                     } else {
                         Column {
                             ShowMoreItems(requests) { request ->

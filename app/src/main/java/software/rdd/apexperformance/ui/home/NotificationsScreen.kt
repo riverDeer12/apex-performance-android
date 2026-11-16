@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.home
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -229,7 +231,7 @@ class NotificationsScreen : Screen() {
             val notifications = NotificationInbox.notifications
             CardView(modifier = Modifier.padding(horizontal = 20.dp).padding(top = 8.dp)) {
                 if (notifications.isEmpty() && NotificationInbox.hasLoaded) {
-                    EmptyText(stringResource(R.string.no_notifications))
+                    EmptyStateView(Icons.Outlined.NotificationsNone, stringResource(R.string.no_notifications))
                 } else {
                     Column {
                         ShowMoreItems(notifications) { notification ->
