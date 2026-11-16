@@ -51,6 +51,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import software.rdd.apexperformance.MainActivity
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.network.PushTokenService
+import software.rdd.apexperformance.core.network.OfflineTrainingQueue
+import software.rdd.apexperformance.ui.components.OfflineTrainingBanner
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.NavigatorHost
@@ -213,6 +215,16 @@ class HomeState {
                     tab = AppTab.CLIENTS
                 }
             }
+            // The appointment reminder opens the appointment from the appointments
+            // tab's first screen; clients without that tab get home.
+            tab == AppTab.APPOINTMENTS && NotificationRouter.pendingAppointmentId != null -> {
+                if (tab in tabs) {
+                    navigator(AppTab.APPOINTMENTS).popToRoot()
+                } else {
+                    NotificationRouter.pendingAppointmentId = null
+                    tab = AppTab.HOME
+                }
+            }
             // Requests open from appointments when there is no requests tab.
             tab == AppTab.APPOINTMENT_REQUESTS && tab !in tabs -> {
                 tab = AppTab.APPOINTMENTS
@@ -293,6 +305,8 @@ private fun HomeView() {
     // Clients on private coaching accept the cooperation rules first.
     LaunchedEffect(state) {
         CooperationRulesGate.checkLater()
+        // Training saves made offline, e.g. before the session expired.
+        OfflineTrainingQueue.syncLater()
     }
 
     // Small profile picture on the profile tab.
@@ -321,6 +335,9 @@ private fun HomeView() {
                 }
             }
         }
+
+        // Training saves waiting for the connection.
+        OfflineTrainingBanner()
 
         HorizontalDivider(thickness = 0.5.dp, color = ApexColors.separator)
         NavigationBar(containerColor = ApexColors.card, tonalElevation = 0.dp) {

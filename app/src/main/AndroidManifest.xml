@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Training saves made offline are sent when the connection returns. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -43,6 +45,18 @@
         <receiver
             android:name=".core.network.EndTrainingReceiver"
             android:exported="false" />
+
+        <!-- Home screen widget: next appointment, package or pending requests. -->
+        <receiver
+            android:name=".core.widget.ApexWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/apex_widget_info" />
+        </receiver>
 
         <!-- Notifications sent while the app is in the background use this channel. -->
         <meta-data
