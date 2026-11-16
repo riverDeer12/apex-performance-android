@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.workouts
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.ui.platform.testTag
 import android.content.Context
 import android.content.Intent
@@ -178,7 +180,14 @@ class WorkoutsScreen(
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredWorkouts
                 if (list.isEmpty() && !isLoading) {
-                    EmptyText(stringResource(if (searchText.isEmpty() && category == null) R.string.no_workouts else R.string.no_workouts_found))
+                    val isFiltering = searchText.isNotEmpty() || category != null
+                    EmptyStateView(
+                        if (isFiltering) Icons.Outlined.SearchOff else Icons.Outlined.FitnessCenter,
+                        stringResource(if (isFiltering) R.string.no_workouts_found else R.string.no_workouts),
+                        // Staff add the exercise they looked for.
+                        buttonText = if (canManageWorkouts && workoutFilter == null) stringResource(R.string.add_exercise) else null,
+                        onButtonClick = { navigator.push(WorkoutEditScreen { created -> workouts = workouts + created }) }
+                    )
                 } else {
                     Column {
                         ShowMoreItems(list) { workout ->
@@ -299,7 +308,7 @@ class WorkoutsScreen(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .height(44.dp)
+                .heightIn(min = 44.dp)
                 .shadow(8.dp, RoundedCornerShape(12.dp), ambientColor = Color.Black.copy(alpha = 0.05f), spotColor = Color.Black.copy(alpha = 0.05f))
                 .clip(RoundedCornerShape(12.dp))
                 .background(ApexColors.background)

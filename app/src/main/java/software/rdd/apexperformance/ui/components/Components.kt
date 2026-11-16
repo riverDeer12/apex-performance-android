@@ -254,7 +254,7 @@ fun TintedButton(
 ) {
     Row(
         modifier = Modifier
-            .height(34.dp)
+            .heightIn(min = 34.dp)
             .widthIn(min = 34.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(ApexColors.main.copy(alpha = 0.10f))

@@ -197,7 +197,7 @@ fun LoginScreen() {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp)
+                            .heightIn(min = 48.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(ApexColors.main)
                             .clickable(enabled = !isLoading) { login() },

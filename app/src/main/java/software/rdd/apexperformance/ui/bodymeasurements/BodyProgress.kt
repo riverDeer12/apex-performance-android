@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.bodymeasurements
 
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.Straighten
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +63,7 @@ fun BodyProgress(measurements: List<BodyMeasurement>, period: ProgressPeriod, is
                             SmallProgress()
                         }
                     } else {
-                        Text(stringResource(R.string.no_measurements), style = ApexText.body, color = ApexColors.secondaryLabel)
+                        EmptyStateView(Icons.Outlined.Straighten, stringResource(R.string.no_measurements_yet))
                     }
                 }
             }
