@@ -2,4 +2,9 @@
 <resources>
     <!-- ApexBackground (dark) from the iOS asset catalog. -->
     <color name="grouped_background">#FF0B0C0E</color>
+    <!-- Home screen widget in dark mode. -->
+    <color name="widget_background">#FF17191D</color>
+    <color name="widget_text">#FFFFFFFF</color>
+    <color name="widget_secondary_text">#FFB4B4BE</color>
+    <color name="widget_accent">#FF5CB5F5</color>
 </resources>

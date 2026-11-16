@@ -62,6 +62,7 @@ import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.ApiClient
+import software.rdd.apexperformance.core.widget.ApexWidget
 import software.rdd.apexperformance.core.util.AppTab
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.Permissions
@@ -580,6 +581,8 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                 }
             }
 
+            updateWidget()
+
             // Picture, goal and plan are extras, home works without them.
             try {
                 profile = ApiClient.get<Profile>("profile")
@@ -595,6 +598,22 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
         } finally {
             isLoading = false
         }
+    }
+
+    // Home screen widget: next appointment with the coach, and the package.
+    private fun updateWidget() {
+        val now = Instant.now()
+        val approved = approvedAppointments.filter { it.startTime.isAfter(now) }.minByOrNull { it.startTime }
+        val next = approved ?: pendingAppointments.filter { it.startTime.isAfter(now) }.minByOrNull { it.startTime }
+        val summary = PackageSummary(client, approvedAppointments)
+        ApexWidget.saveClient(
+            ApexApp.appContext,
+            next = next,
+            nextIsPending = approved == null && next != null,
+            coachName = next?.coaches?.firstOrNull()?.fullName,
+            packageDone = summary.done,
+            packageTotal = summary.total
+        )
     }
 
     private suspend fun loadClient(): UserProfile? =

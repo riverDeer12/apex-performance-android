@@ -8,4 +8,9 @@
     <color name="grouped_background">#FFF2F1EE</color>
     <!-- Background of the intro video (splash). -->
     <color name="splash_background">#FF090B0D</color>
+    <!-- Home screen widget, like the app's cards. -->
+    <color name="widget_background">#FFFFFFFF</color>
+    <color name="widget_text">#FF000000</color>
+    <color name="widget_secondary_text">#FF636366</color>
+    <color name="widget_accent">#FF3A98E4</color>
 </resources>

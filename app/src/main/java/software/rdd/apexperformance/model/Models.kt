@@ -70,7 +70,9 @@ data class Appointment(
     val endTime: IsoInstant,
     val timeSlot: TimeSlot,
     val status: AppointmentStatus,
-    val clients: List<Client> = emptyList()
+    val clients: List<Client> = emptyList(),
+    // Coaches of the appointment, e.g. for the widget's "Luka Marić".
+    val coaches: List<Coach> = emptyList()
 ) {
     val isActive: Boolean
         get() = status.name == BusinessStatus.APPROVED && startTime.isAfter(Instant.now())
