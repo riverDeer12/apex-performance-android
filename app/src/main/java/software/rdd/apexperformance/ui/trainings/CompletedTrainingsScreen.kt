@@ -1,5 +1,9 @@
 package software.rdd.apexperformance.ui.trainings
 
+import androidx.compose.foundation.layout.heightIn
+import software.rdd.apexperformance.ui.components.EmptyStateView
+import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -99,7 +103,7 @@ class CompletedTrainingsScreen : Screen() {
             if (trainings.none { it.id.equals(id, ignoreCase = true) }) load()
             val training = trainings.firstOrNull { it.id.equals(id, ignoreCase = true) }
             if (training != null) {
-                navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl(training)))
+                navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl(training), history = trainings))
             } else {
                 ToastManager.show(R.string.training_not_completed_yet, ToastType.INFO)
             }
@@ -116,7 +120,10 @@ class CompletedTrainingsScreen : Screen() {
             val filtered = filteredTrainings
             if (filtered.isEmpty() && !isLoading) {
                 CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    EmptyText(stringResource(if (searchText.isEmpty()) R.string.no_client_trainings else R.string.no_trainings_found))
+                    EmptyStateView(
+                        if (searchText.isEmpty()) Icons.Outlined.FitnessCenter else Icons.Outlined.SearchOff,
+                        stringResource(if (searchText.isEmpty()) R.string.no_client_trainings else R.string.no_trainings_found)
+                    )
                 }
             } else {
                 // Planned trainings are for the coach; started ones are in progress.
@@ -139,7 +146,7 @@ class CompletedTrainingsScreen : Screen() {
                 ShowMoreItems(trainings) { training ->
                     val imageUrl = imageUrl(training)
                     TrainingCard(training, imageUrl) {
-                        navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl))
+                        navigator.push(TrainingDetailScreen(training, heroImageUrl = imageUrl, history = this@CompletedTrainingsScreen.trainings))
                     }
                 }
             }
@@ -152,7 +159,7 @@ class CompletedTrainingsScreen : Screen() {
             modifier = Modifier
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .height(44.dp)
+                .heightIn(min = 44.dp)
                 .apexCard(cornerRadius = 10.dp)
                 .padding(horizontal = 14.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

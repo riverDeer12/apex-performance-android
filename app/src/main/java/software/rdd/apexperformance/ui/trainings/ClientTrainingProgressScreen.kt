@@ -30,7 +30,9 @@ import software.rdd.apexperformance.ui.components.ScrollScreen
 class ClientTrainingProgressScreen(
     private val clientName: String,
     // Client's trainings, only completed ones are used.
-    private val trainings: List<Training>
+    private val trainings: List<Training>,
+    // Staff pass the client for the record history; clients get their own.
+    private val clientId: String? = null
 ) : Screen() {
 
     private var period by mutableStateOf(ProgressPeriod.SIX_MONTHS)
@@ -63,6 +65,9 @@ class ClientTrainingProgressScreen(
                 }
 
                 TrainingProgress(trainings = trainings, workouts = workouts, period = period)
+
+                // Best weight of every exercise, most recent record first.
+                WeightRecordsSection(trainings, clientId)
             }
         }
     }

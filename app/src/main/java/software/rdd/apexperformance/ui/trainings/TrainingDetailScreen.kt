@@ -30,6 +30,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.widthIn
+import software.rdd.apexperformance.model.TrainingHistory
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -109,9 +112,31 @@ class TrainingDetailScreen(
     private var templateName by mutableStateOf("")
     private var isSavingTimes by mutableStateOf(false)
 
+    // Exercises with a new record (heavier than any earlier set of the
+    // client), with the record set: exercise id to set id.
+    private val newRecords: Map<String, String>
+        get() = TrainingHistory.newRecords(training, history)
+
+    // "Novi rekord: Bench press 72,5 kg", shown to the client once.
+    private var celebration by mutableStateOf<String?>(null)
+
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
+
+        val records = newRecords
+        val isClient = AuthManager.hasRole(Roles.CLIENT)
+        val kg = stringResource(R.string.kg)
+        val newRecordTitle = stringResource(R.string.new_record)
+        LaunchedEffect(training.id) {
+            if (!isClient || records.isEmpty() || RecordCelebrations.isCelebrated(training.id)) return@LaunchedEffect
+            val lifts = training.exercises.filter { it.id in records }.mapNotNull { exercise ->
+                val set = exercise.sets.firstOrNull { it.id == records[exercise.id] } ?: return@mapNotNull null
+                "${exercise.workoutName.localized} ${formatWeight(set.weight ?: 0.0)} $kg"
+            }
+            if (lifts.isNotEmpty()) celebration = "$newRecordTitle: ${lifts.joinToString(", ")}"
+            RecordCelebrations.markCelebrated(training.id)
+        }
 
         ScrollScreen(
             topBar = {
@@ -132,6 +157,10 @@ class TrainingDetailScreen(
 
             Header()
 
+            celebration?.let { text ->
+                RecordCelebrationBanner(text, modifier = Modifier.padding(horizontal = 20.dp))
+            }
+
             // Start and end marked by the coach, heart rate from the client's Apple Health.
             TimesCard()
 
@@ -141,7 +170,7 @@ class TrainingDetailScreen(
                 }
             }
 
-            TrainingExerciseCards(training.exercises)
+            TrainingExerciseCards(training.exercises, records)
 
             val note = training.note
             if (!note.isNullOrEmpty()) {
@@ -411,25 +440,33 @@ class TrainingDetailScreen(
 // Cards of a training's or template's exercises with their sets,
 // numbered "1.", "2a", "2b"... like the web.
 @Composable
-internal fun TrainingExerciseCards(exercises: List<Training.Exercise>) {
+internal fun TrainingExerciseCards(
+    exercises: List<Training.Exercise>,
+    // Exercise id to the id of its new record set (training details).
+    newRecords: Map<String, String> = emptyMap()
+) {
     val sorted = exercises.sortedBy { it.order }
     val labels = SupersetLabels.labels(sorted.map { it.isSupersetWithPrevious })
     sorted.forEachIndexed { index, exercise ->
         val isInSuperset = exercise.isSupersetWithPrevious ||
             (index + 1 < sorted.size && sorted[index + 1].isSupersetWithPrevious)
         key(exercise.id) {
-            TrainingExerciseCard(exercise, labels[index], isInSuperset)
+            TrainingExerciseCard(exercise, labels[index], isInSuperset, newRecords[exercise.id])
         }
     }
 }
 
 @Composable
-private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isInSuperset: Boolean) {
+private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isInSuperset: Boolean, recordSetId: String?) {
     CardView(modifier = Modifier.testTag("exercise-card").padding(horizontal = 20.dp)) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (isInSuperset) {
-                // Exercises of a superset are done one after another without rest.
-                SupersetBadge(modifier = Modifier.padding(bottom = 6.dp))
+            if (isInSuperset || recordSetId != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(bottom = 6.dp)) {
+                    // Exercises of a superset are done one after another without rest.
+                    if (isInSuperset) SupersetBadge()
+                    // Heavier than any earlier set of this exercise.
+                    if (recordSetId != null) NewRecordBadge()
+                }
             }
 
             // Opens the workout with its description, video and muscles.
@@ -497,7 +534,8 @@ private fun TrainingExerciseCard(exercise: Training.Exercise, label: String, isI
                         ?: "—",
                     set.weight?.let(::formatWeight) ?: "—",
                     time = if (hasDuration) set.durationSeconds?.let { setDuration(it) } ?: "—" else null,
-                    isDropSet = number == null
+                    isDropSet = number == null,
+                    isRecord = set.id == recordSetId
                 )
             }
 
@@ -523,7 +561,9 @@ private fun TrainingSetRow(
     weight: String,
     time: String? = null,
     isHeader: Boolean = false,
-    isDropSet: Boolean = false
+    isDropSet: Boolean = false,
+    // The set of a new record gets a trophy next to its weight.
+    isRecord: Boolean = false
 ) {
     val style = if (isHeader) {
         TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = ApexColors.secondaryLabel)
@@ -547,7 +587,12 @@ private fun TrainingSetRow(
                 .padding(start = if (isDropSet) 8.dp else 0.dp)
         )
         Text(reps, style = style, modifier = Modifier.weight(1f))
-        Text(weight, style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
+        Text(
+            if (isRecord) "🏆 $weight" else weight,
+            style = if (isRecord) style.copy(fontWeight = FontWeight.Bold) else style,
+            textAlign = TextAlign.End,
+            modifier = Modifier.widthIn(min = 64.dp)
+        )
         if (time != null) {
             Text(time, style = style, textAlign = TextAlign.End, modifier = Modifier.width(64.dp))
         }
