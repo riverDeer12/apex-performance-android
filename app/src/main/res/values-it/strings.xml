@@ -636,4 +636,46 @@
         <item quantity="many">%d allenamenti negli ultimi 30 giorni</item>
         <item quantity="other">%d allenamenti negli ultimi 30 giorni</item>
     </plurals>
+    <!-- UX round 2: Today, repeat training, offline saves, undo, records, widget, empty states. -->
+    <string name="undo">Annulla</string>
+    <string name="deleted">Eliminato</string>
+    <string name="retry">Riprova</string>
+    <string name="discard">Scarta</string>
+    <string name="offline_banner">Nessuna connessione – salverò appena torna</string>
+    <string name="offline_will_save">Nessuna connessione. L\'allenamento resta sul telefono e verrà salvato appena torna la connessione.</string>
+    <string name="offline_synced">Salvato</string>
+    <string name="offline_save_rejected">L\'allenamento \"%1$s\" non è stato salvato</string>
+    <string name="repeat_last_training">Ripeti l\'ultimo allenamento</string>
+    <string name="repeat_last_training_hint">Compila esercizi e serie dall\'ultimo allenamento del cliente (l\'ultimo con questo nome, se esiste).</string>
+    <string name="repeated_from_training">Dall\'allenamento %1$s · %2$s</string>
+    <string name="no_weight_records">Ancora nessun record. Qui comparirà la serie più pesante di ogni esercizio.</string>
+    <string name="today">Oggi</string>
+    <string name="tomorrow">Domani</string>
+    <string name="widget_description">Il tuo prossimo allenamento e il pacchetto, o gli appuntamenti di oggi e le richieste in attesa.</string>
+    <string name="widget_no_appointment">Nessun allenamento prenotato</string>
+    <string name="widget_package">Pacchetto %1$d / %2$d</string>
+    <string name="widget_no_more_today">Nessun altro appuntamento oggi</string>
+    <string name="widget_pending_requests">Richieste in attesa: %1$d</string>
+    <string name="widget_open_app">Apri Apex per vedere i tuoi allenamenti</string>
+    <string name="widget_log_in">Accedi ad Apex</string>
+    <string name="today_appointments">Appuntamenti di oggi</string>
+    <string name="no_appointments_today">Oggi non hai appuntamenti.</string>
+    <string name="no_trainings_in_progress">Nessun allenamento in corso.</string>
+    <string name="pending_requests">Richieste in attesa</string>
+    <string name="no_pending_requests">Nessuna richiesta ti aspetta.</string>
+    <string name="status_approved">Confermato</string>
+    <string name="status_pending">In attesa</string>
+    <string name="elapsed_minutes">%1$d min</string>
+    <string name="elapsed_hours_minutes">%1$d h %2$d min</string>
+    <string name="appointment_not_found">Questo appuntamento non è più tra i tuoi appuntamenti.</string>
+    <string name="no_sent_requests">Non hai ancora inviato richieste.</string>
+    <string name="request_appointment">Richiedi un appuntamento</string>
+    <string name="no_measurements_client">Il cliente non ha ancora misurazioni.</string>
+    <string name="add_measurement">Aggiungi misurazione</string>
+    <string name="no_measurements_yet">Ancora nessuna misurazione. Il coach le aggiunge dopo averti misurato.</string>
+    <string name="no_templates_yet">Ancora nessun modello. Creane uno o salva un allenamento come modello.</string>
+    <string name="no_staff_trainings">Ancora nessun allenamento. Inizia con \"Nuovo allenamento\".</string>
+    <string name="no_clients_found">Nessun cliente corrisponde alla ricerca.</string>
+    <string name="no_clients_yet">Non hai ancora clienti.</string>
+    <string name="add_client">Aggiungi cliente</string>
 </resources>

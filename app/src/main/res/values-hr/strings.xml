@@ -636,4 +636,46 @@
         <item quantity="few">%d treninga u zadnjih 30 dana</item>
         <item quantity="other">%d treninga u zadnjih 30 dana</item>
     </plurals>
+    <!-- UX round 2: Today, repeat training, offline saves, undo, records, widget, empty states. -->
+    <string name="undo">Poništi</string>
+    <string name="deleted">Obrisano</string>
+    <string name="retry">Pokušaj ponovno</string>
+    <string name="discard">Odbaci</string>
+    <string name="offline_banner">Nema veze – spremit ću čim se veza vrati</string>
+    <string name="offline_will_save">Nema veze. Trening je spremljen na mobitelu i spremit će se čim se veza vrati.</string>
+    <string name="offline_synced">Spremljeno</string>
+    <string name="offline_save_rejected">Trening \"%1$s\" nije spremljen</string>
+    <string name="repeat_last_training">Ponovi zadnji trening</string>
+    <string name="repeat_last_training_hint">Popunjava vježbe i serije iz klijentovog zadnjeg treninga (zadnjeg s ovim nazivom, ako postoji).</string>
+    <string name="repeated_from_training">Iz treninga %1$s · %2$s</string>
+    <string name="no_weight_records">Još nema rekorda. Ovdje će se pojaviti najteža serija svake vježbe.</string>
+    <string name="today">Danas</string>
+    <string name="tomorrow">Sutra</string>
+    <string name="widget_description">Tvoj sljedeći trening i paket ili današnji termini i zahtjevi na čekanju.</string>
+    <string name="widget_no_appointment">Nema rezerviranog treninga</string>
+    <string name="widget_package">Paket %1$d / %2$d</string>
+    <string name="widget_no_more_today">Danas više nema termina</string>
+    <string name="widget_pending_requests">Zahtjevi na čekanju: %1$d</string>
+    <string name="widget_open_app">Otvori Apex za svoje treninge</string>
+    <string name="widget_log_in">Prijavi se u Apex</string>
+    <string name="today_appointments">Današnji termini</string>
+    <string name="no_appointments_today">Danas nemaš termina.</string>
+    <string name="no_trainings_in_progress">Nijedan trening nije u tijeku.</string>
+    <string name="pending_requests">Zahtjevi na čekanju</string>
+    <string name="no_pending_requests">Nema zahtjeva koji te čekaju.</string>
+    <string name="status_approved">Potvrđen</string>
+    <string name="status_pending">Na čekanju</string>
+    <string name="elapsed_minutes">%1$d min</string>
+    <string name="elapsed_hours_minutes">%1$d h %2$d min</string>
+    <string name="appointment_not_found">Ovaj termin više nije među tvojim terminima.</string>
+    <string name="no_sent_requests">Još nema poslanih zahtjeva.</string>
+    <string name="request_appointment">Zatraži termin</string>
+    <string name="no_measurements_client">Klijent još nema mjerenja.</string>
+    <string name="add_measurement">Dodaj mjerenje</string>
+    <string name="no_measurements_yet">Još nema mjerenja. Trener ih dodaje nakon mjerenja.</string>
+    <string name="no_templates_yet">Još nemaš predložaka. Kreiraj novi ili spremi trening kao predložak.</string>
+    <string name="no_staff_trainings">Još nema treninga. Kreni s \"Novi trening\".</string>
+    <string name="no_clients_found">Nijedan klijent ne odgovara pretrazi.</string>
+    <string name="no_clients_yet">Još nemaš klijenata.</string>
+    <string name="add_client">Dodaj klijenta</string>
 </resources>

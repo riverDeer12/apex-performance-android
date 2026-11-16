@@ -2,6 +2,9 @@ package software.rdd.apexperformance.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.testTag
+import software.rdd.apexperformance.core.util.ToastManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +49,7 @@ fun ToastView(toast: Toast, modifier: Modifier = Modifier) {
     ) {
         Icon(type.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 stringResource(type.title),
                 style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
@@ -58,6 +61,22 @@ fun ToastView(toast: Toast, modifier: Modifier = Modifier) {
                 color = Color.White.copy(alpha = 0.95f),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // E.g. "Poništi" after deleting a set in the training form.
+        val action = toast.action
+        if (action != null) {
+            Text(
+                action.label.resolve(),
+                style = ApexText.subheadline.copy(fontWeight = FontWeight.Bold),
+                color = Color.White,
+                modifier = Modifier
+                    .testTag("toast-action")
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White.copy(alpha = 0.18f))
+                    .clickable { ToastManager.performAction(toast) }
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
             )
         }
     }
