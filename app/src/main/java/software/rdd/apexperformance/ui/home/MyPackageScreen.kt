@@ -68,8 +68,10 @@ class PackageSummary(client: UserProfile?, approvedAppointments: List<Appointmen
     val available: Int
 
     init {
+        // GET appointments gives a client only upcoming appointments, so the
+        // done ones come from the API; counted here only without it (demo data).
         val thisMonth = YearMonth.from(now.atZone(DateFormats.zone))
-        done = approvedAppointments.count {
+        done = client?.doneThisMonth ?: approvedAppointments.count {
             !it.endTime.isAfter(now) && YearMonth.from(it.startTime.atZone(DateFormats.zone)) == thisMonth
         }
         reserved = approvedAppointments.count { it.startTime.isAfter(now) }

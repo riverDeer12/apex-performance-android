@@ -403,6 +403,7 @@
     <string name="passwords_do_not_match">Die Passwörter stimmen nicht überein.</string>
     <string name="pending">Ausstehend</string>
     <string name="pending_approvals">Ausstehende Bestätigungen</string>
+    <string name="awaiting_coach_approval">Wartet auf deinen Coach</string>
     <string name="period_all">Alle</string>
     <string name="period_one_month">1 Monat</string>
     <string name="period_six_months">6 Monate</string>
