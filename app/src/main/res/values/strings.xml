@@ -404,6 +404,7 @@
     <string name="passwords_do_not_match">Passwords do not match.</string>
     <string name="pending">Pending</string>
     <string name="pending_approvals">Pending approvals</string>
+    <string name="awaiting_coach_approval">Waiting for your coach</string>
     <string name="period_all">All</string>
     <string name="period_one_month">1 month</string>
     <string name="period_six_months">6 months</string>

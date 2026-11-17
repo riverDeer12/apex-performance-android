@@ -247,7 +247,10 @@ data class UserProfile(
     val lastName: String = "",
     val email: String? = null,
     val credits: Int? = null,
-    val plan: String? = null
+    val plan: String? = null,
+    // Approved appointments of this month that are over, worked out by the
+    // API: appointments only has the client's upcoming ones.
+    val doneThisMonth: Int? = null
 )
 
 // MARK: - Profile
