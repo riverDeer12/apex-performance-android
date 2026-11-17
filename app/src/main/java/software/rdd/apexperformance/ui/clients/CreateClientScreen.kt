@@ -130,7 +130,9 @@ class CreateClientScreen : Screen() {
                         ToggleRow(
                             title = coach.fullName ?: stringResource(R.string.unknown_coach),
                             checked = coach.id in selectedCoaches,
-                            enabled = !isLoadingCoaches
+                            enabled = !isLoadingCoaches,
+                            personPictureUrl = coach.pictureUrl,
+                            showsPerson = true
                         ) { isOn ->
                             selectedCoaches = if (isOn) selectedCoaches + coach.id else selectedCoaches - coach.id
                         }

@@ -84,6 +84,8 @@ fun TopBar(
     title: String? = null,
     showBack: Boolean = LocalNavigator.current.canPop,
     onBack: (() -> Unit)? = null,
+    // Shown before the title, e.g. the picture of the person in a chat.
+    titleLeading: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     val navigator = LocalNavigator.current
@@ -112,7 +114,23 @@ fun TopBar(
             TopBarChatButton()
         }
 
-        if (title != null) {
+        if (title != null && titleLeading != null) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 96.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                titleLeading()
+                Text(
+                    title,
+                    style = ApexText.navigationTitle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        } else if (title != null) {
             Text(
                 title,
                 style = ApexText.navigationTitle,
@@ -363,7 +381,15 @@ fun <T> MenuPicker(
 }
 
 @Composable
-fun ToggleRow(title: String, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
+fun ToggleRow(
+    title: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    // Picture (or initials) before the title, for rows of people.
+    personPictureUrl: String? = null,
+    showsPerson: Boolean = false,
+    onCheckedChange: (Boolean) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -371,7 +397,11 @@ fun ToggleRow(title: String, checked: Boolean, enabled: Boolean = true, onChecke
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, style = ApexText.body, modifier = Modifier.weight(1f))
+        if (showsPerson) {
+            UserNameLabel(title, personPictureUrl, modifier = Modifier.weight(1f))
+        } else {
+            Text(title, style = ApexText.body, modifier = Modifier.weight(1f))
+        }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,

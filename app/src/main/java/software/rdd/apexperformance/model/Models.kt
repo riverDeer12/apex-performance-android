@@ -187,7 +187,9 @@ data class Client(
     val bodyMeasurements: List<BodyMeasurement>? = null,
     val lastCreditsIncrease: IsoInstant? = null,
     // One of ClientPlan values.
-    val plan: String? = null
+    val plan: String? = null,
+    // Profile picture link ("users/{id}/picture?v=..."), null when there is none.
+    val pictureUrl: String? = null
 ) {
     val fullName: String get() = "$firstName $lastName"
 
@@ -232,7 +234,9 @@ data class Coach(
     val firstName: String? = null,
     val lastName: String? = null,
     val email: String? = null,
-    val phone: String? = null
+    val phone: String? = null,
+    // Profile picture link ("users/{id}/picture?v=..."), null when there is none.
+    val pictureUrl: String? = null
 ) {
     // Null when the coach has no name, shown as "Unknown Coach".
     val fullName: String?

@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.chat
 
+import software.rdd.apexperformance.ui.components.UserAvatar
 import androidx.compose.ui.platform.testTag
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import software.rdd.apexperformance.R
@@ -141,7 +140,7 @@ class ChatListScreen(private val onClose: (() -> Unit)? = null) : Screen() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ChatAvatar(other.fullName)
+            UserAvatar(other.fullName, other.pictureUrl)
 
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -241,24 +240,6 @@ fun shortDate(instant: java.time.Instant): String {
     }
 }
 
-// Round initials of a participant.
-@Composable
-fun ChatAvatar(name: String, size: Dp = 44.dp) {
-    val initials = name.split(" ").filter { it.isNotEmpty() }.take(2).joinToString("") { it.first().uppercase() }
-    Box(
-        modifier = Modifier
-            .size(size)
-            .background(ApexColors.accent, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            initials.ifEmpty { "?" },
-            style = ApexText.subheadline.copy(fontWeight = FontWeight.Bold, fontSize = (size.value * 0.36f).sp),
-            color = ApexColors.onAccent
-        )
-    }
-}
-
 // People the user can chat with (clients for a coach, coaches for a client);
 // tapping one picks them.
 class ChatContactListScreen(
@@ -313,7 +294,7 @@ class ChatContactListScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                ChatAvatar(contact.fullName, size = 34.dp)
+                                UserAvatar(contact.fullName, contact.pictureUrl, size = 34.dp)
                                 Text(contact.fullName, style = ApexText.body, modifier = Modifier.weight(1f))
                                 if (contact.conversationId != null) {
                                     Icon(

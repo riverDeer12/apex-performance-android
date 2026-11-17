@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.appointments
 
+import software.rdd.apexperformance.ui.components.UserAvatar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -59,7 +62,9 @@ class AppointmentRequestDetailsScreen(private val request: AppointmentRequest) :
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.request_information)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    InfoLine(stringResource(R.string.sender), request.sender.fullName)
+                    InfoLine(stringResource(R.string.sender), request.sender.fullName) {
+                        UserAvatar(request.sender.fullName, request.sender.pictureUrl, size = 24.dp)
+                    }
                     HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
                     InfoLine(stringResource(R.string.created_at), DateFormats.dateAndTime(request.createdAt))
                     HorizontalDivider(color = ApexColors.separator, thickness = 0.5.dp)
@@ -138,10 +143,14 @@ class AppointmentRequestDetailsScreen(private val request: AppointmentRequest) :
     }
 
     @Composable
-    private fun InfoLine(title: String, value: String) {
-        Row {
+    private fun InfoLine(title: String, value: String, leading: (@Composable () -> Unit)? = null) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(title, style = ApexText.subheadline, color = ApexColors.secondaryLabel)
             Spacer(Modifier.weight(1f))
+            if (leading != null) {
+                leading()
+                Spacer(Modifier.width(8.dp))
+            }
             Text(value, style = ApexText.subheadline.copy(fontWeight = FontWeight.Medium))
         }
     }

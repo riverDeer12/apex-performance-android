@@ -64,7 +64,9 @@ data class Training(
     data class Person(
         val id: String,
         val firstName: String? = null,
-        val lastName: String? = null
+        val lastName: String? = null,
+        // Profile picture link ("users/{id}/picture?v=..."), null when there is none.
+        val pictureUrl: String? = null
     ) {
         val fullName: String get() = "${firstName.orEmpty()} ${lastName.orEmpty()}".trim()
     }

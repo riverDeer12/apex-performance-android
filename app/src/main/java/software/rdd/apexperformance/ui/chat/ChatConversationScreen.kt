@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.chat
 
+import software.rdd.apexperformance.ui.components.UserAvatar
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -132,7 +133,13 @@ class ChatConversationScreen(private val conversationId: String) : Screen() {
                 .background(ApexColors.groupedBackground)
                 .imePadding()
         ) {
-            TopBar(title = conversation?.otherParticipant(ChatStore.userId)?.fullName) {
+            val other = conversation?.otherParticipant(ChatStore.userId)
+            TopBar(
+                title = other?.fullName,
+                titleLeading = other?.let {
+                    { UserAvatar(it.fullName, it.pictureUrl, size = 30.dp, opensFullScreen = true) }
+                }
+            ) {
                 if (conversation != null) {
                     var menuOpen by remember { mutableStateOf(false) }
                     Box {

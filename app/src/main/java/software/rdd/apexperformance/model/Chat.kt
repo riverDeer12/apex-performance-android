@@ -15,7 +15,9 @@ data class ChatParticipant(
     // Coach id or client id.
     val id: String,
     val userId: String,
-    val fullName: String = ""
+    val fullName: String = "",
+    // Profile picture link ("users/{id}/picture?v=..."), null when there is none.
+    val pictureUrl: String? = null
 )
 
 @Serializable
@@ -82,7 +84,9 @@ data class ChatContact(
     // Null when no chat was started yet.
     val conversationId: String? = null,
     // False when the coach turned the chat off or the client blocked it (read only).
-    val isEnabled: Boolean = true
+    val isEnabled: Boolean = true,
+    // Profile picture link ("users/{id}/picture?v=..."), null when there is none.
+    val pictureUrl: String? = null
 )
 
 // "MessagesRead" hub event.

@@ -198,6 +198,7 @@ class ClientsScreen : Screen() {
             subtitle = if (plan != null) "$credits · $plan" else credits,
             showChevron = true,
             badge = if (client.isOutOfCredits) stringResource(R.string.out_of_credits) else null,
+            person = client.fullName to client.pictureUrl,
             onClick = onClick
         )
     }
