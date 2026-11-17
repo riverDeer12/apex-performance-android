@@ -1,5 +1,8 @@
 package software.rdd.apexperformance.ui.workouts
 
+import androidx.compose.runtime.LaunchedEffect
+import software.rdd.apexperformance.model.loadWorkout
+import software.rdd.apexperformance.model.setFavoriteWorkout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -66,17 +69,34 @@ class WorkoutDetailScreen(
     private var isPlayingVideo by mutableStateOf(false)
     private var showDeleteDialog by mutableStateOf(false)
     private var isDeleting by mutableStateOf(false)
+    // Set once the star is tapped, so a later answer of the refresh doesn't undo it.
+    private var hasToggledFavorite = false
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
 
+        // Opened from a training or the chat, the workout may not say
+        // whether it is a favorite of this user: the API's answer does.
+        LaunchedEffect(Unit) {
+            val fresh = runCatching { loadWorkout(workout.id) }.getOrNull()
+            if (fresh?.isFavorite != null && !hasToggledFavorite) {
+                workout = workout.copy(isFavorite = fresh.isFavorite)
+            }
+        }
+
         ScrollScreen(
             topBar = {
                 TopBar(title = workout.name.localized) {
+                    // Everyone marks their own favorites; not with an API without them.
+                    if (workout.isFavorite != null) {
+                        FavoriteStarButton(workout.isFavoriteWorkout) { launch { toggleFavorite() } }
+                    }
                     if (canEdit) {
                         TextButton(onClick = {
-                            navigator.push(WorkoutEditScreen(workout) { updated ->
+                            navigator.push(WorkoutEditScreen(workout) { saved ->
+                                // An answer without favorites keeps the star as it was.
+                                val updated = saved.copy(isFavorite = saved.isFavorite ?: workout.isFavorite)
                                 workout = updated
                                 isPlayingVideo = false
                                 onSaved(updated)
@@ -158,6 +178,21 @@ class WorkoutDetailScreen(
                 onConfirm = { launch { delete(navigator) } },
                 onDismiss = { showDeleteDialog = false }
             )
+        }
+    }
+
+    // Shows the star at once and puts it back when the API fails.
+    private suspend fun toggleFavorite() {
+        hasToggledFavorite = true
+        val isFavorite = !workout.isFavoriteWorkout
+        workout = workout.copy(isFavorite = isFavorite)
+        onSaved(workout)
+        try {
+            setFavoriteWorkout(workout.id, isFavorite)
+        } catch (e: Exception) {
+            workout = workout.copy(isFavorite = !isFavorite)
+            onSaved(workout)
+            showError(e)
         }
     }
 

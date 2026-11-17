@@ -698,4 +698,8 @@
     <string name="no_clients_found">Keine Kunden passen zur Suche.</string>
     <string name="no_clients_yet">Noch keine Kunden.</string>
     <string name="add_client">Kunden hinzufügen</string>
+    <string name="favorites">Favoriten</string>
+    <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
+    <string name="remove_from_favorites">Aus Favoriten entfernen</string>
+    <string name="no_favorite_workouts">Noch keine Favoriten. Tippe auf den Stern bei einer Übung, um sie schneller zu finden.</string>
 </resources>

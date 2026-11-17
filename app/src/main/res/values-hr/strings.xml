@@ -702,4 +702,8 @@
     <string name="no_clients_found">Nijedan klijent ne odgovara pretrazi.</string>
     <string name="no_clients_yet">Još nemaš klijenata.</string>
     <string name="add_client">Dodaj klijenta</string>
+    <string name="favorites">Favoriti</string>
+    <string name="add_to_favorites">Dodaj u favorite</string>
+    <string name="remove_from_favorites">Ukloni iz favorita</string>
+    <string name="no_favorite_workouts">Još nemaš favorita. Označi vježbu zvjezdicom da je brže pronađeš.</string>
 </resources>
