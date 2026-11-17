@@ -892,7 +892,9 @@ private class Fixtures(private val role: DemoAPI.Role, private val language: Str
         "exercises" to exercisesJson(number, exercises),
         "startedAt" to minutes?.let { iso(date) },
         "endedAt" to minutes?.let { iso(date.plusMinutes(it.toLong())) },
-        "heartRate" to heartRate?.let { json("min" to it.first, "max" to it.second, "average" to it.third) }
+        "heartRate" to heartRate?.let {
+            json("min" to it.first, "max" to it.second, "average" to it.third, "source" to "health_connect")
+        }
     )
 
     val lowerBodyStrength get() = tr("Lower Body Strength", "Snaga – donji dio tijela", "Forza – parte inferiore", "Kraft – Unterkörper")

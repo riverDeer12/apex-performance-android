@@ -22,15 +22,24 @@ data class Training(
     // When the training really started and ended, marked by the coach.
     val startedAt: IsoInstant? = null,
     val endedAt: IsoInstant? = null,
-    // Client's heart rate in between, from Apple Health on the client's iPhone.
+    // Client's heart rate in between, from the client's phone:
+    // Apple Health on an iPhone, Health Connect on Android.
     val heartRate: HeartRate? = null
 ) {
     // Started by the coach, not completed yet; clients see it then.
     val isInProgress: Boolean get() = !isCompleted && startedAt != null
 
-    // Beats per minute.
+    // Beats per minute. Source: where the client's phone read it
+    // ("apple_health" or "health_connect"), shown with the values.
     @Serializable
-    data class HeartRate(val min: Int, val max: Int, val average: Int)
+    data class HeartRate(val min: Int, val max: Int, val average: Int, val source: String? = null)
+
+    // Sends the heart rate read from Health Connect for this training
+    // (PUT trainings/{id}/heart-rate, clients only); returns the saved one.
+    suspend fun sendingHeartRate(heartRate: HeartRate): Training {
+        val saved: HeartRate = ApiClient.request("trainings/$id/heart-rate", HttpMethod.PUT, heartRate)
+        return copy(heartRate = saved)
+    }
 
     @Serializable
     data class TimesRequest(
