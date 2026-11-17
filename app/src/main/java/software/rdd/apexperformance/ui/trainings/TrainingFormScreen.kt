@@ -1,5 +1,7 @@
 package software.rdd.apexperformance.ui.trainings
 
+import software.rdd.apexperformance.model.setFavoriteWorkout
+import software.rdd.apexperformance.ui.workouts.FavoriteStarButton
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.StringRes
@@ -604,7 +606,8 @@ class TrainingFormScreen private constructor(
                                 workouts = { workouts },
                                 trainingName = name,
                                 selection = exercise.workoutId,
-                                onCreated = if (canCreateWorkouts) this@TrainingFormScreen::addCreatedWorkout else null
+                                onCreated = if (canCreateWorkouts) this@TrainingFormScreen::addCreatedWorkout else null,
+                                onToggleFavorite = { workout -> launch { toggleFavorite(workout) } }
                             ) { id -> updateExercise(exercise.id) { it.copy(workoutId = id, paceType = null) } }
                         )
                     }
@@ -1169,6 +1172,18 @@ class TrainingFormScreen private constructor(
         return null
     }
 
+    // Star tapped in the exercise picker: shown at once, put back when the API fails.
+    private suspend fun toggleFavorite(workout: Workout) {
+        val isFavorite = !(workouts.firstOrNull { it.id == workout.id } ?: workout).isFavoriteWorkout
+        workouts = workouts.map { if (it.id == workout.id) it.copy(isFavorite = isFavorite) else it }
+        try {
+            setFavoriteWorkout(workout.id, isFavorite)
+        } catch (e: Exception) {
+            workouts = workouts.map { if (it.id == workout.id) it.copy(isFavorite = !isFavorite) else it }
+            showError(e)
+        }
+    }
+
     // MARK: - API
 
     private suspend fun loadWorkouts() {
@@ -1573,8 +1588,9 @@ internal fun repeatedExercises(training: Training): List<ExerciseDraft> =
 
 // MARK: - Workout picker
 
-// Searchable list of all workouts to choose a training exercise, with
-// the ones that fit the training's name on top (GET workouts/suggested).
+// Searchable list of all workouts to choose a training exercise, with the
+// user's favorites on top, then the ones that fit the training's name
+// (GET workouts/suggested). The star marks or unmarks a favorite.
 // A coach who can't find the exercise adds it here with just a name and
 // a category; it is picked right away and edited later in Workouts.
 private class WorkoutPickerScreen(
@@ -1584,6 +1600,7 @@ private class WorkoutPickerScreen(
     private val selection: String?,
     // Given when the user can add workouts: gets the new one.
     private val onCreated: ((Workout) -> Unit)? = null,
+    private val onToggleFavorite: ((Workout) -> Unit)? = null,
     private val onSelect: (String) -> Unit
 ) : Screen() {
 
@@ -1639,6 +1656,16 @@ private class WorkoutPickerScreen(
                 }
             }
 
+            // The user's favorites the search finds, so the coach picks them fast.
+            val favorites = all.filter { it.isFavoriteWorkout && it.matches(searchText) }
+            if (favorites.isNotEmpty()) {
+                SectionTitle(stringResource(R.string.favorites))
+                WorkoutList(favorites, limited = false, tag = "picker-favorites") { workout ->
+                    onSelect(workout.id)
+                    navigator.pop()
+                }
+            }
+
             // Suggestions while not searching, in the API's order (best first).
             val suggested = if (searchText.isEmpty()) {
                 val byId = all.associateBy { it.id }
@@ -1652,6 +1679,8 @@ private class WorkoutPickerScreen(
                     onSelect(workout.id)
                     navigator.pop()
                 }
+            }
+            if (suggested.isNotEmpty() || favorites.isNotEmpty()) {
                 SectionTitle(stringResource(R.string.all_workouts))
             }
 
@@ -1723,9 +1752,10 @@ private class WorkoutPickerScreen(
     }
 
     @Composable
-    private fun WorkoutList(workouts: List<Workout>, limited: Boolean = true, onClick: (Workout) -> Unit) {
+    private fun WorkoutList(workouts: List<Workout>, limited: Boolean = true, tag: String? = null, onClick: (Workout) -> Unit) {
         Column(
             modifier = Modifier
+                .then(if (tag != null) Modifier.testTag(tag) else Modifier)
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
@@ -1743,6 +1773,12 @@ private class WorkoutPickerScreen(
                     Text(workout.name.localized, style = ApexText.body, modifier = Modifier.weight(1f))
                     if (workout.id == selection) {
                         Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
+                    }
+                    // Not with an API without favorites.
+                    if (workout.isFavorite != null && onToggleFavorite != null) {
+                        FavoriteStarButton(workout.isFavoriteWorkout, Modifier.size(40.dp)) {
+                            onToggleFavorite.invoke(workout)
+                        }
                     }
                 }
                 if (workout.id != workouts.last().id) {

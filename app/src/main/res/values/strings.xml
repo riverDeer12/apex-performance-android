@@ -675,4 +675,8 @@
     <string name="no_clients_found">No clients match the search.</string>
     <string name="no_clients_yet">No clients yet.</string>
     <string name="add_client">Add client</string>
+    <string name="favorites">Favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="no_favorite_workouts">No favorites yet. Tap the star on an exercise to find it faster.</string>
 </resources>
