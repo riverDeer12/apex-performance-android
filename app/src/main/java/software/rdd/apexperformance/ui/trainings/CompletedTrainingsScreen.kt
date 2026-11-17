@@ -51,6 +51,9 @@ import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.Workout
+import software.rdd.apexperformance.core.auth.AuthManager
+import software.rdd.apexperformance.core.health.HealthConnect
+import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.ApexPictureBackground
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
@@ -197,6 +200,8 @@ class CompletedTrainingsScreen : Screen() {
         isLoading = true
         try {
             trainings = Training.loadStartedOrCompleted()
+            // Heart rate of trainings the coach marked, once the client allowed Health Connect.
+            if (AuthManager.hasRole(Roles.CLIENT)) trainings = HealthConnect.sendMissing(trainings)
         } catch (e: Exception) {
             showError(e)
         } finally {

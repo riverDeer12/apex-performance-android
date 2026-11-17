@@ -13,6 +13,8 @@ appUpdate = "2.1.0"
 serialization = "1.9.0"
 okhttp = "4.12.0"
 coil = "3.2.0"
+# Health Connect: Mi Fitness, Google Fit, Fitbit, Samsung Health... write into it.
+healthConnect = "1.1.0"
 firebaseBom = "33.16.0"
 googleServices = "4.4.3"
 crashlyticsPlugin = "3.0.4"
@@ -42,6 +44,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil" }
+androidx-health-connect = { group = "androidx.health.connect", name = "connect-client", version.ref = "healthConnect" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }

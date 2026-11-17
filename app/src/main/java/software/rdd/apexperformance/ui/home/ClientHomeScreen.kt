@@ -37,6 +37,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -107,6 +108,8 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
     private var isLoading by mutableStateOf(false)
     private var goal by mutableStateOf<ClientGoal?>(null)
     private var showGoalSheet by mutableStateOf(false)
+    // Changed on every load, the Health Connect card reads the day again.
+    private var healthRefresh by mutableIntStateOf(0)
 
     private val canGetAppointments: Boolean
         get() = AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENTS)
@@ -140,6 +143,8 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
                 if (goal != null && !goal.isEmpty) {
                     GoalCard(goal)
                 }
+
+                HealthConnectCard(healthRefresh)
 
                 Shortcuts()
             }
@@ -567,6 +572,8 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
         }
 
     private suspend fun load() {
+        // The Health Connect card reads the day again too.
+        healthRefresh++
         isLoading = true
         try {
             // Loaded separately so one failing doesn't hide the other.

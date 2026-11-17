@@ -29,6 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.widthIn
@@ -90,6 +91,7 @@ import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.network.HttpMethod
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
+import software.rdd.apexperformance.core.health.HealthConnect
 import java.time.Instant
 import androidx.compose.material.icons.outlined.Timer
 
@@ -111,6 +113,9 @@ class TrainingDetailScreen(
     private var showSaveAsTemplate by mutableStateOf(false)
     private var templateName by mutableStateOf("")
     private var isSavingTimes by mutableStateOf(false)
+    // The client reading the heart rate from Health Connect.
+    private var isReadingHealth by mutableStateOf(false)
+    private var hasNoMeasurements by mutableStateOf(false)
 
     // Exercises with a new record (heavier than any earlier set of the
     // client), with the record set: exercise id to set id.
@@ -161,7 +166,8 @@ class TrainingDetailScreen(
                 RecordCelebrationBanner(text, modifier = Modifier.padding(horizontal = 20.dp))
             }
 
-            // Start and end marked by the coach, heart rate from the client's Apple Health.
+            // Start and end marked by the coach, heart rate from the client's phone
+            // (Apple Health on an iPhone, Health Connect here).
             TimesCard()
 
             if (training.exercises.isEmpty()) {
@@ -288,6 +294,10 @@ class TrainingDetailScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Icon(Icons.Filled.Favorite, contentDescription = null, tint = ApexColors.red, modifier = Modifier.size(16.dp))
                         Text(stringResource(R.string.heart_rate), style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold), color = ApexColors.red)
+                        // Where the client's phone read it.
+                        heartRateSourceName(heartRate.source)?.let { source ->
+                            Text("· $source", style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                        }
                     }
                     Row {
                         val bpm = stringResource(R.string.bpm)
@@ -297,9 +307,69 @@ class TrainingDetailScreen(
                     }
                 } else if (endedAt != null && isStaff) {
                     Text(stringResource(R.string.heart_rate_from_client_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel)
+                } else if (endedAt != null && HealthConnect.isAvailable) {
+                    ReadHeartRate()
                 }
             }
         }
+    }
+
+    // The client reads the training's heart rate from Health Connect (asked once).
+    @Composable
+    private fun ReadHeartRate() {
+        val permissions = rememberLauncherForActivityResult(HealthConnect.permissionContract()) { granted ->
+            if (HealthConnect.heartRatePermission in granted) {
+                launch { readHealth() }
+            } else {
+                isReadingHealth = false
+                ToastManager.show(R.string.health_not_allowed, ToastType.ERROR)
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (hasNoMeasurements) {
+                Text(stringResource(R.string.no_heart_rate_measurements), style = ApexText.footnote, color = ApexColors.orange)
+            }
+            ApexPrimaryButton(
+                stringResource(R.string.read_heart_rate_health_connect),
+                modifier = Modifier.testTag("read-heart-rate-button"),
+                icon = Icons.Filled.Favorite,
+                isLoading = isReadingHealth
+            ) {
+                isReadingHealth = true
+                launch {
+                    if (HealthConnect.isConnected()) readHealth()
+                    else permissions.launch(setOf(HealthConnect.heartRatePermission))
+                }
+            }
+            Text(stringResource(R.string.health_connect_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel)
+        }
+    }
+
+    private suspend fun readHealth() {
+        isReadingHealth = true
+        try {
+            val updated = HealthConnect.send(training)
+            if (updated != null) {
+                training = updated
+                hasNoMeasurements = false
+                onSaved?.invoke(training)
+            } else {
+                hasNoMeasurements = true
+            }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            showError(e)
+        } finally {
+            isReadingHealth = false
+        }
+    }
+
+    @Composable
+    private fun heartRateSourceName(source: String?): String? = when (source) {
+        "apple_health" -> stringResource(R.string.heart_rate_source_apple_health)
+        "health_connect" -> "Health Connect"
+        else -> null
     }
 
     @Composable
