@@ -218,7 +218,9 @@ class CreateAppointmentScreen : Screen() {
                         ToggleRow(
                             title = client.fullName,
                             checked = client.id in selectedClients,
-                            enabled = !isLoadingClients
+                            enabled = !isLoadingClients,
+                            personPictureUrl = client.pictureUrl,
+                            showsPerson = true
                         ) { isOn ->
                             selectedClients = if (isOn) selectedClients + client.id else selectedClients - client.id
                         }

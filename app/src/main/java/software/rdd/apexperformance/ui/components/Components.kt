@@ -170,6 +170,10 @@ fun SettingsRow(
     titleColor: Color = ApexColors.label,
     badge: String? = null,
     enabled: Boolean = true,
+    // Row of a person: their profile picture (or initials) instead of the icon,
+    // with `personBadge` as a small icon on it (e.g. the status of their training).
+    person: Pair<String, String?>? = null,
+    personBadge: Pair<ImageVector, Color>? = null,
     onClick: (() -> Unit)? = null
 ) {
     Row(
@@ -180,7 +184,14 @@ fun SettingsRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        IconTile(icon, iconTint)
+        when {
+            person != null && personBadge != null ->
+                AvatarWithBadge(personBadge.first, personBadge.second, badgeSize = 16.dp) {
+                    UserAvatar(person.first, person.second, size = 34.dp)
+                }
+            person != null -> UserAvatar(person.first, person.second, size = 34.dp)
+            else -> IconTile(icon, iconTint)
+        }
 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {

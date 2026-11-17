@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import software.rdd.apexperformance.ui.components.UserNameLabel
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -188,6 +189,8 @@ class StaffTrainingsScreen : Screen() {
                                 title = training.name,
                                 subtitle = "${training.client.fullName} · ${DateFormats.date(training.date)}",
                                 showChevron = true,
+                                person = training.client.fullName to training.client.pictureUrl,
+                                personBadge = training.statusIcon to training.statusTint,
                                 onClick = {
                                     navigator.push(
                                         TrainingDetailScreen(
@@ -405,7 +408,7 @@ class ClientListScreen(
                                     .padding(vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(client.fullName, style = ApexText.body, modifier = Modifier.weight(1f))
+                                UserNameLabel(client.fullName, client.pictureUrl, modifier = Modifier.weight(1f))
                                 Chevron()
                             }
                             if (client.id != list.last().id) RowDivider(startIndent = 0.dp)

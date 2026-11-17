@@ -169,7 +169,9 @@ class AppointmentRequestsScreen : Screen() {
                 iconTint = requestColor(request.type.name),
                 title = title,
                 subtitle = subtitle,
-                showChevron = true
+                showChevron = true,
+                // Staff see who sent it; a client sees the type (their own requests).
+                person = if (isClient) null else request.sender.fullName to request.sender.pictureUrl
             )
             if (request.comment.isNotEmpty()) {
                 Text(

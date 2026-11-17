@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.AccessibilityNew
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Description
@@ -75,7 +74,7 @@ import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.Chevron
 import software.rdd.apexperformance.ui.components.EditableRow
 import software.rdd.apexperformance.ui.components.EmptyText
-import software.rdd.apexperformance.ui.components.IconCircle
+import software.rdd.apexperformance.ui.components.UserAvatar
 import software.rdd.apexperformance.ui.components.IconTile
 import software.rdd.apexperformance.ui.components.MenuPicker
 import software.rdd.apexperformance.ui.components.NumberWheelField
@@ -144,7 +143,7 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
         ) {
             CardView(modifier = Modifier.padding(horizontal = 20.dp).padding(top = 8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconCircle(Icons.Filled.Person, ApexColors.secondaryLabel, size = 56.dp, background = ApexColors.systemGray5, iconSize = 26.dp)
+                    UserAvatar(client.fullName, client.pictureUrl, size = 56.dp, opensFullScreen = true)
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("${client.firstName} ${client.lastName}", style = ApexText.headline)
                         Row(verticalAlignment = Alignment.CenterVertically) {

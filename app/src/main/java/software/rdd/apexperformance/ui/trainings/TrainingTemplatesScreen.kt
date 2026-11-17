@@ -1,5 +1,6 @@
 package software.rdd.apexperformance.ui.trainings
 
+import software.rdd.apexperformance.ui.components.UserNameLabel
 import androidx.compose.foundation.layout.heightIn
 import software.rdd.apexperformance.ui.components.EmptyStateView
 import androidx.compose.material.icons.outlined.SearchOff
@@ -513,7 +514,7 @@ class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Scr
                                 .padding(vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(client.fullName, style = ApexText.body, modifier = Modifier.weight(1f))
+                            UserNameLabel(client.fullName, client.pictureUrl, modifier = Modifier.weight(1f))
                             if (client.id in selectedClients) {
                                 Icon(Icons.Filled.Check, contentDescription = null, tint = ApexColors.main)
                             }

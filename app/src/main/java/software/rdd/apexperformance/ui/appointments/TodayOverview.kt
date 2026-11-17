@@ -1,5 +1,8 @@
 package software.rdd.apexperformance.ui.appointments
 
+import software.rdd.apexperformance.ui.components.AvatarWithBadge
+import software.rdd.apexperformance.ui.components.UserAvatar
+import software.rdd.apexperformance.ui.components.UserAvatarStack
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -124,7 +127,11 @@ private fun TodayAppointmentRow(appointment: Appointment, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        IconCircle(Icons.Outlined.CalendarMonth, statusColor)
+        if (appointment.clients.isEmpty()) {
+            IconCircle(Icons.Outlined.CalendarMonth, statusColor)
+        } else {
+            UserAvatarStack(appointment.clients.map { it.fullName to it.pictureUrl })
+        }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 "${DateFormats.time(appointment.startTime)} – ${DateFormats.time(appointment.endTime)}",
@@ -159,7 +166,9 @@ private fun RunningTrainingRow(training: Training, now: Instant, onClick: () -> 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        IconCircle(Icons.Outlined.Timer, ApexColors.orange)
+        AvatarWithBadge(Icons.Outlined.Timer, ApexColors.orange) {
+            UserAvatar(training.client.fullName, training.client.pictureUrl, size = 40.dp)
+        }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(training.name, style = ApexText.body.copy(fontWeight = FontWeight.SemiBold))
             Text(training.client.fullName, style = ApexText.subheadline, color = ApexColors.secondaryLabel)

@@ -129,7 +129,7 @@ object ProfilePictureStore {
 // Full screen profile picture with pinch and double tap to zoom,
 // drag to move when zoomed, and swipe down or close to dismiss.
 @Composable
-private fun ProfilePictureViewer(image: ImageBitmap, onDismiss: () -> Unit) {
+internal fun ProfilePictureViewer(image: ImageBitmap, onDismiss: () -> Unit) {
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     // Vertical drag while not zoomed, used to dismiss.

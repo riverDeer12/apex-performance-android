@@ -1,5 +1,8 @@
 package software.rdd.apexperformance.ui.appointments
 
+import software.rdd.apexperformance.ui.components.AvatarWithBadge
+import software.rdd.apexperformance.ui.components.UserAvatar
+import software.rdd.apexperformance.ui.components.UserAvatarStack
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -295,7 +298,9 @@ class AppointmentsScreen : Screen() {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconCircle(if (isCancelation) Icons.Outlined.EventBusy else Icons.Outlined.PersonAdd, tint)
+                AvatarWithBadge(if (isCancelation) Icons.Outlined.EventBusy else Icons.Outlined.PersonAdd, tint) {
+                    UserAvatar(request.sender.fullName, request.sender.pictureUrl, size = 40.dp)
+                }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(request.sender.fullName, style = ApexText.body)
                     Text(
@@ -332,7 +337,14 @@ class AppointmentsScreen : Screen() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconCircle(if (appointment.isActive) Icons.Outlined.CalendarMonth else Icons.Outlined.TaskAlt, tint)
+            // Client picture(s), a check when it is over.
+            val people = appointment.clients.map { it.fullName to it.pictureUrl }
+            when {
+                people.isEmpty() ->
+                    IconCircle(if (appointment.isActive) Icons.Outlined.CalendarMonth else Icons.Outlined.TaskAlt, tint)
+                appointment.isActive -> UserAvatarStack(people)
+                else -> AvatarWithBadge(Icons.Filled.Check, ApexColors.green) { UserAvatarStack(people) }
+            }
 
             // First client's name split into two lines.
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -367,7 +379,14 @@ class AppointmentsScreen : Screen() {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconCircle(Icons.Outlined.EventRepeat, ApexColors.orange)
+                // Client picture(s), marked as waiting.
+                if (appointment.clients.isEmpty()) {
+                    IconCircle(Icons.Outlined.EventRepeat, ApexColors.orange)
+                } else {
+                    AvatarWithBadge(Icons.Outlined.EventRepeat, ApexColors.orange) {
+                        UserAvatarStack(appointment.clients.map { it.fullName to it.pictureUrl })
+                    }
+                }
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(DateFormats.date(appointment.startTime), style = ApexText.body)
                     Text(

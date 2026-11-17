@@ -89,7 +89,11 @@ class AppointmentDetailsScreen(private val appointment: Appointment) : Screen() 
             CardView(modifier = Modifier.padding(horizontal = 20.dp), title = stringResource(R.string.clients)) {
                 Column {
                     appointment.clients.forEach { client ->
-                        SettingsRow(icon = Icons.Outlined.Person, iconTint = ApexColors.main, title = "${client.firstName} ${client.lastName}")
+                        SettingsRow(
+                            icon = Icons.Outlined.Person, iconTint = ApexColors.main,
+                            title = "${client.firstName} ${client.lastName}",
+                            person = client.fullName to client.pictureUrl
+                        )
                         if (client.id != appointment.clients.last().id) RowDivider()
                     }
                 }
