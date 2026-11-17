@@ -10,4 +10,8 @@ object Permissions {
 object Roles {
     const val CLIENT = "Client"
     const val COACH = "Coach"
+
+    // Approving or rejecting appointments and requests is for staff only; a
+    // client sees their own bookings waiting for the coach, without the buttons.
+    fun canApproveAppointments(role: String): Boolean = role.isNotEmpty() && role != CLIENT
 }

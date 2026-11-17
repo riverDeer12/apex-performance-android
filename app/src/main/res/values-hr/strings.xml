@@ -425,6 +425,7 @@
     <string name="passwords_do_not_match">Lozinke se ne podudaraju.</string>
     <string name="pending">Na čekanju</string>
     <string name="pending_approvals">Novi termini</string>
+    <string name="awaiting_coach_approval">Čeka potvrdu trenera</string>
     <string name="period_all">Sve</string>
     <string name="period_one_month">1 mjesec</string>
     <string name="period_six_months">6 mjeseci</string>

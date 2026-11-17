@@ -425,6 +425,7 @@
     <string name="passwords_do_not_match">Le password non corrispondono.</string>
     <string name="pending">In attesa</string>
     <string name="pending_approvals">Appuntamenti in attesa approvazione</string>
+    <string name="awaiting_coach_approval">In attesa di conferma del coach</string>
     <string name="period_all">Tutto</string>
     <string name="period_one_month">1 mese</string>
     <string name="period_six_months">6 mesi</string>
