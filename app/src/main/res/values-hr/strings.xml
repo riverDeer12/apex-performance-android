@@ -403,6 +403,7 @@
     <string name="passwords_do_not_match">Lozinke se ne podudaraju.</string>
     <string name="pending">Na čekanju</string>
     <string name="pending_approvals">Novi termini</string>
+    <string name="awaiting_coach_approval">Čeka potvrdu trenera</string>
     <string name="period_all">Sve</string>
     <string name="period_one_month">1 mjesec</string>
     <string name="period_six_months">6 mjeseci</string>
@@ -678,4 +679,8 @@
     <string name="no_clients_found">Nijedan klijent ne odgovara pretrazi.</string>
     <string name="no_clients_yet">Još nemaš klijenata.</string>
     <string name="add_client">Dodaj klijenta</string>
+    <string name="favorites">Favoriti</string>
+    <string name="add_to_favorites">Dodaj u favorite</string>
+    <string name="remove_from_favorites">Ukloni iz favorita</string>
+    <string name="no_favorite_workouts">Još nemaš favorita. Označi vježbu zvjezdicom da je brže pronađeš.</string>
 </resources>

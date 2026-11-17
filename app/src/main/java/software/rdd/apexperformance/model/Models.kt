@@ -251,7 +251,10 @@ data class UserProfile(
     val lastName: String = "",
     val email: String? = null,
     val credits: Int? = null,
-    val plan: String? = null
+    val plan: String? = null,
+    // Approved appointments of this month that are over, worked out by the
+    // API: appointments only has the client's upcoming ones.
+    val doneThisMonth: Int? = null
 )
 
 // MARK: - Profile
@@ -423,8 +426,13 @@ data class Workout(
     val category: String? = null,
     // PaceType value (e.g. rowing): sets record a distance and show a pace.
     // Null when the workout records no distance.
-    val paceType: String? = null
+    val paceType: String? = null,
+    // The user marked it with the star (each user has their own favorites).
+    // Null from an API without favorites: then the star isn't shown.
+    val isFavorite: Boolean? = null
 ) {
+    val isFavoriteWorkout: Boolean get() = isFavorite == true
+
     // Category for filtering; before the API had them, taken from the types.
     val workoutCategory: WorkoutCategory
         get() = WorkoutCategory.entries.firstOrNull { it.value == category }
@@ -605,6 +613,11 @@ enum class PaceTypeOption(val value: String?, @StringRes val title: Int) {
 // One workout, e.g. of an exercise in a training. Clients also get
 // the workouts of their trainings outside their plan.
 suspend fun loadWorkout(id: String): Workout = ApiClient.get("workouts/$id")
+
+// Marks the workout as a favorite of the user (PUT) or removes it (DELETE).
+suspend fun setFavoriteWorkout(id: String, isFavorite: Boolean) {
+    ApiClient.requestData("workouts/$id/favorite", if (isFavorite) HttpMethod.PUT else HttpMethod.DELETE)
+}
 
 suspend fun deleteWorkout(id: String) {
     ApiClient.requestData("workouts/$id", HttpMethod.DELETE)

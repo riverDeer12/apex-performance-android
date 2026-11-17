@@ -2,6 +2,8 @@ package software.rdd.apexperformance
 
 import kotlinx.serialization.decodeFromString
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import software.rdd.apexperformance.core.auth.JwtDecoder
@@ -164,5 +166,30 @@ class DemoAPITest {
         assertTrue(appointment.clients.isNotEmpty())
         // The chat hub fails quietly and retries, as on iOS.
         assertEquals(404, DemoAPI.fixture("GET", "hubs/chat", Role.CLIENT).status)
+    }
+
+    @Test
+    fun favoriteWorkoutsArePerUserAndToggle() {
+        fun favorites(role: Role): Set<String> {
+            val workouts = decode<List<Workout>>("workouts", role, "en")
+            assertTrue("isFavorite in every workout", workouts.all { it.isFavorite != null })
+            return workouts.filter { it.isFavoriteWorkout }.map { it.id }.toSet()
+        }
+
+        val plank = DemoAPI.id(DemoAPI.Kind.WORKOUT, DemoAPI.W.PLANK)
+        val coachFavorites = favorites(Role.COACH)
+        assertTrue(coachFavorites.isNotEmpty())
+        assertNotEquals(coachFavorites, favorites(Role.CLIENT))
+        assertFalse(plank in coachFavorites)
+
+        try {
+            assertEquals(204, DemoAPI.fixture("PUT", "workouts/$plank/favorite", Role.COACH).status)
+            assertTrue(plank in favorites(Role.COACH))
+            assertFalse(plank in favorites(Role.CLIENT))
+            assertEquals(true, decode<Workout>("workouts/$plank", Role.COACH, "en").isFavorite)
+        } finally {
+            assertEquals(204, DemoAPI.fixture("DELETE", "workouts/$plank/favorite", Role.COACH).status)
+        }
+        assertEquals(coachFavorites, favorites(Role.COACH))
     }
 }

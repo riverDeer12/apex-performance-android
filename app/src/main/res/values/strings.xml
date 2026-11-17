@@ -404,6 +404,7 @@
     <string name="passwords_do_not_match">Passwords do not match.</string>
     <string name="pending">Pending</string>
     <string name="pending_approvals">Pending approvals</string>
+    <string name="awaiting_coach_approval">Waiting for your coach</string>
     <string name="period_all">All</string>
     <string name="period_one_month">1 month</string>
     <string name="period_six_months">6 months</string>
@@ -675,4 +676,8 @@
     <string name="no_clients_found">No clients match the search.</string>
     <string name="no_clients_yet">No clients yet.</string>
     <string name="add_client">Add client</string>
+    <string name="favorites">Favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="no_favorite_workouts">No favorites yet. Tap the star on an exercise to find it faster.</string>
 </resources>

@@ -403,6 +403,7 @@
     <string name="passwords_do_not_match">Die Passwörter stimmen nicht überein.</string>
     <string name="pending">Ausstehend</string>
     <string name="pending_approvals">Ausstehende Bestätigungen</string>
+    <string name="awaiting_coach_approval">Wartet auf deinen Coach</string>
     <string name="period_all">Alle</string>
     <string name="period_one_month">1 Monat</string>
     <string name="period_six_months">6 Monate</string>
@@ -674,4 +675,8 @@
     <string name="no_clients_found">Keine Kunden passen zur Suche.</string>
     <string name="no_clients_yet">Noch keine Kunden.</string>
     <string name="add_client">Kunden hinzufügen</string>
+    <string name="favorites">Favoriten</string>
+    <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
+    <string name="remove_from_favorites">Aus Favoriten entfernen</string>
+    <string name="no_favorite_workouts">Noch keine Favoriten. Tippe auf den Stern bei einer Übung, um sie schneller zu finden.</string>
 </resources>

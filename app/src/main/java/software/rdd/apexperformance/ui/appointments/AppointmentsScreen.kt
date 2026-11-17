@@ -73,6 +73,7 @@ import software.rdd.apexperformance.ui.components.ActionButton
 import software.rdd.apexperformance.ui.components.ApexLabel
 import software.rdd.apexperformance.ui.components.ApexPrimaryButton
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
+import software.rdd.apexperformance.ui.components.Badge
 import software.rdd.apexperformance.ui.components.CalendarMonth
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.Chevron
@@ -105,7 +106,8 @@ class AppointmentsScreen : Screen() {
 
     private val isClient: Boolean get() = AuthManager.hasRole(Roles.CLIENT)
 
-    private val canManageRequests: Boolean get() = !isClient
+    // Staff only: approve / reject buttons and the pending requests.
+    private val canManageRequests: Boolean get() = Roles.canApproveAppointments(AuthManager.userRole)
 
     private val showsRequestsButton: Boolean
         get() = isClient || AuthManager.hasPermission(Permissions.CAN_GET_APPOINTMENT_REQUESTS)
@@ -215,7 +217,8 @@ class AppointmentsScreen : Screen() {
 
             if (pendingAppointments.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SectionLabel(stringResource(R.string.pending_approvals))
+                    // Clients: their own bookings waiting for the coach.
+                    SectionLabel(stringResource(if (canManageRequests) R.string.pending_approvals else R.string.awaiting_coach_approval))
                     CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                         Column {
                             ShowMoreItems(pendingAppointments) { appointment ->
@@ -404,13 +407,17 @@ class AppointmentsScreen : Screen() {
                         )
                     }
                 }
+                if (!canManageRequests) Badge(stringResource(R.string.status_pending), ApexColors.orange)
             }
-            Row(modifier = Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ActionButton(stringResource(R.string.approve), Icons.Filled.Check, ApexColors.green, isLoading = isProcessing, enabled = !isProcessing) {
-                    launch { updateAppointment(appointment, "approve", R.string.appointment_approved_successfully) }
-                }
-                ActionButton(stringResource(R.string.reject), Icons.Filled.Close, ApexColors.red, enabled = !isProcessing) {
-                    launch { updateAppointment(appointment, "decline", R.string.appointment_declined_successfully) }
+            // Only staff decide; the API refuses a client anyway.
+            if (canManageRequests) {
+                Row(modifier = Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ActionButton(stringResource(R.string.approve), Icons.Filled.Check, ApexColors.green, isLoading = isProcessing, enabled = !isProcessing) {
+                        launch { updateAppointment(appointment, "approve", R.string.appointment_approved_successfully) }
+                    }
+                    ActionButton(stringResource(R.string.reject), Icons.Filled.Close, ApexColors.red, enabled = !isProcessing) {
+                        launch { updateAppointment(appointment, "decline", R.string.appointment_declined_successfully) }
+                    }
                 }
             }
         }
