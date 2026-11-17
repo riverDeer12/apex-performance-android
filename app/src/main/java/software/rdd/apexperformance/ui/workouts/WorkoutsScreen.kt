@@ -36,6 +36,9 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -81,6 +84,7 @@ import software.rdd.apexperformance.model.ImportWorkoutsResponse
 import software.rdd.apexperformance.model.Workout
 import software.rdd.apexperformance.model.WorkoutCategory
 import software.rdd.apexperformance.model.deleteWorkout
+import software.rdd.apexperformance.model.setFavoriteWorkout
 import software.rdd.apexperformance.ui.components.ApexScreenHeader
 import software.rdd.apexperformance.ui.components.CardView
 import software.rdd.apexperformance.ui.components.Chevron
@@ -108,6 +112,8 @@ class WorkoutsScreen(
     private var searchText by mutableStateOf("")
     // Null shows all workouts.
     private var category by mutableStateOf<WorkoutCategory?>(null)
+    // Only the user's favorites (with the category, if one is picked).
+    private var showsOnlyFavorites by mutableStateOf(false)
     private var isLoading by mutableStateOf(false)
     private var isImporting by mutableStateOf(false)
     // Workout picked for deletion from the long-press menu.
@@ -124,9 +130,14 @@ class WorkoutsScreen(
     private val showsCategoryFilter: Boolean
         get() = visibleWorkouts.map { it.workoutCategory }.toSet().size > 1
 
+    // An API without favorites leaves isFavorite out: no stars, no filter.
+    private val supportsFavorites: Boolean
+        get() = workouts.any { it.isFavorite != null }
+
     private val filteredWorkouts: List<Workout>
         get() = visibleWorkouts
             .filter { category == null || it.workoutCategory == category }
+            .filter { !showsOnlyFavorites || it.isFavoriteWorkout }
             .filter { it.matches(searchText) }
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name.localized })
 
@@ -134,7 +145,26 @@ class WorkoutsScreen(
     private val importTemplateUrl = "${AppEnvironment.webUrl}/assets/templates/workouts-import-template.xlsx"
 
     fun updateWorkout(updated: Workout) {
-        workouts = workouts.map { if (it.id == updated.id) updated else it }
+        workouts = workouts.map {
+            // An answer without favorites keeps the star as it was.
+            if (it.id == updated.id) updated.copy(isFavorite = updated.isFavorite ?: it.isFavorite) else it
+        }
+    }
+
+    // Shows the star at once and puts it back when the API fails.
+    private suspend fun toggleFavorite(workout: Workout) {
+        val isFavorite = !(workouts.firstOrNull { it.id == workout.id } ?: workout).isFavoriteWorkout
+        setFavorite(workout.id, isFavorite)
+        try {
+            setFavoriteWorkout(workout.id, isFavorite)
+        } catch (e: Exception) {
+            setFavorite(workout.id, !isFavorite)
+            showError(e)
+        }
+    }
+
+    private fun setFavorite(id: String, isFavorite: Boolean) {
+        workouts = workouts.map { if (it.id == id) it.copy(isFavorite = isFavorite) else it }
     }
 
     private fun removeWorkout(id: String) {
@@ -175,12 +205,14 @@ class WorkoutsScreen(
 
             SearchField()
 
-            if (showsCategoryFilter) CategoryFilter()
+            if (showsCategoryFilter || supportsFavorites) CategoryFilter()
 
             CardView(modifier = Modifier.padding(horizontal = 20.dp)) {
                 val list = filteredWorkouts
-                if (list.isEmpty() && !isLoading) {
-                    val isFiltering = searchText.isNotEmpty() || category != null
+                if (list.isEmpty() && !isLoading && showsOnlyFavorites && searchText.isEmpty() && category == null) {
+                    EmptyStateView(Icons.Outlined.StarBorder, stringResource(R.string.no_favorite_workouts))
+                } else if (list.isEmpty() && !isLoading) {
+                    val isFiltering = searchText.isNotEmpty() || category != null || showsOnlyFavorites
                     EmptyStateView(
                         if (isFiltering) Icons.Outlined.SearchOff else Icons.Outlined.FitnessCenter,
                         stringResource(if (isFiltering) R.string.no_workouts_found else R.string.no_workouts),
@@ -259,8 +291,8 @@ class WorkoutsScreen(
 
     @Composable
     private fun CategoryFilter() {
-        // Two buttons, one per category: a tapped one shows only its workouts,
-        // tapped again all of them.
+        // The favorites and one button per category: a tapped one shows only its
+        // workouts, tapped again all of them. Favorites combine with a category.
         Row(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
@@ -268,37 +300,66 @@ class WorkoutsScreen(
                 .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            WorkoutCategory.entries.forEach { option ->
-                val isSelected = category == option
-                Row(
-                    modifier = Modifier
-                        .testTag("category-${option.value}")
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .heightIn(min = 44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) ApexColors.accent else ApexColors.accent.copy(alpha = 0.12f))
-                        .selectable(selected = isSelected, role = Role.Tab) { category = if (isSelected) null else option }
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val color = if (isSelected) ApexColors.onAccent else ApexColors.accent
-                    Icon(
-                        if (option == WorkoutCategory.MOBILITY_FLEXIBILITY) Icons.Outlined.SelfImprovement else Icons.Outlined.FitnessCenter,
-                        contentDescription = null,
-                        tint = color,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    // With the number of workouts, e.g. "Mobility and flexibility · 11".
-                    Text(
-                        "${stringResource(option.title)} · ${visibleWorkouts.count { it.workoutCategory == option }}",
-                        style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
-                        color = color,
-                        textAlign = TextAlign.Center
-                    )
+            if (supportsFavorites) {
+                val count = visibleWorkouts.count {
+                    it.isFavoriteWorkout && (category == null || it.workoutCategory == category)
+                }
+                FilterButton(
+                    title = stringResource(R.string.favorites),
+                    count = count,
+                    icon = if (showsOnlyFavorites) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                    isSelected = showsOnlyFavorites,
+                    tag = "category-Favorites"
+                ) { showsOnlyFavorites = !showsOnlyFavorites }
+            }
+            if (showsCategoryFilter) {
+                WorkoutCategory.entries.forEach { option ->
+                    val isSelected = category == option
+                    FilterButton(
+                        title = stringResource(option.title),
+                        count = visibleWorkouts.count {
+                            it.workoutCategory == option && (!showsOnlyFavorites || it.isFavoriteWorkout)
+                        },
+                        icon = if (option == WorkoutCategory.MOBILITY_FLEXIBILITY) Icons.Outlined.SelfImprovement else Icons.Outlined.FitnessCenter,
+                        isSelected = isSelected,
+                        tag = "category-${option.value}"
+                    ) { category = if (isSelected) null else option }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun androidx.compose.foundation.layout.RowScope.FilterButton(
+        title: String,
+        count: Int,
+        icon: ImageVector,
+        isSelected: Boolean,
+        tag: String,
+        onClick: () -> Unit
+    ) {
+        Row(
+            modifier = Modifier
+                .testTag(tag)
+                .weight(1f)
+                .fillMaxHeight()
+                .heightIn(min = 44.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isSelected) ApexColors.accent else ApexColors.accent.copy(alpha = 0.12f))
+                .selectable(selected = isSelected, role = Role.Tab, onClick = onClick)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val color = if (isSelected) ApexColors.onAccent else ApexColors.accent
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+            // With the number of workouts, e.g. "Mobility and flexibility · 11".
+            Text(
+                "$title · $count",
+                style = ApexText.subheadline.copy(fontWeight = FontWeight.SemiBold),
+                color = color,
+                textAlign = TextAlign.Center
+            )
         }
     }
 
@@ -344,7 +405,7 @@ class WorkoutsScreen(
                 workout,
                 Modifier.combinedClickable(
                     onClick = onClick,
-                    onLongClick = if (canManageWorkouts) ({ showMenu = true }) else null
+                    onLongClick = if (canManageWorkouts || supportsFavorites) ({ showMenu = true }) else null
                 )
             )
             DropdownMenu(
@@ -352,14 +413,34 @@ class WorkoutsScreen(
                 onDismissRequest = { showMenu = false },
                 containerColor = ApexColors.background
             ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.delete_workout), color = ApexColors.red) },
-                    leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = ApexColors.red) },
-                    onClick = {
-                        showMenu = false
-                        workoutToDelete = workout
-                    }
-                )
+                if (supportsFavorites) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(stringResource(if (workout.isFavoriteWorkout) R.string.remove_from_favorites else R.string.add_to_favorites))
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (workout.isFavoriteWorkout) Icons.Outlined.StarBorder else Icons.Filled.Star,
+                                contentDescription = null,
+                                tint = ApexColors.accent
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            launch { toggleFavorite(workout) }
+                        }
+                    )
+                }
+                if (canManageWorkouts) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.delete_workout), color = ApexColors.red) },
+                        leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = ApexColors.red) },
+                        onClick = {
+                            showMenu = false
+                            workoutToDelete = workout
+                        }
+                    )
+                }
             }
         }
     }
@@ -405,6 +486,10 @@ class WorkoutsScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
+
+            if (supportsFavorites) {
+                FavoriteStarButton(workout.isFavoriteWorkout) { launch { toggleFavorite(workout) } }
             }
 
             Chevron()
@@ -464,5 +549,20 @@ class WorkoutsScreen(
 
     private companion object {
         const val XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }
+}
+
+// Gold of the favorite star, the same in light and dark.
+val FavoriteStarColor = Color(0xFFEAB308)
+
+// Star that marks a workout as a favorite of the user, or removes it.
+@Composable
+fun FavoriteStarButton(isFavorite: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = modifier.testTag("workout-favorite")) {
+        Icon(
+            if (isFavorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+            contentDescription = stringResource(if (isFavorite) R.string.remove_from_favorites else R.string.add_to_favorites),
+            tint = if (isFavorite) FavoriteStarColor else ApexColors.secondaryLabel
+        )
     }
 }

@@ -679,4 +679,8 @@
     <string name="no_clients_found">Nessun cliente corrisponde alla ricerca.</string>
     <string name="no_clients_yet">Non hai ancora clienti.</string>
     <string name="add_client">Aggiungi cliente</string>
+    <string name="favorites">Preferiti</string>
+    <string name="add_to_favorites">Aggiungi ai preferiti</string>
+    <string name="remove_from_favorites">Rimuovi dai preferiti</string>
+    <string name="no_favorite_workouts">Nessun preferito. Tocca la stella su un esercizio per trovarlo più in fretta.</string>
 </resources>

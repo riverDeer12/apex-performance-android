@@ -53,6 +53,17 @@ object DemoAPI {
 
     enum class Role { COACH, CLIENT }
 
+    // Workouts each user marked with the star in this launch (W numbers):
+    // the coach's strength favorites, Ana's mobility ones.
+    val favoriteWorkouts: MutableMap<Role, MutableSet<Int>> = java.util.concurrent.ConcurrentHashMap(
+        mapOf(
+            Role.COACH to java.util.Collections.synchronizedSet(mutableSetOf(W.BENCH, W.SQUAT, W.ROMANIAN_DEADLIFT, W.HIP_THRUST)),
+            Role.CLIENT to java.util.Collections.synchronizedSet(mutableSetOf(W.HIP_FLEXOR_STRETCH, W.CAT_COW))
+        )
+    )
+
+    fun isFavorite(role: Role, number: Int): Boolean = favoriteWorkouts[role]?.contains(number) == true
+
     class Reply(val status: Int = 200, val contentType: String = "application/json", val body: ByteArray = ByteArray(0)) {
         companion object {
             val notFound = Reply(status = 404)
@@ -807,7 +818,8 @@ private class Fixtures(private val role: DemoAPI.Role, private val language: Str
             // Plank sets record a duration, row erg sets a distance and a duration.
             "isTimed" to (info.number == DemoAPI.W.PLANK || DemoAPI.paceTypes.containsKey(info.number)),
             "category" to if (DemoAPI.MOBILITY_TYPE_NUMBER in info.types) "MobilityFlexibility" else "StrengthConditioning",
-            "paceType" to DemoAPI.paceTypes[info.number]
+            "paceType" to DemoAPI.paceTypes[info.number],
+            "isFavorite" to DemoAPI.isFavorite(role, info.number)
         )
     }
 
@@ -1679,7 +1691,8 @@ private class Fixtures(private val role: DemoAPI.Role, private val language: Str
             "secondaryMuscles" to (input["secondaryMuscles"] as? JsonArray ?: JsonArray(emptyList())),
             "isTimed" to ((input.bool("isTimed") ?: false) || paceType != null),
             "category" to (input.string("category") ?: "StrengthConditioning"),
-            "paceType" to paceType
+            "paceType" to paceType,
+            "isFavorite" to (workoutNumber(id)?.let { DemoAPI.isFavorite(role, it) } ?: false)
         )
     }
 
@@ -1844,6 +1857,15 @@ private class Fixtures(private val role: DemoAPI.Role, private val language: Str
                 "content" to input.string("content").orEmpty(),
                 "updatedAt" to iso(now)
             ))
+        }
+        // Favorites: 204 like the API; only the demo's own workouts keep the star.
+        route("PUT", "workouts/*/favorite")?.let { ids ->
+            workoutNumber(ids[0])?.let { DemoAPI.favoriteWorkouts.getOrPut(role) { java.util.Collections.synchronizedSet(mutableSetOf()) }.add(it) }
+            return DemoAPI.Reply(status = 204)
+        }
+        route("DELETE", "workouts/*/favorite")?.let { ids ->
+            workoutNumber(ids[0])?.let { DemoAPI.favoriteWorkouts[role]?.remove(it) }
+            return DemoAPI.Reply(status = 204)
         }
         if (route("POST", "workouts/import") != null) {
             return ok(json("id" to UUID.randomUUID().toString(), "status" to true, "queuedWorkoutsCount" to 0))
