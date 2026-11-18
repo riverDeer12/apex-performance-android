@@ -1,8 +1,7 @@
 Novosti:
-- Trener na vrhu Termina vidi "Danas": današnje termine, treninge u tijeku i zahtjeve na čekanju.
-- "Ponovi zadnji trening" popunjava novi trening iz klijentovog zadnjeg.
-- Bez veze trening se čuva na mobitelu i sprema čim se veza vrati.
-- Obrisana serija ili vježba vraća se s "Poništi".
-- Osobni rekordi u napretku i oznaka 🏆 Novi rekord na treningu.
-- Widget sa sljedećim terminom i paketom.
-- Podsjetnik 2 h prije termina otvara taj termin.
+- Health Connect: san, koraci, kalorije i puls iz Mi Fitnessa, Google Fita, Fitbita ili Samsung Healtha.
+- Favoriti vježbi i profilne slike posvuda.
+- Paket točno broji odrađene treninge.
+- Trener: "Danas" na vrhu Termina i "Ponovi zadnji trening".
+- Osobni rekordi, widget i podsjetnik 2 h prije termina.
+- Bez veze trening se čuva i sprema kasnije; "Poništi" vraća obrisanu seriju.
