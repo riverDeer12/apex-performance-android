@@ -52,6 +52,8 @@ import software.rdd.apexperformance.core.navigation.LocalNavigator
 import software.rdd.apexperformance.core.navigation.Navigator
 import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.showError
+import software.rdd.apexperformance.core.navigation.launch
+import software.rdd.apexperformance.core.util.NotificationRouter
 import software.rdd.apexperformance.core.network.ApiClient
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.model.Client
@@ -126,6 +128,20 @@ class StaffTrainingsScreen : Screen() {
             load()
         }
 
+        // Training of a tapped push (a training push or the end reminder): a
+        // training of a session opens the session, others their details.
+        val pendingTrainingId = NotificationRouter.pendingTrainingId
+        LaunchedEffect(pendingTrainingId) {
+            val id = pendingTrainingId ?: return@LaunchedEffect
+            NotificationRouter.pendingTrainingId = null
+            // In the screen's scope: clearing the id ends this effect.
+            this@StaffTrainingsScreen.launch {
+                if (trainings.none { it.id.equals(id, ignoreCase = true) }) load()
+                val training = trainings.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: return@launch
+                open(navigator, training)
+            }
+        }
+
         ScrollScreen(
             showLoading = isLoading && trainings.isEmpty(),
             onRefresh = { load() }
@@ -193,14 +209,12 @@ class StaffTrainingsScreen : Screen() {
                                 person = training.client.fullName to training.client.pictureUrl,
                                 personBadge = training.statusIcon to training.statusTint,
                                 onClick = {
-                                    navigator.push(
-                                        TrainingDetailScreen(
-                                            training = training,
-                                            history = trainings.filter { it.client.id == training.client.id },
-                                            onSaved = { upsert(it) },
-                                            onDeleted = { id -> trainings = trainings.filter { it.id != id } }
-                                        )
-                                    )
+                                    if (training.sessionId != null) {
+                                        // A training of a session opens the session.
+                                        launch { open(navigator, training) }
+                                    } else {
+                                        navigator.push(detailScreen(training))
+                                    }
                                 }
                             )
                             if (training.id != list.last().id) RowDivider()
@@ -209,6 +223,19 @@ class StaffTrainingsScreen : Screen() {
                 }
             }
         }
+    }
+
+    private fun detailScreen(training: Training) = TrainingDetailScreen(
+        training = training,
+        history = trainings.filter { it.client.id == training.client.id },
+        onSaved = { upsert(it) },
+        onDeleted = { id -> trainings = trainings.filter { it.id != id } }
+    )
+
+    // A training of a session opens the session, any other its details.
+    private suspend fun open(navigator: Navigator, training: Training) {
+        val session = sessionScreenOrNull(training, trainings) { upsert(it) }
+        navigator.push(session ?: detailScreen(training))
     }
 
     // Templates and personal records, like the web's trainings menu.

@@ -659,7 +659,13 @@ class TrainingSessionScreen private constructor(
 // the same time with the coach) opens the session with all its trainings and
 // the tapped client shown; any other training (or an API without sessions)
 // opens the usual form. Clients never see the session.
-suspend fun trainingEditScreen(training: Training, history: List<Training>, onSaved: ((Training) -> Unit)?): Screen {
+suspend fun trainingEditScreen(training: Training, history: List<Training>, onSaved: ((Training) -> Unit)?): Screen =
+    sessionScreenOrNull(training, history, onSaved)
+        ?: TrainingFormScreen(clientId = training.client.id, training = training, history = history, onSaved = onSaved)
+
+// For staff, the session screen of a training of a session (two or more
+// trainings); null for a training on its own, a client or an API without sessions.
+suspend fun sessionScreenOrNull(training: Training, history: List<Training>, onSaved: ((Training) -> Unit)?): Screen? {
     val isStaff = !AuthManager.hasRole(Roles.CLIENT)
     if (isStaff && TrainingSession.mayHaveSession(training.sessionId, training.startedAt)) {
         val session = try {
@@ -679,5 +685,5 @@ suspend fun trainingEditScreen(training: Training, history: List<Training>, onSa
             return TrainingSessionScreen(editing = session, selectedTrainingId = training.id, history = all, onSaved = onSaved)
         }
     }
-    return TrainingFormScreen(clientId = training.client.id, training = training, history = history, onSaved = onSaved)
+    return null
 }
