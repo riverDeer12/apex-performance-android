@@ -720,4 +720,8 @@
     <string name="time_hours_ago">%1$d h fa</string>
     <string name="client_already_in_session">Il cliente è già in questa sessione.</string>
     <string name="training_not_saved_for">L\'allenamento di %1$s non è stato salvato: %2$s</string>
+    <string name="close_client_tab">Chiudi la scheda</string>
+    <string name="remove_from_session">Rimuovi dalla sessione</string>
+    <string name="remove_saved_client_info">Chiudi la scheda: l\'allenamento di %1$s resta com\'è, nella sessione. Rimuovi dalla sessione: l\'allenamento resta da solo. Elimina allenamento: l\'allenamento viene eliminato. Le modifiche non salvate della scheda vanno perse.</string>
+    <string name="session_times_not_saved">L\'orario non è stato cambiato in tutti gli allenamenti della sessione.</string>
 </resources>

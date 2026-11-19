@@ -67,7 +67,7 @@ import software.rdd.apexperformance.ApexApp
 import software.rdd.apexperformance.core.widget.ApexWidget
 import software.rdd.apexperformance.core.widget.WidgetSnapshot
 import software.rdd.apexperformance.ui.components.EmptyStateView
-import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
+import software.rdd.apexperformance.ui.trainings.trainingEditScreen
 import java.time.Instant
 import software.rdd.apexperformance.ui.components.ActionButton
 import software.rdd.apexperformance.ui.components.ApexLabel
@@ -194,14 +194,15 @@ class AppointmentsScreen : Screen() {
                     isLoading = isInitialLoading,
                     onOpenAppointment = { navigator.push(AppointmentDetailsScreen(it)) },
                     onOpenTraining = { training ->
-                        navigator.push(
-                            TrainingFormScreen(
-                                clientId = training.client.id,
-                                training = training,
-                                history = trainings.filter { it.client.id == training.client.id },
-                                onSaved = { saved -> trainings = trainings.map { if (it.id == saved.id) saved else it } }
+                        // A training of a session opens the session with all its trainings.
+                        launch {
+                            navigator.push(
+                                trainingEditScreen(
+                                    training,
+                                    trainings.filter { it.client.id == training.client.id }
+                                ) { saved -> trainings = trainings.map { if (it.id == saved.id) saved else it } }
                             )
-                        )
+                        }
                     }
                 )
 

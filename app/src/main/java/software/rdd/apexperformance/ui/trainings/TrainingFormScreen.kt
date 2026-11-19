@@ -197,7 +197,9 @@ class TrainingFormScreen private constructor(
         // More than one client: the session shows the time and the switcher.
         val isShared: () -> Boolean,
         // A name was written: the session's time starts.
-        val onStart: () -> Unit
+        val onStart: () -> Unit,
+        // The id linking the session's trainings, null while it has one client.
+        val sessionId: () -> String? = { null }
     )
 
     // The set entered last, shown in the other clients' trainings of a session.
@@ -271,6 +273,9 @@ class TrainingFormScreen private constructor(
     internal val isQueued: Boolean get() = OfflineTrainingQueue.entries.any { it.key == offlineKey }
 
     internal val queueKey: String get() = offlineKey
+
+    // The new training once saved (autosaved or by the session's Save).
+    internal val savedTraining: Training? get() = autosaved
 
     // Trainings of several clients aren't planned: they run at the session's time.
     private val isPlannedNow: Boolean get() = isPlanned && session?.isShared?.invoke() != true
@@ -1309,7 +1314,8 @@ class TrainingFormScreen private constructor(
                 isCompleted = false,
                 exercises = exercises.filter { it.isValid }.mapNotNull { it.request },
                 // The client hears about the new training once.
-                notifyClient = autosaved == null && notifyClient
+                notifyClient = autosaved == null && notifyClient,
+                sessionId = session?.sessionId?.invoke()
             )
             val knownId = autosaved?.id ?: OfflineTrainingQueue.knownTrainingId(offlineKey)
             val entry = PendingTrainingSave(
@@ -1366,7 +1372,8 @@ class TrainingFormScreen private constructor(
             note = note.trim().ifEmpty { null },
             isCompleted = isCompleted,
             exercises = exercises.mapNotNull { it.request },
-            notifyClient = notifyClient
+            notifyClient = notifyClient,
+            sessionId = session?.sessionId?.invoke()
         )
         return PendingTrainingSave(
             key = offlineKey,
