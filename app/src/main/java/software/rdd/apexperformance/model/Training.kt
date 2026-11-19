@@ -24,7 +24,10 @@ data class Training(
     val endedAt: IsoInstant? = null,
     // Client's heart rate in between, from the client's phone:
     // Apple Health on an iPhone, Health Connect on Android.
-    val heartRate: HeartRate? = null
+    val heartRate: HeartRate? = null,
+    // Shared by the trainings of clients training at the same time with the
+    // coach (one session, one time); null on its own or from an older API.
+    val sessionId: String? = null
 ) {
     // Started by the coach, not completed yet; clients see it then.
     val isInProgress: Boolean get() = !isCompleted && startedAt != null
@@ -102,6 +105,27 @@ data class Training(
 
     // Marks the training as completed or planned (staff only).
     // Returns the training with the new state.
+    // The training as it is saved, e.g. to take it out of its session.
+    fun saveRequest(sessionId: String?): SaveTrainingRequest = SaveTrainingRequest(
+        client = client.id,
+        name = name,
+        date = date.toString(),
+        note = note,
+        isCompleted = isCompleted,
+        exercises = exercises.sortedBy { it.order }.map { exercise ->
+            SaveTrainingRequest.Exercise(
+                workout = exercise.workoutId,
+                note = exercise.note,
+                sets = exercise.sets.sortedBy { it.order }.map {
+                    SaveTrainingRequest.ExerciseSet(it.reps, it.weight, it.isDropSet, it.durationSeconds, it.distanceMeters)
+                },
+                isSupersetWithPrevious = exercise.isSupersetWithPrevious
+            )
+        },
+        notifyClient = false,
+        sessionId = sessionId
+    )
+
     // Marks when the training started and ended (PUT trainings/{id}/times, staff only).
     suspend fun settingTimes(startedAt: java.time.Instant?, endedAt: java.time.Instant?): Training {
         val response: TimesResponse =
@@ -150,6 +174,13 @@ data class Training(
         suspend fun save(request: SaveTrainingRequest, id: String? = null): Training =
             if (id == null) ApiClient.request("trainings", HttpMethod.POST, request)
             else ApiClient.request("trainings/$id", HttpMethod.PUT, request)
+
+        // The trainings of the session the training belongs to, itself included
+        // (GET trainings/{id}/session). Throws with an API that doesn't have it.
+        suspend fun loadSession(id: String): List<Training> = ApiClient.get("trainings/$id/session")
+
+        // Sent as the session id to take a training out of its session.
+        const val NO_SESSION = "00000000-0000-0000-0000-000000000000"
 
         // Deletes the training (soft delete on the API, staff only).
         suspend fun delete(id: String) {
@@ -280,7 +311,10 @@ data class SaveTrainingRequest(
     val exercises: List<Exercise>,
     // Push notification to the client. The API sends it for a new
     // training and not for an edited one when this is null.
-    val notifyClient: Boolean? = null
+    val notifyClient: Boolean? = null,
+    // The session of clients training at the same time (the form's id for
+    // it); null keeps the training's session, an empty id takes it out.
+    val sessionId: String? = null
 ) {
     @Serializable
     data class Exercise(

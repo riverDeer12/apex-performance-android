@@ -385,11 +385,34 @@ class TrainingDetailScreen(
         try {
             training = training.settingTimes(startedAt, endedAt)
             onSaved?.invoke(training)
+            saveSessionTimes(startedAt, endedAt)
         } catch (e: Exception) {
             showError(e)
         } finally {
             isSavingTimes = false
         }
+    }
+
+    // The other trainings of its session (clients training at the same time)
+    // share the time: they get the same start and end.
+    private suspend fun saveSessionTimes(startedAt: Instant?, endedAt: Instant?) {
+        if (training.sessionId == null) return
+        val session = try {
+            Training.loadSession(training.id)
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            return
+        }
+        var failed = false
+        for (other in session.filter { it.id != training.id }) {
+            try {
+                onSaved?.invoke(other.settingTimes(startedAt, endedAt))
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                failed = true
+            }
+        }
+        if (failed) ToastManager.show(R.string.session_times_not_saved, ToastType.ERROR)
     }
 
     @Composable
@@ -420,16 +443,19 @@ class TrainingDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                     onClick = {
                         showMenu = false
-                        navigator.push(
-                            TrainingFormScreen(
-                                clientId = training.client.id,
-                                training = training,
-                                history = history
-                            ) { saved ->
-                                training = saved
-                                onSaved?.invoke(saved)
+                        // A training of a session opens the session with all its trainings.
+                        launch {
+                            isUpdating = true
+                            val screen = try {
+                                trainingEditScreen(training, history) { saved ->
+                                    if (saved.id == training.id) training = saved
+                                    onSaved?.invoke(saved)
+                                }
+                            } finally {
+                                isUpdating = false
                             }
-                        )
+                            navigator.push(screen)
+                        }
                     }
                 )
 
@@ -455,7 +481,7 @@ class TrainingDetailScreen(
                         showMenu = false
                         // The copy is a new training, so it is only added to the list.
                         navigator.push(
-                            TrainingFormScreen(copying = training, history = history) { saved ->
+                            TrainingSessionScreen(copying = training, history = history) { saved ->
                                 onSaved?.invoke(saved)
                             }
                         )

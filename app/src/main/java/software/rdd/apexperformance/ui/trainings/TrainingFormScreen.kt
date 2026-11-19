@@ -96,6 +96,7 @@ import software.rdd.apexperformance.core.network.OfflineTrainingQueue
 import software.rdd.apexperformance.core.network.PendingTrainingSave
 import software.rdd.apexperformance.core.network.SaveFailure
 import software.rdd.apexperformance.core.network.SendResult
+import software.rdd.apexperformance.core.network.mapError
 import software.rdd.apexperformance.core.util.DateFormats
 import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
@@ -107,6 +108,7 @@ import software.rdd.apexperformance.model.SaveTrainingTemplateRequest
 import software.rdd.apexperformance.model.SupersetLabels
 import software.rdd.apexperformance.model.Training
 import software.rdd.apexperformance.model.TrainingHistory
+import software.rdd.apexperformance.model.TrainingSession
 import software.rdd.apexperformance.model.TrainingTemplate
 import software.rdd.apexperformance.model.UpdateWorkoutRequest
 import software.rdd.apexperformance.model.Workout
@@ -183,6 +185,26 @@ class TrainingFormScreen private constructor(
     private var isCompleted by mutableStateOf(training?.isCompleted ?: false)
     // Planned trainings are saved without starting; others start on save.
     private var isPlanned by mutableStateOf(training?.let { !it.isCompleted && it.startedAt == null } ?: false)
+
+    // Set when this is one client's training of a session of several clients
+    // (TrainingSessionScreen), which has the top bar and the shared time.
+    internal var session: SessionHooks? = null
+
+    // What a training form of a session gets from it.
+    internal class SessionHooks(
+        // The shared start of all trainings of the session, null until a name is written.
+        val startedAt: () -> Instant?,
+        // More than one client: the session shows the time and the switcher.
+        val isShared: () -> Boolean,
+        // A name was written: the session's time starts.
+        val onStart: () -> Unit,
+        // The id linking the session's trainings, null while it has one client.
+        val sessionId: () -> String? = { null }
+    )
+
+    // The set entered last, shown in the other clients' trainings of a session.
+    internal var lastSet by mutableStateOf<TrainingSession.SetActivity?>(null)
+        private set
     // When the coach wrote the new training's name: its start, so the time
     // is right even when the form stays open during the training.
     private var startedAt by mutableStateOf<Instant?>(null)
@@ -232,6 +254,36 @@ class TrainingFormScreen private constructor(
         super.onDispose()
     }
 
+    // MARK: - Session
+
+    internal val trainingName: String get() = name.trim()
+
+    internal val canBeSaved: Boolean get() = isValid
+
+    // Sets with something entered (reps, weight, time or distance).
+    internal val enteredSets: Int get() = exercises.sumOf { exercise -> exercise.sets.count { it.request != null } }
+
+    // Not planned and not completed: started with the session's time.
+    internal val startsWithSession: Boolean get() = startsOnSave
+
+    // The training exists on the server (autosaved or saved).
+    internal val savedTrainingId: String? get() = serverTrainingId
+
+    // Kept on the phone to be saved when the connection is back.
+    internal val isQueued: Boolean get() = OfflineTrainingQueue.entries.any { it.key == offlineKey }
+
+    internal val queueKey: String get() = offlineKey
+
+    // The new training once saved (autosaved or by the session's Save).
+    internal val savedTraining: Training? get() = autosaved
+
+    // Trainings of several clients aren't planned: they run at the session's time.
+    private val isPlannedNow: Boolean get() = isPlanned && session?.isShared?.invoke() != true
+
+    // The start of the new training: the session's shared one, or the form's own.
+    private val runningStart: Instant?
+        get() = session?.let { it.startedAt() } ?: startedAt
+
     // Id of the training on the server: edited, autosaved or created by the queue.
     private val serverTrainingId: String?
         get() = currentTraining?.id ?: OfflineTrainingQueue.knownTrainingId(offlineKey)
@@ -259,9 +311,6 @@ class TrainingFormScreen private constructor(
     override fun Content() {
         val navigator = LocalNavigator.current
 
-        LaunchedEffect(Unit) { loadWorkouts() }
-        // A copied training comes with its name.
-        LaunchedEffect(Unit) { startTimerIfNeeded() }
         // Locking the phone or leaving the app saves the running training.
         val lifecycleOwner = LocalLifecycleOwner.current
         DisposableEffect(lifecycleOwner) {
@@ -271,7 +320,6 @@ class TrainingFormScreen private constructor(
             lifecycleOwner.lifecycle.addObserver(observer)
             onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
-        LaunchedEffect(Unit) { loadTemplates() }
 
         ScrollScreen(
             topBar = {
@@ -280,97 +328,113 @@ class TrainingFormScreen private constructor(
                 }
             }
         ) {
-            if (canRepeatLastTraining) {
-                RepeatLastTrainingSection()
-            }
-
-            if (canUseTemplates && templates.isNotEmpty()) {
-                Section(
-                    footer = { Text(stringResource(R.string.from_template_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
-                ) {
-                    val noTemplate = stringResource(R.string.no_template)
-                    MenuPicker(
-                        label = stringResource(R.string.from_template),
-                        selectedText = templates.firstOrNull { it.id == selectedTemplateId }?.name ?: noTemplate,
-                        options = listOf<TrainingTemplate?>(null) + templates,
-                        optionText = { it?.name ?: noTemplate },
-                        onSelect = { selected ->
-                            selectedTemplateId = selected?.id
-                            if (selected != null) applyTemplate(selected)
-                        }
-                    )
-                }
-            }
-
-            Section(
-                footer = if (!isTemplate && canBePlanned) {
-                    {
-                        Text(
-                            stringResource(if (isPlanned) R.string.planned_training_hint else R.string.starts_on_save_hint),
-                            style = ApexText.footnote,
-                            color = ApexColors.secondaryLabel
-                        )
-                    }
-                } else null
-            ) {
-                PlainTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it
-                        startTimerIfNeeded()
-                    },
-                    placeholder = stringResource(R.string.name),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                )
-                Divider()
-                startedAt?.takeIf { startsOnSave || autosaved != null }?.let { start ->
-                    TrainingTimerRow(start)
-                    Divider()
-                }
-                if (!isTemplate) {
-                    DateRow()
-                    Divider()
-                    SwitchRow(stringResource(R.string.completed), isCompleted) { isCompleted = it }
-                    Divider()
-                    if (canBePlanned) {
-                        SwitchRow(stringResource(R.string.planned), isPlanned) { isPlanned = it }
-                        Divider()
-                    }
-                    NotifyClientRow(notifyClient) { notifyClient = it }
-                    Divider()
-                }
-                PlainTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    placeholder = stringResource(R.string.note),
-                    singleLine = false,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                )
-            }
-
-            val labels = SupersetLabels.labels(exercises.map { it.isSupersetWithPrevious })
-            exercises.forEachIndexed { index, exercise ->
-                key(exercise.id) {
-                    ExerciseSection(index, exercise, labels.getOrElse(index) { "${index + 1}." }, navigator)
-                }
-            }
-
-            Section(
-                footer = if (exercises.isEmpty()) {
-                    { Text(stringResource(R.string.no_exercises_yet), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
-                } else null
-            ) {
-                ButtonRow(Icons.Filled.Add, stringResource(R.string.add_exercise)) {
-                    exercises = exercises + ExerciseDraft()
-                }
-            }
+            FormSections(navigator)
         }
 
         if (showDatePicker) TrainingDatePicker()
+    }
+
+    // The form's sections, also shown by a session of several clients for
+    // the shown client (its state stays here while another one is shown).
+    @Composable
+    internal fun FormSections(navigator: Navigator) {
+        LaunchedEffect(Unit) { loadWorkouts() }
+        // A copied training comes with its name.
+        LaunchedEffect(Unit) { startTimerIfNeeded() }
+        LaunchedEffect(Unit) { loadTemplates() }
+
+        if (session != null && showDatePicker) TrainingDatePicker()
+
+        if (canRepeatLastTraining) {
+            RepeatLastTrainingSection()
+        }
+
+        if (canUseTemplates && templates.isNotEmpty()) {
+            Section(
+                footer = { Text(stringResource(R.string.from_template_hint), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
+            ) {
+                val noTemplate = stringResource(R.string.no_template)
+                MenuPicker(
+                    label = stringResource(R.string.from_template),
+                    selectedText = templates.firstOrNull { it.id == selectedTemplateId }?.name ?: noTemplate,
+                    options = listOf<TrainingTemplate?>(null) + templates,
+                    optionText = { it?.name ?: noTemplate },
+                    onSelect = { selected ->
+                        selectedTemplateId = selected?.id
+                        if (selected != null) applyTemplate(selected)
+                    }
+                )
+            }
+        }
+
+        Section(
+            footer = if (!isTemplate && canBePlanned) {
+                {
+                    Text(
+                        stringResource(if (isPlannedNow) R.string.planned_training_hint else R.string.starts_on_save_hint),
+                        style = ApexText.footnote,
+                        color = ApexColors.secondaryLabel
+                    )
+                }
+            } else null
+        ) {
+            PlainTextField(
+                value = name,
+                onValueChange = {
+                    name = it
+                    startTimerIfNeeded()
+                },
+                placeholder = stringResource(R.string.name),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp)
+            )
+            Divider()
+            // With several clients the session shows the time above them.
+            runningStart?.takeIf { (startsOnSave || autosaved != null) && session?.isShared?.invoke() != true }?.let { start ->
+                TrainingTimerRow(start)
+                Divider()
+            }
+            if (!isTemplate) {
+                DateRow()
+                Divider()
+                SwitchRow(stringResource(R.string.completed), isCompleted) { isCompleted = it }
+                Divider()
+                // Trainings of several clients all run at the session's time.
+                if (canBePlanned && session?.isShared?.invoke() != true) {
+                    SwitchRow(stringResource(R.string.planned), isPlanned) { isPlanned = it }
+                    Divider()
+                }
+                NotifyClientRow(notifyClient) { notifyClient = it }
+                Divider()
+            }
+            PlainTextField(
+                value = note,
+                onValueChange = { note = it },
+                placeholder = stringResource(R.string.note),
+                singleLine = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp)
+            )
+        }
+
+        val labels = SupersetLabels.labels(exercises.map { it.isSupersetWithPrevious })
+        exercises.forEachIndexed { index, exercise ->
+            key(exercise.id) {
+                ExerciseSection(index, exercise, labels.getOrElse(index) { "${index + 1}." }, navigator)
+            }
+        }
+
+        Section(
+            footer = if (exercises.isEmpty()) {
+                { Text(stringResource(R.string.no_exercises_yet), style = ApexText.footnote, color = ApexColors.secondaryLabel) }
+            } else null
+        ) {
+            ButtonRow(Icons.Filled.Add, stringResource(R.string.add_exercise)) {
+                exercises = exercises + ExerciseDraft()
+            }
+        }
     }
 
     // MARK: - Repeat last training
@@ -1082,7 +1146,23 @@ class TrainingFormScreen private constructor(
             ?: if (exercise.sets.any { it.distance.isNotBlank() }) PaceType.PER_KM else null
 
     private fun updateExercise(id: String, transform: (ExerciseDraft) -> ExerciseDraft) {
+        val before = exercises.firstOrNull { it.id == id }
         exercises = exercises.map { if (it.id == id) transform(it) else it }
+        val after = exercises.firstOrNull { it.id == id } ?: return
+        if (before?.sets != after.sets) noteLastSet(after)
+    }
+
+    // The exercise whose sets just changed, e.g. "Squat 3/4", for the line
+    // the other clients' trainings of a session show about this one.
+    private fun noteLastSet(exercise: ExerciseDraft) {
+        val entered = exercise.sets.count { it.request != null }
+        if (entered == 0) return
+        lastSet = TrainingSession.SetActivity(
+            at = Instant.now(),
+            exerciseName = workouts.firstOrNull { it.id == exercise.workoutId }?.name?.localized.orEmpty(),
+            enteredSets = entered,
+            setCount = exercise.sets.size
+        )
     }
 
     private fun updateSet(exerciseId: String, setId: String, transform: (SetDraft) -> SetDraft) {
@@ -1215,14 +1295,14 @@ class TrainingFormScreen private constructor(
     // A training not marked as planned starts when it is saved, so its
     // time is measured without another tap.
     private val startsOnSave: Boolean
-        get() = !isTemplate && canBePlanned && !isPlanned
+        get() = !isTemplate && canBePlanned && !isPlannedNow
 
     // Saves the running new training as in progress when the app goes to the
     // background (locked phone, another app), so nothing is lost if the app is
     // closed. The form stays open and goes on editing it; a failed try is
     // repeated the next time. An unfinished exercise waits for the next save.
-    private suspend fun autosave() {
-        val start = startedAt ?: return
+    internal suspend fun autosave() {
+        val start = runningStart ?: return
         val clientId = clientId ?: return
         if (isTemplate || isSaving || name.isBlank() || (autosaved == null && !startsOnSave)) return
         try {
@@ -1234,7 +1314,8 @@ class TrainingFormScreen private constructor(
                 isCompleted = false,
                 exercises = exercises.filter { it.isValid }.mapNotNull { it.request },
                 // The client hears about the new training once.
-                notifyClient = autosaved == null && notifyClient
+                notifyClient = autosaved == null && notifyClient,
+                sessionId = session?.sessionId?.invoke()
             )
             val knownId = autosaved?.id ?: OfflineTrainingQueue.knownTrainingId(offlineKey)
             val entry = PendingTrainingSave(
@@ -1266,14 +1347,79 @@ class TrainingFormScreen private constructor(
 
     // A new training starts when its name is written, not when it is saved.
     private fun startTimerIfNeeded() {
-        if (startedAt == null && training == null && !isTemplate && name.isNotBlank()) startedAt = Instant.now()
+        if (training != null || isTemplate || name.isBlank()) return
+        // The session's time is shared by all its trainings: the first name starts it.
+        val session = session
+        if (session != null) {
+            if (session.startedAt() == null) session.onStart()
+            return
+        }
+        if (startedAt == null) startedAt = Instant.now()
     }
 
     // Saves the training; one not marked as planned is also marked as
     // started now (in progress).
+    // What Save sends: the training, started now unless it is planned.
+    private fun saveEntry(clientId: String): PendingTrainingSave {
+        val starting = startsOnSave
+        val start = runningStart ?: Instant.now()
+        val request = SaveTrainingRequest(
+            client = clientId,
+            name = name.trim(),
+            // ISO 8601 without fractions, like ISO8601DateFormatter on iOS.
+            // A started training happens today.
+            date = (if (starting) start else date).truncatedTo(ChronoUnit.SECONDS).toString(),
+            note = note.trim().ifEmpty { null },
+            isCompleted = isCompleted,
+            exercises = exercises.mapNotNull { it.request },
+            notifyClient = notifyClient,
+            sessionId = session?.sessionId?.invoke()
+        )
+        return PendingTrainingSave(
+            key = offlineKey,
+            userId = AuthManager.userId,
+            trainingName = name.trim(),
+            trainingId = serverTrainingId,
+            request = request,
+            startedAt = if (starting) start.toString() else null,
+            timesSaved = !starting
+        )
+    }
+
+    // Save of a session: the session closes once all its trainings are saved;
+    // until then this one is edited, so another try doesn't create it again.
+    internal suspend fun saveInSession(): TrainingSession.SaveOutcome {
+        val clientId = clientId ?: return TrainingSession.SaveOutcome.Failed("")
+        isSaving = true
+        try {
+            return when (val result = OfflineTrainingQueue.submit(saveEntry(clientId))) {
+                is SendResult.Synced -> {
+                    autosaved = result.training
+                    notifyClient = false
+                    initialState = formState()
+                    onSaved?.invoke(result.training)
+                    TrainingSession.SaveOutcome.Saved
+                }
+                is SendResult.Failed -> {
+                    if (result.failure == SaveFailure.OFFLINE) {
+                        notifyClient = false
+                        initialState = formState()
+                        TrainingSession.SaveOutcome.Queued
+                    } else {
+                        TrainingSession.SaveOutcome.Failed(mapError(result.error))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            return TrainingSession.SaveOutcome.Failed(mapError(e))
+        } finally {
+            isSaving = false
+        }
+    }
+
     private suspend fun save(navigator: Navigator) {
         val starting = startsOnSave
-        val start = startedAt ?: Instant.now()
         if (isTemplate) {
             saveTemplate(navigator)
             return
@@ -1282,28 +1428,7 @@ class TrainingFormScreen private constructor(
 
         isSaving = true
         try {
-            val trimmedNote = note.trim()
-            val request = SaveTrainingRequest(
-                client = clientId,
-                name = name.trim(),
-                // ISO 8601 without fractions, like ISO8601DateFormatter on iOS.
-                // A started training happens today.
-                date = (if (starting) start else date).truncatedTo(ChronoUnit.SECONDS).toString(),
-                note = trimmedNote.ifEmpty { null },
-                isCompleted = isCompleted,
-                exercises = exercises.mapNotNull { it.request },
-                notifyClient = notifyClient
-            )
-
-            val entry = PendingTrainingSave(
-                key = offlineKey,
-                userId = AuthManager.userId,
-                trainingName = name.trim(),
-                trainingId = serverTrainingId,
-                request = request,
-                startedAt = if (starting) start.toString() else null,
-                timesSaved = !starting
-            )
+            val entry = saveEntry(clientId)
             when (val result = OfflineTrainingQueue.submit(entry)) {
                 is SendResult.Synced -> {
                     onSaved?.invoke(result.training)
