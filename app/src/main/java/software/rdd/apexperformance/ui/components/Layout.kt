@@ -64,6 +64,7 @@ import software.rdd.apexperformance.core.navigation.LocalScreen
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
+import software.rdd.apexperformance.ui.trainings.TrainingSessionScreen
 
 // Chat button and notification bell shown in the top bar of every screen of
 // the tabs, provided by the tabs for users who can chat or have the bell
@@ -78,8 +79,8 @@ private fun showsTopBarActions(): Boolean {
     val stack = LocalNavigator.current.stack
     val index = stack.indexOf(screen)
     val screens = if (index >= 0) stack.subList(0, index + 1) else listOf(screen)
-    // The training form is a form too (its screens are kept as they are).
-    return screens.none { !it.showsTopBarActions || it is TrainingFormScreen }
+    // The training forms are forms too (their screens are kept as they are).
+    return screens.none { !it.showsTopBarActions || it is TrainingFormScreen || it is TrainingSessionScreen }
 }
 
 // The chat button after the back chevron (or alone on a tab's first screen).
