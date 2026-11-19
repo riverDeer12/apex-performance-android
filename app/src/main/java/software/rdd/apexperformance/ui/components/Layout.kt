@@ -54,31 +54,88 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import software.rdd.apexperformance.R
 import software.rdd.apexperformance.core.navigation.LocalNavigator
-import software.rdd.apexperformance.core.navigation.isRootScreen
+import software.rdd.apexperformance.core.navigation.LocalScreen
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
+import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
+import software.rdd.apexperformance.ui.trainings.TrainingSessionScreen
 
-// Chat button shown at the start of the top bar of each tab's first screen,
-// provided by the tabs for users who can chat (null otherwise).
+// Chat button and notification bell shown in the top bar of every screen of
+// the tabs, provided by the tabs for users who can chat or have the bell
+// (null otherwise, e.g. in the chat and on login).
 val LocalChatButton = compositionLocalOf<(@Composable () -> Unit)?> { null }
+val LocalNotificationBell = compositionLocalOf<(@Composable () -> Unit)?> { null }
 
-// The chat button when this is the first screen of a tab and the user can chat.
+// No chat button or bell on forms and the chat, nor on the screens opened from them.
 @Composable
-fun BoxScope.TopBarChatButton() {
-    val chatButton = LocalChatButton.current
-    if (chatButton != null && isRootScreen) {
-        Box(modifier = Modifier.align(Alignment.CenterStart)) { chatButton() }
+private fun showsTopBarActions(): Boolean {
+    val screen = LocalScreen.current ?: return true
+    val stack = LocalNavigator.current.stack
+    val index = stack.indexOf(screen)
+    val screens = if (index >= 0) stack.subList(0, index + 1) else listOf(screen)
+    // The training forms are forms too (their screens are kept as they are).
+    return screens.none { !it.showsTopBarActions || it is TrainingFormScreen || it is TrainingSessionScreen }
+}
+
+// The chat button after the back chevron (or alone on a tab's first screen).
+@Composable
+fun TopBarLeadingActions() {
+    if (!showsTopBarActions()) return
+    LocalChatButton.current?.invoke()
+}
+
+// The bell after the screen's own actions.
+@Composable
+fun TopBarTrailingActions() {
+    if (!showsTopBarActions()) return
+    if (LocalScreen.current?.showsNotificationBell == false) return
+    LocalNotificationBell.current?.invoke()
+}
+
+// Start and end of a top bar with the title centred between them, as wide
+// as the wider side leaves it.
+@Composable
+fun TopBarLayout(
+    modifier: Modifier = Modifier,
+    start: @Composable RowScope.() -> Unit,
+    title: @Composable () -> Unit,
+    end: @Composable RowScope.() -> Unit
+) {
+    Layout(
+        modifier = modifier,
+        content = {
+            Row(verticalAlignment = Alignment.CenterVertically, content = start)
+            Box(contentAlignment = Alignment.Center) { title() }
+            Row(verticalAlignment = Alignment.CenterVertically, content = end)
+        }
+    ) { measurables, constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val startPlaceable = measurables[0].measure(loose)
+        val endPlaceable = measurables[2].measure(loose)
+        val side = maxOf(startPlaceable.width, endPlaceable.width, 48.dp.roundToPx())
+        val titleWidth = (constraints.maxWidth - 2 * side).coerceAtLeast(0)
+        val titlePlaceable = measurables[1].measure(loose.copy(maxWidth = titleWidth))
+        val height = constraints.maxHeight
+        layout(constraints.maxWidth, height) {
+            startPlaceable.placeRelative(0, (height - startPlaceable.height) / 2)
+            titlePlaceable.placeRelative(
+                (constraints.maxWidth - titlePlaceable.width) / 2,
+                (height - titlePlaceable.height) / 2
+            )
+            endPlaceable.placeRelative(constraints.maxWidth - endPlaceable.width, (height - endPlaceable.height) / 2)
+        }
     }
 }
 
-// Inline navigation bar: back chevron on the left, title in the middle and
-// actions (checkmark, plus...) on the right, as on iOS. The first screen of
-// a tab shows the chat button where the back chevron would be.
+// Inline navigation bar: back chevron and the chat button on the left, title
+// in the middle and actions (checkmark, plus...) and the bell on the right,
+// as on iOS. The first screen of a tab has no back chevron.
 @Composable
 fun TopBar(
     title: String? = null,
@@ -90,65 +147,55 @@ fun TopBar(
 ) {
     val navigator = LocalNavigator.current
 
-    Box(
+    TopBarLayout(
         modifier = Modifier
             .fillMaxWidth()
             .background(ApexColors.groupedBackground)
             .windowInsetsPadding(WindowInsets.statusBars)
             .height(48.dp)
-            .padding(horizontal = 4.dp)
-    ) {
-        if (showBack) {
-            IconButton(
-                onClick = { onBack?.invoke() ?: navigator.requestPop() },
-                modifier = Modifier.align(Alignment.CenterStart)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBackIos,
-                    contentDescription = stringResource(R.string.back_button),
-                    tint = ApexColors.main,
-                    modifier = Modifier.size(20.dp)
-                )
+            .padding(horizontal = 4.dp),
+        start = {
+            if (showBack) {
+                IconButton(onClick = { onBack?.invoke() ?: navigator.requestPop() }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBackIos,
+                        contentDescription = stringResource(R.string.back_button),
+                        tint = ApexColors.main,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
-        } else {
-            TopBarChatButton()
-        }
-
-        if (title != null && titleLeading != null) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(horizontal = 96.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                titleLeading()
+            TopBarLeadingActions()
+        },
+        title = {
+            if (title != null && titleLeading != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    titleLeading()
+                    Text(
+                        title,
+                        style = ApexText.navigationTitle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else if (title != null) {
                 Text(
                     title,
                     style = ApexText.navigationTitle,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
                 )
             }
-        } else if (title != null) {
-            Text(
-                title,
-                style = ApexText.navigationTitle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(horizontal = 96.dp)
-            )
+        },
+        end = {
+            actions()
+            TopBarTrailingActions()
         }
-
-        Row(
-            modifier = Modifier.align(Alignment.CenterEnd),
-            verticalAlignment = Alignment.CenterVertically,
-            content = actions
-        )
-    }
+    )
 }
 
 // Toolbar icon button tinted with the main color.

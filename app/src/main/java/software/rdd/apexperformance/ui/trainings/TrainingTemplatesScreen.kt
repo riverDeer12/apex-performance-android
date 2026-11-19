@@ -395,6 +395,8 @@ class TrainingTemplateDetailScreen(
 // Picks clients and a date; each client gets a planned training
 // with the template's exercises and sets.
 class AssignTrainingTemplateScreen(private val template: TrainingTemplate) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var clients by mutableStateOf<List<Client>>(emptyList())
     private var selectedClients by mutableStateOf<Set<String>>(emptySet())

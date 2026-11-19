@@ -86,6 +86,8 @@ import software.rdd.apexperformance.model.Workout
 // live from the chat hub; "load older" fetches earlier ones. The coach can
 // turn the chat off, then nobody can write but messages are kept.
 class ChatConversationScreen(private val conversationId: String) : Screen() {
+    // The chat itself: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private val messages = mutableStateListOf<ChatMessage>()
     private var draft by mutableStateOf("")

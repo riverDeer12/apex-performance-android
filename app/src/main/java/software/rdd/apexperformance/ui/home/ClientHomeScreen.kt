@@ -124,7 +124,7 @@ class ClientHomeScreen(private val openTab: (AppTab) -> Unit) : Screen() {
         val planTitle = ClientPlan.from(client?.plan)?.let { stringResource(it.title) }
 
         ScrollScreen(
-            topBar = { ApexTitleTopBar(planTitle) { NotificationBell() } },
+            topBar = { ApexTitleTopBar(planTitle) },
             onRefresh = { load() }
         ) {
             Column(

@@ -69,6 +69,8 @@ class EditProfileScreen(
     profile: Profile,
     private val onProfileChanged: (Profile) -> Unit
 ) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var profile by mutableStateOf(profile)
     private var firstName by mutableStateOf(profile.firstName.orEmpty())

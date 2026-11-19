@@ -50,6 +50,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.semantics
@@ -237,6 +238,7 @@ fun LoginScreen() {
         LanguageMenu(modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)) { open ->
             Row(
                 modifier = Modifier
+                    .testTag("login-language")
                     .clip(RoundedCornerShape(50))
                     .background(ApexColors.background)
                     .clickable(onClick = open)

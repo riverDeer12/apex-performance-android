@@ -134,6 +134,8 @@ class ClientGoalFormScreen(
     private val goal: ClientGoal,
     private val onSaved: ((ClientGoal) -> Unit)? = null
 ) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var goalText by mutableStateOf(goal.goal.orEmpty())
     private var currentBlock by mutableStateOf(goal.currentBlock.orEmpty())
@@ -411,6 +413,8 @@ class MonthlyReviewFormScreen(
     review: MonthlyReview? = null,
     private val onChanged: (() -> Unit)? = null
 ) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     // A new review is for the current month, written before the 1st.
     private var year by mutableIntStateOf(review?.year ?: LocalDate.now().year)

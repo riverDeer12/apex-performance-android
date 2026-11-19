@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import software.rdd.apexperformance.core.auth.AuthManager
 import software.rdd.apexperformance.core.network.OfflineTrainingQueue
+import software.rdd.apexperformance.core.network.PushTokenService
 import software.rdd.apexperformance.core.util.AppLanguage
 import software.rdd.apexperformance.core.util.AppUpdateChecker
 import software.rdd.apexperformance.core.util.NotificationRouter
@@ -45,7 +46,14 @@ class MainActivity : ComponentActivity() {
 
     // The language picked in the app (AppLanguage).
     override fun attachBaseContext(newBase: Context) {
+        val language = AppLanguage.selected(newBase)
         super.attachBaseContext(AppLanguage.wrap(newBase))
+        // Changed in the system settings (Android 13+): texts outside of
+        // composables and pushes follow it too.
+        if (AppLanguage.selected(newBase) != language) {
+            ApexApp.applyLanguage()
+            PushTokenService.registerCurrentToken()
+        }
     }
 
     // Light or dark status and navigation bar icons for the app's appearance.

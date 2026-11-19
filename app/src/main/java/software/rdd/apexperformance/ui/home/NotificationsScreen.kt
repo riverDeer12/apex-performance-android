@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -111,9 +112,19 @@ object NotificationInbox {
         scope.launch { refreshCount() }
     }
 
+    private var countRefreshedAt = 0L
+
     suspend fun refreshCount() {
+        countRefreshedAt = System.currentTimeMillis()
         runCatching { ApiClient.get<CountResponse>("notifications/unread-count") }
             .onSuccess { unreadCount = it.count }
+    }
+
+    // For the bell of every screen: pushes bring new notifications too,
+    // so the count isn't asked again on each screen opened right after.
+    suspend fun refreshCountIfStale() {
+        if (System.currentTimeMillis() - countRefreshedAt < 30_000) return
+        refreshCount()
     }
 
     suspend fun load() {
@@ -146,6 +157,7 @@ object NotificationInbox {
         notifications = emptyList()
         unreadCount = 0
         hasLoaded = false
+        countRefreshedAt = 0L
     }
 }
 
@@ -153,10 +165,11 @@ object NotificationInbox {
 @Composable
 fun NotificationBell() {
     val navigator = LocalNavigator.current
-    LaunchedEffect(Unit) { NotificationInbox.refreshCount() }
+    LaunchedEffect(Unit) { NotificationInbox.refreshCountIfStale() }
 
     Box(
         modifier = Modifier
+            .testTag("notifications-bell")
             .size(44.dp)
             .clickable { navigator.push(NotificationsScreen()) },
         contentAlignment = Alignment.Center
@@ -182,6 +195,8 @@ fun NotificationBell() {
 
 // Notifications newest first; tapping one opens what it is about.
 class NotificationsScreen : Screen() {
+
+    override val showsNotificationBell: Boolean get() = false
 
     private var isLoading by mutableStateOf(false)
 

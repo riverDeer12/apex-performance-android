@@ -83,7 +83,6 @@ import software.rdd.apexperformance.ui.components.RowDivider
 import software.rdd.apexperformance.ui.components.ScrollScreen
 import software.rdd.apexperformance.ui.components.ToolbarIcon
 import software.rdd.apexperformance.ui.components.TopBar
-import software.rdd.apexperformance.ui.home.NotificationBell
 import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.LocalDate
@@ -155,8 +154,6 @@ class AppointmentsScreen : Screen() {
         ScrollScreen(
             topBar = {
                 TopBar {
-                    // Clients have the bell on home.
-                    if (!isClient) NotificationBell()
                     if (showsRequestsButton) {
                         // Clients: requests they sent, with their status.
                         // Staff: requests waiting for approval.

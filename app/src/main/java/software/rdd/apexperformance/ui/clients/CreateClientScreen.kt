@@ -45,6 +45,8 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import kotlin.math.roundToInt
 
 class CreateClientScreen : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var firstName by mutableStateOf("")
     private var lastName by mutableStateOf("")

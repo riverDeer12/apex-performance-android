@@ -38,6 +38,8 @@ class FunctionalMovementScreenScreen(
     private val screen: FunctionalMovementScreen? = null,
     private val onSaved: (() -> Unit)? = null
 ) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var deepSquat by mutableStateOf(screen?.deepSquat.orEmpty())
     private var hurdleStep by mutableStateOf(screen?.hurdleStep.orEmpty())
