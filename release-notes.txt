@@ -1,5 +1,5 @@
 Novosti:
-- Zajednički termin: trener vodi treninge za više klijenata u isto vrijeme ("+ Klijent"), s prekidačem i zajedničkim vremenom; uređivanje otvara cijeli termin.
+- Zajednički termin: trener vodi treninge za više klijenata u isto vrijeme ("+ Klijent"), s prekidačem i zajedničkim vremenom; uređivanje, popis treninga i obavijesti otvaraju cijeli termin.
 - Promjena jezika sada radi na svim uređajima.
 - Zvonce i poruke u gornjoj traci svakog ekrana.
 - YouTube video preko cijelog ekrana.
