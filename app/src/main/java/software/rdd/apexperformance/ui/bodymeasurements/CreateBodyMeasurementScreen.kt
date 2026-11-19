@@ -41,6 +41,8 @@ class CreateBodyMeasurementScreen(
     private val client: Client,
     private val onSuccess: (() -> Unit)? = null
 ) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private val form = MeasurementForm()
     private var isSaving by mutableStateOf(false)

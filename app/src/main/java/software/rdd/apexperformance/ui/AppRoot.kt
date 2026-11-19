@@ -69,6 +69,8 @@ import software.rdd.apexperformance.core.network.ChatStore
 import software.rdd.apexperformance.ui.bodymeasurements.ClientProgressScreen
 import software.rdd.apexperformance.ui.chat.ChatTopBarButton
 import software.rdd.apexperformance.ui.components.LocalChatButton
+import software.rdd.apexperformance.ui.components.LocalNotificationBell
+import software.rdd.apexperformance.ui.home.NotificationBell
 import software.rdd.apexperformance.ui.home.CooperationRulesGate
 import software.rdd.apexperformance.ui.home.CooperationRulesPopup
 import software.rdd.apexperformance.ui.home.NotificationInbox
@@ -174,6 +176,9 @@ class HomeState {
     // Chat is between coaches and their clients. It opens over the tabs
     // from a button in the top bar, with its own stack.
     val canChat: Boolean = AuthManager.hasRole(Roles.CLIENT) || AuthManager.hasRole(Roles.COACH)
+
+    // The bell is in the top bars of clients and of staff with appointments.
+    val showsNotificationBell: Boolean = AuthManager.hasRole(Roles.CLIENT) || AppTab.APPOINTMENTS in tabs
     var showsChat by mutableStateOf(false)
     private var chatNavigatorOrNull: Navigator? = null
     val chatNavigator: Navigator
@@ -188,9 +193,15 @@ class HomeState {
 
     fun navigator(tab: AppTab): Navigator = navigators.getOrPut(tab) { Navigator(rootScreen(tab)) }
 
+    // A tab tapped in the tab bar (or opened from home's shortcuts) shows its
+    // first screen, also when it was left on a pushed one, as does tapping the
+    // open tab again. Notifications open their screen with openPendingTab.
+    // A form with changes not saved yet (e.g. a training being written) is
+    // kept, so a look at another tab doesn't lose it.
     fun select(tab: AppTab) {
-        // Tapping the open tab again goes back to its first screen, as on iOS.
-        if (tab == selectedTab) navigators[tab]?.popToRoot()
+        navigators[tab]?.let { navigator ->
+            if (navigator.stack.none { it.hasUnsavedChanges }) navigator.popToRoot()
+        }
         selectedTab = tab
     }
 
@@ -319,7 +330,8 @@ private fun HomeView() {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             // Each tab keeps its own stack, like a NavigationStack per tab on iOS.
-            // Chat opens from a round button in the top bar of each tab's first screen.
+            // Chat and the notifications open from round buttons in the top bar
+            // of every screen of the tabs (TopBar).
             val chatButton: (@Composable () -> Unit)? = if (state.canChat) {
                 {
                     ChatTopBarButton(
@@ -329,7 +341,12 @@ private fun HomeView() {
                     )
                 }
             } else null
-            CompositionLocalProvider(LocalChatButton provides chatButton) {
+            val notificationBell: (@Composable () -> Unit)? =
+                if (state.showsNotificationBell) ({ NotificationBell() }) else null
+            CompositionLocalProvider(
+                LocalChatButton provides chatButton,
+                LocalNotificationBell provides notificationBell
+            ) {
                 androidx.compose.runtime.key(state.selectedTab) {
                     NavigatorHost(state.navigator(state.selectedTab))
                 }

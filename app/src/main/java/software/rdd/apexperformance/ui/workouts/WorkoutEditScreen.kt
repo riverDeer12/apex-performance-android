@@ -64,6 +64,8 @@ class WorkoutEditScreen(
     private val workout: Workout? = null,
     private val onSaved: (Workout) -> Unit
 ) : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var nameHr by mutableStateOf(workout?.name?.value("HR").orEmpty())
     private var nameEn by mutableStateOf(workout?.name?.value("EN").orEmpty())

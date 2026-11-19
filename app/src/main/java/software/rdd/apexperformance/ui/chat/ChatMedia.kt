@@ -266,6 +266,8 @@ fun ChatWorkoutCard(workout: Workout?) {
 
 // Searchable workouts; tapping one shares it in the chat.
 class ChatWorkoutPickerScreen(private val onPick: (Workout) -> Unit) : Screen() {
+    // Opened from the chat: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var workouts by mutableStateOf<List<Workout>>(emptyList())
     private var searchText by mutableStateOf("")

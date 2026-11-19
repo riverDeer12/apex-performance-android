@@ -45,6 +45,8 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 
 class ChangePasswordScreen : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var newPassword by mutableStateOf("")
     private var confirmPassword by mutableStateOf("")
@@ -134,6 +136,8 @@ class ChangePasswordScreen : Screen() {
 }
 
 class ChangeUsernameScreen : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var newUsername by mutableStateOf("")
 

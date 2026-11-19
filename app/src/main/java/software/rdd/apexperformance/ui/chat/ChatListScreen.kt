@@ -72,6 +72,8 @@ import software.rdd.apexperformance.ui.components.ShowMoreItems
 // their clients, newest activity first. Either side can start a chat; only
 // the coach can turn it off, then it stays read only for both.
 class ChatListScreen(private val onClose: (() -> Unit)? = null) : Screen() {
+    // The chat itself: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     private var isStarting by mutableStateOf(false)
 

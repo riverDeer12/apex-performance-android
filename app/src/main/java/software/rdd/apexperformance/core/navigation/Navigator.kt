@@ -33,6 +33,14 @@ abstract class Screen {
     // Forms with changes not saved yet: going back asks before they are lost.
     open val hasUnsavedChanges: Boolean get() = false
 
+    // The chat button and the bell in the top bar (TopBar). Off for forms and
+    // the chat, and so for the screens opened from them, like the forms and
+    // chat that iOS shows as sheets.
+    open val showsTopBarActions: Boolean get() = true
+
+    // The notifications list has no bell to itself.
+    open val showsNotificationBell: Boolean get() = true
+
     open fun onDispose() {
         scope.cancel()
     }
@@ -97,16 +105,9 @@ class Navigator(root: Screen) {
 
 val LocalNavigator = staticCompositionLocalOf<Navigator> { error("No navigator") }
 
-// The screen being composed, so its bars can tell whether it is the first
-// screen of its stack (also while it slides out under a pushed one).
+// The screen being composed, so its bars can tell what it shows (also
+// while it slides out under a pushed one).
 val LocalScreen = staticCompositionLocalOf<Screen?> { null }
-
-// True for the first screen of a stack, e.g. the root screen of a tab.
-val isRootScreen: Boolean
-    @Composable get() {
-        val screen = LocalScreen.current ?: return !LocalNavigator.current.canPop
-        return LocalNavigator.current.stack.firstOrNull() === screen
-    }
 
 @Composable
 fun NavigatorHost(navigator: Navigator) {

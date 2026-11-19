@@ -82,6 +82,8 @@ import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.components.ShowMoreItems
 
 class CreateAppointmentScreen : Screen() {
+    // A form: no chat button or bell in its top bar.
+    override val showsTopBarActions: Boolean get() = false
 
     // Form values
     private var selectedDay by mutableStateOf(startDate())

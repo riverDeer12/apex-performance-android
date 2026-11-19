@@ -38,8 +38,11 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="${crashlyticsEnabled}" />
 
+        <!-- Turning the phone doesn't restart the activity (Compose follows the new
+             size), so a playing video, e.g. in fullscreen landscape, keeps going. -->
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:exported="true"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
