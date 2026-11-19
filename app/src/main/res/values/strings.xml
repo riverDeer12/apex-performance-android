@@ -717,4 +717,8 @@
     <string name="time_hours_ago">%1$d h ago</string>
     <string name="client_already_in_session">The client is already in this session.</string>
     <string name="training_not_saved_for">%1$s\'s training was not saved: %2$s</string>
+    <string name="close_client_tab">Close the tab</string>
+    <string name="remove_from_session">Remove from the session</string>
+    <string name="remove_saved_client_info">Close the tab: %1$s\'s training stays as it is, in the session. Remove from the session: the training stays on its own. Delete training: the training is deleted. Unsaved changes on the tab are lost.</string>
+    <string name="session_times_not_saved">The time was not changed on every training of the session.</string>
 </resources>

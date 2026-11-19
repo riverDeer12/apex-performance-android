@@ -720,4 +720,8 @@
     <string name="time_hours_ago">prije %1$d h</string>
     <string name="client_already_in_session">Klijent je već u ovom terminu.</string>
     <string name="training_not_saved_for">Trening klijenta %1$s nije spremljen: %2$s</string>
+    <string name="close_client_tab">Zatvori karticu</string>
+    <string name="remove_from_session">Ukloni iz termina</string>
+    <string name="remove_saved_client_info">Zatvori karticu: trening klijenta %1$s ostaje kakav je, u terminu. Ukloni iz termina: trening ostaje kao samostalni. Obriši trening: trening se briše. Nespremljene izmjene na kartici se gube.</string>
+    <string name="session_times_not_saved">Vrijeme nije promijenjeno na svim treninzima termina.</string>
 </resources>

@@ -134,4 +134,27 @@ class TrainingSessionTest {
         assertEquals("1/2", TrainingSession.SetActivity(now, "", 1, 2).summary)
         assertNotNull(now)
     }
+    @Test
+    fun onlyStaffEditSessionsOfMoreTrainings() {
+        assertTrue(TrainingSession.opensAsSession(2, isStaff = true))
+        assertFalse(TrainingSession.opensAsSession(2, isStaff = false))
+        assertFalse(TrainingSession.opensAsSession(1, isStaff = true))
+    }
+
+    @Test
+    fun sessionIsAskedForOnlyWhenThereCanBeOne() {
+        assertFalse(TrainingSession.mayHaveSession(null, null))
+        assertTrue(TrainingSession.mayHaveSession("s", null))
+        assertTrue(TrainingSession.mayHaveSession(null, Instant.now()))
+    }
+
+    @Test
+    fun editedSessionShowsTheTappedClient() {
+        val start = Instant.parse("2026-11-19T17:00:00Z")
+        val session = TrainingSession(listOf(ana, marko), activeId = "p-marko", startedAt = start)
+        assertEquals("p-marko", session.active.id)
+        assertEquals(start, session.startedAt)
+        // An unknown active id falls back to the first client.
+        assertEquals("p-ana", TrainingSession(listOf(ana, marko), activeId = "x").active.id)
+    }
 }

@@ -59,6 +59,8 @@ import software.rdd.apexperformance.core.navigation.Screen
 import software.rdd.apexperformance.core.navigation.launch
 import software.rdd.apexperformance.core.navigation.showError
 import software.rdd.apexperformance.core.network.OfflineTrainingQueue
+import software.rdd.apexperformance.core.auth.AuthManager
+import software.rdd.apexperformance.core.util.Roles
 import software.rdd.apexperformance.core.util.ToastManager
 import software.rdd.apexperformance.core.util.ToastType
 import software.rdd.apexperformance.model.Client
@@ -76,33 +78,72 @@ import software.rdd.apexperformance.ui.theme.ApexText
 import java.time.Duration
 import java.time.Instant
 import java.util.Locale
+import java.util.UUID
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import software.rdd.apexperformance.core.util.DateFormats
 
 // New training form of the coach, for one client or for several clients who
 // train at the same time ("+ Client"): every client has their own training
 // (the usual training form, one per client, kept while switching), all of
 // them share one time. Save saves every training as a normal training of its
 // client; one that fails shows its error and Save tries again.
+private fun participantOf(person: Training.Person) =
+    TrainingSession.Participant(person.id, person.firstName, person.lastName, person.pictureUrl)
+
 class TrainingSessionScreen private constructor(
-    first: TrainingSession.Participant,
-    history: List<Training>,
-    copying: Training?,
-    private val onSaved: ((Training) -> Unit)?
+    seeds: List<Seed>,
+    selectedTrainingId: String?,
+    private val onSaved: ((Training) -> Unit)?,
+    // A saved session opened to edit: its trainings are edited together.
+    private val isEditing: Boolean
 ) : Screen() {
 
+    // What a client's form starts with: the saved training it edits, or the
+    // training a new one copies.
+    private class Seed(
+        val participant: TrainingSession.Participant,
+        val history: List<Training>,
+        val copying: Training? = null,
+        val training: Training? = null
+    )
+
     constructor(client: Training.Person, history: List<Training>, onSaved: ((Training) -> Unit)? = null) :
-        this(TrainingSession.Participant(client.id, client.firstName, client.lastName, client.pictureUrl), history, null, onSaved)
+        this(listOf(Seed(participantOf(client), history)), null, onSaved, false)
 
     // New training for the same client with the exercises and sets of the given one ("Copy training").
     constructor(copying: Training, history: List<Training>, onSaved: ((Training) -> Unit)? = null) :
+        this(listOf(Seed(participantOf(copying.client), history, copying = copying)), null, onSaved, false)
+
+    // A saved session (trainings of clients who trained at the same time)
+    // opened to edit, with the tapped training's client shown.
+    constructor(editing: List<Training>, selectedTrainingId: String, history: List<Training>, onSaved: ((Training) -> Unit)? = null) :
         this(
-            TrainingSession.Participant(copying.client.id, copying.client.firstName, copying.client.lastName, copying.client.pictureUrl),
-            history, copying, onSaved
+            editing.map { training -> Seed(participantOf(training.client), history.filter { it.client.id == training.client.id }, training = training) },
+            selectedTrainingId, onSaved, true
         )
 
-    private var session by mutableStateOf(TrainingSession(listOf(first)))
+    private val firstStarted = seeds.firstNotNullOfOrNull { it.training?.takeIf { training -> training.startedAt != null } }
+
+    private var session by mutableStateOf(
+        TrainingSession(
+            participants = seeds.map { it.participant },
+            activeId = seeds.firstOrNull { it.training?.id == selectedTrainingId }?.participant?.id ?: seeds.first().participant.id,
+            startedAt = firstStarted?.startedAt
+        )
+    )
+
+    // When the edited session ended; clients added to it get the same times.
+    private val endedAt: Instant? = firstStarted?.endedAt
+
+    // Links the trainings of the session; trainings saved before it get it with this save.
+    private val sessionKey: String = seeds.firstNotNullOfOrNull { it.training?.sessionId } ?: UUID.randomUUID().toString()
+
+    // The saved trainings being edited, by participant.
+    private var existing by mutableStateOf(seeds.mapNotNull { seed -> seed.training?.let { seed.participant.id to it } }.toMap())
 
     // Every client's form; it keeps its state while another client is shown.
-    private var forms by mutableStateOf(mapOf(first.id to makeForm(first, history, copying)))
+    private var forms by mutableStateOf(seeds.associate { it.participant.id to makeForm(it.participant, it.history, it.copying, it.training) })
 
     private var isSaving by mutableStateOf(false)
     private var isAddingClient by mutableStateOf(false)
@@ -110,8 +151,15 @@ class TrainingSessionScreen private constructor(
     // All trainings, loaded once a client is added, for their "last time" sets.
     private var allTrainings: List<Training>? = null
 
-    private fun makeForm(participant: TrainingSession.Participant, history: List<Training>, copying: Training?): TrainingFormScreen {
-        val form = if (copying != null) {
+    private fun makeForm(
+        participant: TrainingSession.Participant,
+        history: List<Training>,
+        copying: Training?,
+        training: Training? = null
+    ): TrainingFormScreen {
+        val form = if (training != null) {
+            TrainingFormScreen(participant.clientId, training = training, history = history, onSaved = onSaved)
+        } else if (copying != null) {
             TrainingFormScreen(copying = copying, history = history, onSaved = onSaved)
         } else {
             TrainingFormScreen(participant.clientId, history = history, onSaved = onSaved)
@@ -119,7 +167,8 @@ class TrainingSessionScreen private constructor(
         form.session = TrainingFormScreen.SessionHooks(
             startedAt = { session.startedAt },
             isShared = { session.isShared },
-            onStart = { session = session.starting(Instant.now()) }
+            onStart = { session = session.starting(Instant.now()) },
+            sessionId = { if (session.isShared) sessionKey else null }
         )
         return form
     }
@@ -156,7 +205,15 @@ class TrainingSessionScreen private constructor(
         ScrollScreen(
             topBar = {
                 Column(modifier = Modifier.background(ApexColors.groupedBackground)) {
-                    TopBar(title = stringResource(if (session.isShared) R.string.training_session else R.string.new_training)) {
+                    TopBar(
+                        title = stringResource(
+                            when {
+                                session.isShared -> R.string.training_session
+                                isEditing -> R.string.edit_training
+                                else -> R.string.new_training
+                            }
+                        )
+                    ) {
                         SaveAction(enabled = canSave, isSaving = isSaving) { launch { saveAll(navigator) } }
                     }
                     Header(navigator)
@@ -178,7 +235,10 @@ class TrainingSessionScreen private constructor(
             if (session.isShared) Spacer(Modifier.height((56 * session.others.size).dp))
         }
 
-        removing?.let { participant ->
+        removing?.takeIf { existing[it.id] != null }?.let { participant ->
+            RemoveSavedDialog(participant, existing.getValue(participant.id))
+        }
+        removing?.takeIf { existing[it.id] == null }?.let { participant ->
             ConfirmDialog(
                 title = stringResource(R.string.remove_client_question),
                 message = stringResource(R.string.remove_client_info, participant.fullName),
@@ -215,7 +275,17 @@ class TrainingSessionScreen private constructor(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    session.startedAt?.let { SharedTimer(it) }
+                    val start = session.startedAt
+                    if (start != null && endedAt != null) {
+                        // An ended session (edited later): its times.
+                        Text(
+                            "${DateFormats.time(start)}–${DateFormats.time(endedAt)}",
+                            style = ApexText.headline,
+                            color = ApexColors.secondaryLabel
+                        )
+                    } else if (start != null) {
+                        SharedTimer(start)
+                    }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Switcher()
@@ -433,10 +503,75 @@ class TrainingSessionScreen private constructor(
         }
     }
 
+    // A saved training of an edited session: close its tab (it stays as it is,
+    // in the session), take it out of the session or delete it.
+    @Composable
+    private fun RemoveSavedDialog(participant: TrainingSession.Participant, training: Training) {
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            containerColor = ApexColors.background,
+            title = { Text(stringResource(R.string.remove_client_question), style = ApexText.headline) },
+            text = {
+                Text(
+                    stringResource(R.string.remove_saved_client_info, participant.fullName),
+                    style = ApexText.subheadline,
+                    color = ApexColors.secondaryLabel
+                )
+            },
+            confirmButton = {
+                Column(horizontalAlignment = Alignment.End) {
+                    TextButton(onClick = { removing = null; close(participant) }) {
+                        Text(stringResource(R.string.close_client_tab), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
+                    }
+                    TextButton(onClick = { removing = null; launch { detach(participant, training) } }) {
+                        Text(stringResource(R.string.remove_from_session), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
+                    }
+                    TextButton(onClick = { removing = null; launch { delete(participant, training) } }) {
+                        Text(stringResource(R.string.delete_training), color = ApexColors.red, fontWeight = FontWeight.SemiBold)
+                    }
+                    TextButton(onClick = { removing = null }) {
+                        Text(stringResource(R.string.cancel), color = ApexColors.main, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+        )
+    }
+
+    // Takes a saved training out of the session: it stays on its own, as it
+    // was last saved.
+    private suspend fun detach(participant: TrainingSession.Participant, training: Training) {
+        try {
+            val saved = Training.save(training.saveRequest(Training.NO_SESSION), training.id)
+            onSaved?.invoke(saved)
+            close(participant)
+        } catch (e: Exception) {
+            showError(e)
+        }
+    }
+
+    private suspend fun delete(participant: TrainingSession.Participant, training: Training) {
+        try {
+            Training.delete(training.id)
+            close(participant)
+            ToastManager.show(R.string.training_deleted_successfully, ToastType.SUCCESS)
+        } catch (e: Exception) {
+            showError(e)
+        }
+    }
+
+    // Only its tab closes; nothing of its training changes.
+    private fun close(participant: TrainingSession.Participant) {
+        val form = form(participant) ?: return
+        session = session.removing(participant.id) ?: return
+        forms = forms - participant.id
+        existing = existing - participant.id
+        form.onDispose()
+    }
+
     private fun requestRemoval(participant: TrainingSession.Participant) {
         val form = form(participant) ?: return
         if (!session.canRemove(participant.id) || isSaving) return
-        val isPersisted = form.savedTrainingId != null || form.isQueued
+        val isPersisted = form.savedTrainingId != null || form.isQueued || existing[participant.id] != null
         if (TrainingSession.needsConfirmationToRemove(form.enteredSets, isPersisted)) {
             removing = participant
         } else {
@@ -482,6 +617,20 @@ class TrainingSessionScreen private constructor(
             }
             when (val result = session.result(outcomes)) {
                 is TrainingSession.SaveAllResult.Saved -> {
+                    // Clients added to an ended session get its times too.
+                    val start = session.startedAt
+                    if (start != null && endedAt != null) {
+                        for (participant in session.participants.filter { existing[it.id] == null }) {
+                            val saved = forms[participant.id]?.savedTraining ?: continue
+                            if (saved.endedAt != null) continue
+                            try {
+                                onSaved?.invoke(saved.settingTimes(start, endedAt))
+                            } catch (e: Exception) {
+                                if (e is kotlinx.coroutines.CancellationException) throw e
+                                showError(e)
+                            }
+                        }
+                    }
                     if (result.anyQueued) {
                         ToastManager.show(R.string.offline_will_save, ToastType.WARNING)
                     } else {
@@ -504,4 +653,31 @@ class TrainingSessionScreen private constructor(
             isSaving = false
         }
     }
+}
+
+// Edit of a saved training. A training of a session (clients who trained at
+// the same time with the coach) opens the session with all its trainings and
+// the tapped client shown; any other training (or an API without sessions)
+// opens the usual form. Clients never see the session.
+suspend fun trainingEditScreen(training: Training, history: List<Training>, onSaved: ((Training) -> Unit)?): Screen {
+    val isStaff = !AuthManager.hasRole(Roles.CLIENT)
+    if (isStaff && TrainingSession.mayHaveSession(training.sessionId, training.startedAt)) {
+        val session = try {
+            Training.loadSession(training.id)
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            null
+        }
+        if (session != null && TrainingSession.opensAsSession(session.size, isStaff)) {
+            // "Last time" of every client of the session; without it the forms still work.
+            val all = try {
+                Training.loadAll()
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                history
+            }
+            return TrainingSessionScreen(editing = session, selectedTrainingId = training.id, history = all, onSaved = onSaved)
+        }
+    }
+    return TrainingFormScreen(clientId = training.client.id, training = training, history = history, onSaved = onSaved)
 }

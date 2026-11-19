@@ -716,4 +716,8 @@
     <string name="time_hours_ago">vor %1$d Std.</string>
     <string name="client_already_in_session">Der Kunde ist bereits in diesem Termin.</string>
     <string name="training_not_saved_for">Das Training von %1$s wurde nicht gespeichert: %2$s</string>
+    <string name="close_client_tab">Tab schließen</string>
+    <string name="remove_from_session">Aus dem Termin entfernen</string>
+    <string name="remove_saved_client_info">Tab schließen: Das Training von %1$s bleibt, wie es ist, im Termin. Aus dem Termin entfernen: Das Training bleibt für sich. Training löschen: Das Training wird gelöscht. Nicht gespeicherte Änderungen im Tab gehen verloren.</string>
+    <string name="session_times_not_saved">Die Zeit wurde nicht bei allen Trainings des Termins geändert.</string>
 </resources>

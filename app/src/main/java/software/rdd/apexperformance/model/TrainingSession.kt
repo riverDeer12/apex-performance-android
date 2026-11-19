@@ -127,6 +127,14 @@ data class TrainingSession(
     }
 
     companion object {
+        // Whether a saved training's edit opens as a session: only staff, and
+        // only when the API returned more than the training itself.
+        fun opensAsSession(sessionSize: Int, isStaff: Boolean): Boolean = isStaff && sessionSize > 1
+
+        // Worth asking the API for the training's session: it has a session id,
+        // or it was started (older sessions are grouped by their start).
+        fun mayHaveSession(sessionId: String?, startedAt: Instant?): Boolean = sessionId != null || startedAt != null
+
         // Asked first when something of the training would be lost.
         fun needsConfirmationToRemove(enteredSets: Int, isPersisted: Boolean): Boolean =
             enteredSets > 0 || isPersisted
