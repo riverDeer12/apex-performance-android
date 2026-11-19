@@ -79,6 +79,15 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+
+    // The language is picked in the app, so every install has all of them:
+    // Google Play would otherwise install only the device's languages from
+    // the bundle, and another language picked in the app would show nothing new.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 kotlin {
