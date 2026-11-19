@@ -1,7 +1,6 @@
 Novosti:
-- Health Connect: san, koraci, kalorije i puls iz Mi Fitnessa, Google Fita, Fitbita ili Samsung Healtha.
-- Favoriti vježbi i profilne slike posvuda.
-- Paket točno broji odrađene treninge.
-- Trener: "Danas" na vrhu Termina i "Ponovi zadnji trening".
-- Osobni rekordi, widget i podsjetnik 2 h prije termina.
-- Bez veze trening se čuva i sprema kasnije; "Poništi" vraća obrisanu seriju.
+- Zajednički termin: trener vodi treninge za više klijenata u isto vrijeme ("+ Klijent"), s prekidačem i zajedničkim vremenom; uređivanje otvara cijeli termin.
+- Promjena jezika sada radi na svim uređajima.
+- Zvonce i poruke u gornjoj traci svakog ekrana.
+- YouTube video preko cijelog ekrana.
+- Dodir na karticu u donjem izborniku uvijek otvara njen početni ekran.
