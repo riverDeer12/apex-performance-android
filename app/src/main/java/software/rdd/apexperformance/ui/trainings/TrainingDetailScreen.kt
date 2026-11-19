@@ -455,7 +455,7 @@ class TrainingDetailScreen(
                         showMenu = false
                         // The copy is a new training, so it is only added to the list.
                         navigator.push(
-                            TrainingFormScreen(copying = training, history = history) { saved ->
+                            TrainingSessionScreen(copying = training, history = history) { saved ->
                                 onSaved?.invoke(saved)
                             }
                         )

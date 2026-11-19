@@ -51,4 +51,14 @@ class TrainingEndReminderTest {
         assertEquals(first.notificationId, again.notificationId)
         assertNotEquals(first.notificationId, other.notificationId)
     }
+
+    @Test
+    fun sessionReminderListsTheOtherTrainings() {
+        val content = TrainingEndReminder.parse(
+            data + ("trainingIds" to "5b0c3f0e-8a7d-4c1b-9e2f-1a2b3c4d5e6f, 7c1d4e2f-0000-4000-8000-000000000002,")
+        )!!
+        assertEquals(listOf("7c1d4e2f-0000-4000-8000-000000000002"), content.otherTrainingIds)
+        // A training on its own has none.
+        assertEquals(emptyList<String>(), TrainingEndReminder.parse(data)!!.otherTrainingIds)
+    }
 }

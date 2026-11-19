@@ -703,4 +703,18 @@
     <string name="add_to_favorites">Add to favorites</string>
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="no_favorite_workouts">No favorites yet. Tap the star on an exercise to find it faster.</string>
+    <string name="training_session">Shared session</string>
+    <string name="training_session_hint">Separate trainings · one time</string>
+    <string name="add_client_to_session">Add client</string>
+    <string name="add_client_short">Client</string>
+    <string name="remove_client">Remove client</string>
+    <string name="remove_client_question">Remove the client from the session?</string>
+    <string name="remove_client_info">%1$s\'s training and the sets entered will be removed.</string>
+    <string name="training_session_no_sets">%1$s: no sets yet</string>
+    <string name="training_session_last_set">%1$s: last set %2$s (%3$s)</string>
+    <string name="time_just_now">just now</string>
+    <string name="time_minutes_ago">%1$d min ago</string>
+    <string name="time_hours_ago">%1$d h ago</string>
+    <string name="client_already_in_session">The client is already in this session.</string>
+    <string name="training_not_saved_for">%1$s\'s training was not saved: %2$s</string>
 </resources>

@@ -702,4 +702,18 @@
     <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
     <string name="remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="no_favorite_workouts">Noch keine Favoriten. Tippe auf den Stern bei einer Übung, um sie schneller zu finden.</string>
+    <string name="training_session">Gemeinsamer Termin</string>
+    <string name="training_session_hint">Getrennte Trainings · eine Zeit</string>
+    <string name="add_client_to_session">Kunde hinzufügen</string>
+    <string name="add_client_short">Kunde</string>
+    <string name="remove_client">Kunde entfernen</string>
+    <string name="remove_client_question">Kunden aus dem Termin entfernen?</string>
+    <string name="remove_client_info">Das Training von %1$s und die eingetragenen Sätze werden entfernt.</string>
+    <string name="training_session_no_sets">%1$s: noch keine Sätze</string>
+    <string name="training_session_last_set">%1$s: letzter Satz %2$s (%3$s)</string>
+    <string name="time_just_now">gerade eben</string>
+    <string name="time_minutes_ago">vor %1$d Min.</string>
+    <string name="time_hours_ago">vor %1$d Std.</string>
+    <string name="client_already_in_session">Der Kunde ist bereits in diesem Termin.</string>
+    <string name="training_not_saved_for">Das Training von %1$s wurde nicht gespeichert: %2$s</string>
 </resources>

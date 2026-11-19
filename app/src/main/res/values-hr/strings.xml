@@ -706,4 +706,18 @@
     <string name="add_to_favorites">Dodaj u favorite</string>
     <string name="remove_from_favorites">Ukloni iz favorita</string>
     <string name="no_favorite_workouts">Još nemaš favorita. Označi vježbu zvjezdicom da je brže pronađeš.</string>
+    <string name="training_session">Zajednički termin</string>
+    <string name="training_session_hint">Odvojeni treninzi · jedno vrijeme</string>
+    <string name="add_client_to_session">Dodaj klijenta</string>
+    <string name="add_client_short">Klijent</string>
+    <string name="remove_client">Ukloni klijenta</string>
+    <string name="remove_client_question">Ukloniti klijenta iz termina?</string>
+    <string name="remove_client_info">Trening klijenta %1$s i unesene serije bit će uklonjeni.</string>
+    <string name="training_session_no_sets">%1$s: još bez serija</string>
+    <string name="training_session_last_set">%1$s: zadnja serija %2$s (%3$s)</string>
+    <string name="time_just_now">upravo</string>
+    <string name="time_minutes_ago">prije %1$d min</string>
+    <string name="time_hours_ago">prije %1$d h</string>
+    <string name="client_already_in_session">Klijent je već u ovom terminu.</string>
+    <string name="training_not_saved_for">Trening klijenta %1$s nije spremljen: %2$s</string>
 </resources>
