@@ -144,9 +144,10 @@ class StaffTrainingsScreen : Screen() {
                 navigator.push(
                     ClientListScreen(R.string.new_training) { listNavigator, client ->
                         listNavigator.pop()
+                        // "+ Client" adds the trainings of clients training at the same time.
                         listNavigator.push(
-                            TrainingFormScreen(
-                                clientId = client.id,
+                            TrainingSessionScreen(
+                                Training.Person(client.id, client.firstName, client.lastName, client.pictureUrl),
                                 history = trainings.filter { it.client.id == client.id },
                                 onSaved = { upsert(it) }
                             )

@@ -29,7 +29,15 @@ object TrainingEndReminder {
 
     const val TYPE = "training_end_reminder"
 
-    data class Content(val trainingId: String, val startedAt: Instant, val title: String, val body: String) {
+    data class Content(
+        val trainingId: String,
+        val startedAt: Instant,
+        val title: String,
+        val body: String,
+        // The other trainings of its session (clients training at the same
+        // time), ended together with it.
+        val otherTrainingIds: List<String> = emptyList()
+    ) {
         // One reminder per training on screen: a later one replaces it.
         val notificationId: Int get() = "$TYPE:$trainingId".hashCode()
     }
@@ -39,8 +47,12 @@ object TrainingEndReminder {
         if (data["type"] != TYPE) return null
         val trainingId = data["trainingId"]?.takeIf { it.isNotBlank() } ?: return null
         val startedAt = data["startedAt"]?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return null
-        return Content(trainingId, startedAt, data["title"].orEmpty(), data["body"].orEmpty())
+        return Content(trainingId, startedAt, data["title"].orEmpty(), data["body"].orEmpty(), otherIds(data["trainingIds"], trainingId))
     }
+
+    // "id,id,id" of a session's reminder, without the training itself.
+    internal fun otherIds(list: String?, trainingId: String): List<String> =
+        list.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() && !it.equals(trainingId, ignoreCase = true) }.distinct()
 
     fun show(context: Context, content: Content) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -62,6 +74,7 @@ object TrainingEndReminder {
             putExtra(EXTRA_STARTED_AT, content.startedAt.toString())
             putExtra(EXTRA_TITLE, content.title)
             putExtra(EXTRA_BODY, content.body)
+            putExtra(EXTRA_TRAINING_IDS, content.otherTrainingIds.joinToString(","))
         }
         val endIntent = PendingIntent.getBroadcast(
             context, content.notificationId, end,
@@ -90,6 +103,7 @@ object TrainingEndReminder {
     internal const val EXTRA_STARTED_AT = "startedAt"
     internal const val EXTRA_TITLE = "title"
     internal const val EXTRA_BODY = "body"
+    internal const val EXTRA_TRAINING_IDS = "trainingIds"
 }
 
 // "End training" of the reminder: ends the training (PUT trainings/{id}/times
@@ -104,7 +118,8 @@ class EndTrainingReceiver : BroadcastReceiver() {
         val content = TrainingEndReminder.Content(
             trainingId, startedAt,
             intent.getStringExtra(TrainingEndReminder.EXTRA_TITLE).orEmpty(),
-            intent.getStringExtra(TrainingEndReminder.EXTRA_BODY).orEmpty()
+            intent.getStringExtra(TrainingEndReminder.EXTRA_BODY).orEmpty(),
+            TrainingEndReminder.otherIds(intent.getStringExtra(TrainingEndReminder.EXTRA_TRAINING_IDS), trainingId)
         )
 
         val pending = goAsync()
@@ -115,7 +130,19 @@ class EndTrainingReceiver : BroadcastReceiver() {
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
                 // A broadcast has about 10 seconds.
-                withTimeout(8_000) { Training.endFromReminder(trainingId, startedAt) }
+                withTimeout(8_000) {
+                    Training.endFromReminder(trainingId, startedAt)
+                    // The session's other trainings end too; one that fails stays
+                    // running and is ended from its own screen.
+                    for (otherId in content.otherTrainingIds) {
+                        try {
+                            Training.endFromReminder(otherId, startedAt)
+                        } catch (e: Exception) {
+                            if (e is kotlinx.coroutines.CancellationException) throw e
+                            if (BuildConfig.DEBUG) Log.w("TrainingEndReminder", "Training $otherId of the session not ended", e)
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 if (BuildConfig.DEBUG) Log.w("TrainingEndReminder", "Training $trainingId not ended", e)
                 TrainingEndReminder.show(appContext, content)

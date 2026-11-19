@@ -90,7 +90,7 @@ import software.rdd.apexperformance.ui.theme.ApexColors
 import software.rdd.apexperformance.ui.theme.ApexText
 import software.rdd.apexperformance.ui.trainings.ClientTrainingProgressScreen
 import software.rdd.apexperformance.ui.trainings.PersonalRecordsScreen
-import software.rdd.apexperformance.ui.trainings.TrainingFormScreen
+import software.rdd.apexperformance.ui.trainings.TrainingSessionScreen
 import software.rdd.apexperformance.ui.trainings.TrainingRows
 import java.time.Instant
 import kotlin.math.roundToInt
@@ -439,7 +439,10 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                 stringResource(R.string.trainings),
                 contentDescription = stringResource(R.string.new_training)
             ) {
-                navigator.push(TrainingFormScreen(client.id, history = trainings, onSaved = { upsertTraining(it) }))
+                navigator.push(TrainingSessionScreen(Training.Person(client.id, client.firstName, client.lastName, client.pictureUrl), history = trainings, onSaved = { saved ->
+                        // Trainings of other clients of the session belong to them.
+                        if (saved.client.id == client.id) upsertTraining(saved)
+                    }))
             }
 
             if (trainings.isEmpty()) {
@@ -447,7 +450,10 @@ class ClientDetailsScreen(private val client: Client) : Screen() {
                     Icons.Outlined.FitnessCenter,
                     stringResource(R.string.no_trainings),
                     buttonText = stringResource(R.string.new_training),
-                    onButtonClick = { navigator.push(TrainingFormScreen(client.id, history = trainings, onSaved = { upsertTraining(it) })) }
+                    onButtonClick = { navigator.push(TrainingSessionScreen(Training.Person(client.id, client.firstName, client.lastName, client.pictureUrl), history = trainings, onSaved = { saved ->
+                        // Trainings of other clients of the session belong to them.
+                        if (saved.client.id == client.id) upsertTraining(saved)
+                    })) }
                 )
             } else {
                 if (trainings.any { it.isCompleted }) {
