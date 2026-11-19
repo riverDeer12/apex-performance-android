@@ -68,14 +68,19 @@ fun TrainingRows(
                     showChevron = true,
                     modifier = Modifier.combinedClickable(
                         onClick = {
-                            navigator.push(
-                                TrainingDetailScreen(
-                                    training = training,
-                                    history = trainings,
-                                    onSaved = onSaved,
-                                    onDeleted = onDeleted
+                            if (onSaved != null && training.sessionId != null) {
+                                // Staff: a training of a session opens the session.
+                                scope.launch { navigator.push(trainingEditScreen(training, trainings, onSaved)) }
+                            } else {
+                                navigator.push(
+                                    TrainingDetailScreen(
+                                        training = training,
+                                        history = trainings,
+                                        onSaved = onSaved,
+                                        onDeleted = onDeleted
+                                    )
                                 )
-                            )
+                            }
                         },
                         onLongClick = if (onSaved != null) {
                             { menuTrainingId = training.id }
