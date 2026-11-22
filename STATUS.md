@@ -6,7 +6,7 @@
 - **Klijent:** Apex Performance (fitness studio)
 - **Status:** Aktivan
 - **Verzija:** 1.45 (44)
-- **Zadnje ažurirano:** 2026-11-20
+- **Zadnje ažurirano:** 2026-11-22
 
 ## Zadnje isporučeno
 - 2026-11-19 1.45: treninzi sesije uvijek se otvaraju kao sesija
@@ -15,7 +15,7 @@
 - 2026-10-09 1.3: redizajn i funkcije prenesene s iOS-a
 
 ## Čeka
-- Googleovo odobrenje Health Connect izjave u Play Consoleu (predano 2026-11-19), zatim objava na Google Playu.
+- 1.45 je na zatvorenom testiranju na Google Playu; za objavu u produkciji treba dovoljno testera (na vlasniku).
 
 ## Klijent
 - Aplikacija je u stvarnoj upotrebi (termini, krediti i prijave klijenata).
