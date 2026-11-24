@@ -1,0 +1,54 @@
+name: Store status
+
+# Every morning before the project dashboard refreshes (06:57 Zagreb): reads what is live, in
+# review and in testing, and writes store-status.json to the store-status branch. Read-only towards
+# the stores: it never submits, releases or changes anything. Can also be run by hand.
+on:
+  schedule:
+    - cron: "20 4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: store-status
+  cancel-in-progress: true
+
+# Google Play through Workload Identity Federation, like the publish workflow (no stored key).
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sign in to Google Cloud
+        id: google
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_PLAY_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+      - name: Read Google Play
+        env:
+          PLAY_ACCESS_TOKEN: ${{ steps.google.outputs.access_token }}
+        run: node .github/scripts/store-status.js --out store-status.json --play-package software.rdd.apexperformance
+      - name: Publish to the store-status branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # One commit on its own branch, replaced every run: main stays untouched and the
+          # branch never grows. The dashboard reads store-status.json from it.
+          mkdir -p "$RUNNER_TEMP/status" && cp store-status.json "$RUNNER_TEMP/status/"
+          cd "$RUNNER_TEMP/status"
+          git init -q -b store-status
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add store-status.json
+          git commit -q -m "Store status $(date -u +%F)"
+          git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:store-status

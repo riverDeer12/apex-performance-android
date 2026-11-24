@@ -6,9 +6,10 @@
 - **Klijent:** Apex Performance (fitness studio)
 - **Status:** Aktivan
 - **Verzija:** 1.45 (44)
-- **Zadnje ažurirano:** 2026-11-20
+- **Zadnje ažurirano:** 2026-11-24
 
 ## Zadnje isporučeno
+- 2026-11-24 Dnevni workflow „Store status”: stanje na Google Playu zapisuje u store-status.json (grana store-status) za dashboard
 - 2026-11-19 1.45: treninzi sesije uvijek se otvaraju kao sesija
 - 2026-11-19 1.44: zajednički trening, jezik iz aplikacije radi i s Google Playa, gornja traka, video, tabovi
 - 2026-11-17 Health Connect: puls na treningu, san, koraci, kalorije, puls u mirovanju
