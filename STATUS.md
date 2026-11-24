@@ -16,7 +16,7 @@
 - 2026-10-09 1.3: redizajn i funkcije prenesene s iOS-a
 
 ## Čeka
-- Googleovo odobrenje Health Connect izjave u Play Consoleu (predano 2026-11-19), zatim objava na Google Playu.
+- 1.45 je na zatvorenom testiranju na Google Playu; za objavu u produkciji treba dovoljno testera (na vlasniku).
 
 ## Klijent
 - Aplikacija je u stvarnoj upotrebi (termini, krediti i prijave klijenata).
