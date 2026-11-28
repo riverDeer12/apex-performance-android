@@ -1,0 +1,35 @@
+{
+  "checked": "2026-11-28T13:14:30.876Z",
+  "googlePlay": {
+    "package": "software.rdd.apexperformance",
+    "tracks": [
+      {
+        "track": "alpha",
+        "releases": [
+          {
+            "name": "1.45",
+            "versionCodes": [
+              "44"
+            ],
+            "status": "completed",
+            "userFraction": null
+          }
+        ]
+      },
+      {
+        "track": "internal",
+        "releases": [
+          {
+            "name": "1.45",
+            "versionCodes": [
+              "44"
+            ],
+            "status": "completed",
+            "userFraction": null
+          }
+        ]
+      }
+    ],
+    "production": false
+  }
+}
